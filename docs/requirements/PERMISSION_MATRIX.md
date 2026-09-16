@@ -1,12 +1,9 @@
-# Draft Role & Permission Matrix
+# Draft Role & Permission Matrix (Superseded)
 
-> [!IMPORTANT]
-> **Status Classifications**:
-> - **KNOWN**: Explicitly defined and mandated in the locked canonical project resource.
-> - **PROPOSED**: Logical baseline proposed for architectural exploration, pending stakeholder sign-off.
-> - **UNRESOLVED**: Conflicting, underspecified, or explicitly flagged as open in the project baseline.
-> 
-> *No PROPOSED or UNRESOLVED permission may be treated as final implementation logic until approved.*
+> [!CAUTION]
+> **SUPERSEDED BY [ROLE_PERMISSION_MATRIX.md](file:///c:/dev/web/Carpediem/docs/requirements/ROLE_PERMISSION_MATRIX.md)**
+> This preliminary draft has been audited and superseded by the official Per-Role Permission Governance Matrix in `ROLE_PERMISSION_MATRIX.md`.
+> Refer to [ROLE_PERMISSION_MATRIX.md](file:///c:/dev/web/Carpediem/docs/requirements/ROLE_PERMISSION_MATRIX.md) for the authoritative, per-role grounded classifications and open stakeholder questions.
 
 ---
 

@@ -18,6 +18,9 @@ Carpediem replaces a fragmented event-staffing workflow previously conducted acr
 
 The following requirements and constraints are locked by the canonical project resource:
 - **Roles**: Exactly three primary roles in V1: `Admin`, `Chief Leader`, `Leader`.
+  - **Chief Leader Role Model & Assignment Flow (APPROVED)**: Chief Leaders are a predefined set of known people in the organization. They do not become "qualified" through the system, and there is no system qualification workflow. Admins choose and assign one of these known Chief Leaders to an event, which creates a `Pending` assignment. The assigned Chief Leader receives an in-platform notification and must explicitly `Accept` (transitions to `Active`, granting operational ownership and satisfying the publishing prerequisite) or `Decline` (transitions to `Declined`, preserved as historical evidence; event remains without an active Chief Leader).
+  - **External Confirmation Exception (APPROVED)**: Admin may record acceptance on behalf of the Chief Leader ONLY when the Chief Leader actually confirmed externally (verbally/chat). The Admin explicitly selects "Record external acceptance", creating an immutable audit record: acting Admin, timestamp, Chief Leader, Event, and mandatory justification note. The audit trail strictly distinguishes direct acceptance from Admin-recorded external confirmation.
+  - **Exclusive Leadership Role (APPROVED - Blocker 2)**: Chief Leaders exclusively lead events; they cannot mark availability, apply, or participate as normal Leaders on any event.
 - **Must Have V1 Scope**:
   - Event creation and lifecycle management
   - Role-based authorization & account management
@@ -55,35 +58,35 @@ All unresolved decisions from Section 13 of the canonical source are categorized
    - *Status*: UNRESOLVED.
    - *Issue*: What are the exact states and valid transitions for a Leader on an Event? Candidate states identified: `Invited`, `Available`, `Not Available`, `Maybe`, `No Response`, `Selected`, `Confirmed`, `Not Selected`, `Attended`, `Cancelled`, `No-show`. Which transitions are automated vs. manual? Who can trigger each?
 2. **Relationship Between Availability and Applications**:
-   - *Status*: UNRESOLVED.
-   - *Issue*: Are "Availability" (indicating passive willingness/schedule match) and "Application" (actively requesting a staffing slot on a specific event) separate concepts/entities, or two representations of a single participation response?
+   - *Status*: **RESOLVED / APPROVED**.
+   - *Resolution*: Combined single response. Leaders mark their availability directly on the event (`Available` / `Not Available`), which automatically qualifies them for team selection. There is no separate Application form or entity in V1.
 3. **Exact Event Lifecycle & State Machine**:
    - *Status*: UNRESOLVED.
    - *Issue*: What is the formal event state machine? Candidate states: `Draft`, `Published/Scheduled`, `Selection Open`, `Selection Closed`, `In Progress`, `Completed`, `Rescheduled`, `Cancelled`. What triggers transition into each state?
 4. **Rescheduling & Event Edits After Team Selection**:
-   - *Status*: UNRESOLVED.
-   - *Issue*: If an event's date, time, location, or required headcount is edited after Leaders have been selected or confirmed:
-     - Does it invalidate existing confirmations?
-     - Are Leaders automatically transitioned to a re-confirmation state?
-     - What constitutes an "important change" requiring re-confirmation vs. a minor administrative update?
+   - *Status*: **RESOLVED / APPROVED**.
+   - *Resolution*:
+     - *Minor edits* (notes, description, etc.): Keep all availability and team assignments.
+     - *Same-day time/location changes*: Keep availability and team assignments; notify affected personnel clearly.
+     - *Date change / true reschedule*: Old availability is invalidated; availability is reopened; previous responses/assignments remain in history; staffing is rebuilt for the new date.
 5. **Replacement Rules & Permissions (Admin vs. Chief Leader)**:
-   - *Status*: UNRESOLVED.
-   - *Issue*: Can a Chief Leader directly replace a confirmed Leader who cancels, or does replacement require Admin intervention? Does replacement pull from remaining applicants, or does it re-open general availability?
-6. **No-Show vs. Late Cancellation Behavior**:
-   - *Status*: UNRESOLVED.
-   - *Issue*: At what threshold does a cancellation become a "Late Cancellation"? Is "No-Show" marked exclusively during attendance tracking? Can an Admin or Chief Leader override a No-Show if an emergency occurs?
+   - *Status*: **RESOLVED / APPROVED**.
+   - *Resolution*: Leaders may cancel their own participation via a controlled action requiring explicit confirmation and a reason. Full assignment history is preserved, and the assigned Chief Leader and Admin are notified immediately. The assigned Chief Leader directly selects the replacement for the event from available candidates. Timing penalties and commitment effects remain unresolved.
+6. **Attendance Authority, Finalization & Correction**:
+   - *Status*: **RESOLVED / APPROVED**.
+   - *Resolution*: The assigned Chief Leader has primary authority to directly record and finalize attendance (`Attended` / `NoShow`) on-site or post-event. There is no routine Admin approval gate. Submitted attendance immediately updates factual participation histories. Admins possess audited override/correction rights (with mandatory recorded justification) in case of disputes or errors. Missing attendance post-event is an operational condition (`Pending Attendance`), not an Event lifecycle state. Timing thresholds for "Late Cancellation" remain unresolved.
 
 ---
 
 ### P1 — Blocks Specific Feature Implementation
 *These decisions block individual feature designs, endpoint contracts, or UI workflows, but do not invalidate core domain boundaries.*
 
-7. **Mandatory vs. Optional Event Fields**:
-   - *Status*: UNRESOLVED.
-   - *Issue*: Minimum required fields at creation time (Title, Start/End DateTime, Location, Role requirements, Dress code, Meeting point, Required leader count, Chief Leader ID, Notes). Can an event be created without an assigned Chief Leader?
+7. **Chief Leader Assignment & Mandatory Publishing Prerequisite**:
+   - *Status*: **RESOLVED / APPROVED**.
+   - *Resolution*: An Event cannot transition to `Published` unless it possesses an accepted, `Active` Chief Leader assignment (`Event.Status == Published => Event has exactly one active accepted ChiefLeaderAssignment`). Admin assignment creates a `Pending` assignment; acceptance activates operational ownership. External acceptance confirmed outside the platform may be recorded by Admin with mandatory audit log. Every published event in Carpediem always has an accepted Chief Leader. Minimum optional/mandatory creation fields remain open. Post-publish replacement is deferred to Event Management feature spec.
 8. **Final Confirmation Behavior & Deadlines**:
-   - *Status*: UNRESOLVED.
-   - *Issue*: Is confirmation mandatory for attendance eligibility? Is there an automated expiration deadline (e.g., 48 hours before event)? If a Leader fails to confirm within the window, are they automatically dropped or flagged?
+   - *Status*: **RESOLVED / APPROVED**.
+   - *Resolution*: No separate final confirmation step. A Leader who marked availability and is selected by the Chief Leader becomes part of the confirmed team immediately. The Leader remains confirmed unless they explicitly cancel. Selection immediately dispatches an in-platform notification. Direct selection without prior availability is treated as a separate invitation flow.
 9. **Feedback & Post-Event Evaluation Visibility**:
    - *Status*: UNRESOLVED.
    - *Issue*: Who sees post-event evaluations and Leader ratings?
