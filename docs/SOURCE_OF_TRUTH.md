@@ -24,7 +24,7 @@ To eliminate documentation drift, ambiguity, and conflicting requirements when c
 **Canonical Directory**: `.specify/memory/constitution.md`, `.specify/specs/`, `.specify/plans/`
 
 **Spec Kit Authoritative Domains**:
-- **Engineering Constitution**: Core code guidelines, quality rules, technology choices (ASP.NET Core, PostgreSQL, Mobile-first UX, Modular Monolith).
+- **Engineering Constitution**: Core code guidelines, quality rules, locked technology choices (Angular 22, C# 14 / .NET 10, Microsoft SQL Server 2025 + T-SQL, Mobile-first UX, WCAG 2.2 AA, Modular Monolith).
 - **Executable Feature Specifications**: Precise, testable specifications for individual user stories (`/speckit-specify`).
 - **Clarification Artifacts**: Structured Q&A de-risking edge cases and ambiguities (`/speckit-clarify`).
 - **Technical Implementation Plans**: Architectural break-downs, technical design, file-by-file modification plan (`/speckit-plan`).
