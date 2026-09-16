@@ -1,0 +1,38 @@
+# Build outputs & binaries
+[Bb]in/
+[Oo]bj/
+out/
+dist/
+build/
+
+# IDE & Editor settings
+.vs/
+.vscode/
+.idea/
+*.user
+*.userosscache
+*.sln.docstates
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+.uv/
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Output & temp logs
+*.log
+_bmad-output/
