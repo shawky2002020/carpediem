@@ -1,0 +1,33 @@
+// Carpediem logo-derived candidates. The PDF remains the brand source of truth.
+// Values are provisional until the product owner approves the UI palette.
+$forest: #1d5041;
+$evergreen: #15281d;
+$orange: #f47025;
+$red: #d13531;
+$white: #ffffff;
+$canvas: #f8f9f5;
+$surface-subtle: #eaf2ed;
+$ink-secondary: #526157;
+$border: #c8d2c9;
+$border-strong: #829486;
+$success: #246a45;
+$warning: #7a4c09;
+$danger: #b42318;
+$info: #195a7a;
+
+$space: (
+  0: 0,
+  1: 0.25rem,
+  2: 0.5rem,
+  3: 0.75rem,
+  4: 1rem,
+  5: 1.25rem,
+  6: 1.5rem,
+  8: 2rem,
+  10: 2.5rem,
+  12: 3rem
+);
+
+$radius-control: 0.5rem;
+$radius-panel: 0.75rem;
+$radius-pill: 999px;

@@ -1,0 +1,188 @@
+:root {
+  color-scheme: light;
+  --cd-bg-canvas: #f8f9f5;
+  --cd-bg-surface: #ffffff;
+  --cd-bg-subtle: #eaf2ed;
+  --cd-text-primary: #15281d;
+  --cd-text-secondary: #526157;
+  --cd-text-muted: #526157;
+  --cd-text-inverse: #ffffff;
+  --cd-border-default: #c8d2c9;
+  --cd-border-strong: #829486;
+  --cd-nav-bg: var(--cd-bg-surface);
+  --cd-nav-text: var(--cd-text-primary);
+  --cd-form-bg: var(--cd-bg-surface);
+  --cd-form-border: var(--cd-border-strong);
+  --cd-form-error: var(--cd-status-danger-fg);
+  --cd-action-primary: #1d5041;
+  --cd-action-primary-hover: #174335;
+  --cd-action-primary-active: #102f25;
+  --cd-focus-ring: #1d5041;
+  --cd-status-success-fg: #246a45;
+  --cd-status-success-bg: #eef7f0;
+  --cd-status-warning-fg: #7a4c09;
+  --cd-status-warning-bg: #fff8eb;
+  --cd-status-danger-fg: #b42318;
+  --cd-status-danger-bg: #fff2f0;
+  --cd-status-info-fg: #195a7a;
+  --cd-status-info-bg: #ecf6fa;
+  --cd-font-ui: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --cd-font-size-xs: 0.75rem;
+  --cd-font-size-sm: 0.875rem;
+  --cd-font-size-md: 1rem;
+  --cd-font-size-lg: 1.25rem;
+  --cd-font-size-xl: 1.5rem;
+  --cd-font-size-2xl: 2rem;
+  --cd-line-tight: 1.25;
+  --cd-line-normal: 1.5;
+  --cd-line-relaxed: 1.6;
+  --cd-weight-regular: 400;
+  --cd-weight-medium: 500;
+  --cd-weight-semibold: 600;
+  --cd-weight-bold: 700;
+  --cd-letter-spacing-caps: 0.04em;
+  --cd-space-1: 0.25rem;
+  --cd-space-2: 0.5rem;
+  --cd-space-3: 0.75rem;
+  --cd-space-4: 1rem;
+  --cd-space-5: 1.25rem;
+  --cd-space-6: 1.5rem;
+  --cd-space-8: 2rem;
+  --cd-space-10: 2.5rem;
+  --cd-space-12: 3rem;
+  --cd-radius-control: 0.5rem;
+  --cd-radius-panel: 0.75rem;
+  --cd-radius-pill: 999px;
+  --cd-border-width: 1px;
+  --cd-shadow-raised: 0 4px 16px rgb(21 40 29 / 10%);
+  --cd-opacity-disabled: 0.45;
+  --cd-layer-base: 0;
+  --cd-layer-sticky: 10;
+  --cd-layer-popover: 20;
+  --cd-layer-dialog: 30;
+  --cd-duration-instant: 0ms;
+  --cd-duration-fast: 120ms;
+  --cd-duration-normal: 180ms;
+  --cd-duration-slow: 240ms;
+  --cd-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --cd-ease-enter: cubic-bezier(0, 0, 0.2, 1);
+  --cd-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --cd-control-min-block-size: 3rem;
+  --cd-touch-target-min: 2.75rem;
+  --cd-icon-size-sm: 1.25rem;
+  --cd-icon-size-md: 1.5rem;
+  --cd-content-max: 72rem;
+  --cd-reading-max: 42rem;
+  --cd-page-gutter: 1rem;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --cd-page-gutter: 1.5rem;
+  }
+}
+@media (min-width: 75rem) {
+  :root {
+    --cd-page-gutter: 2rem;
+  }
+}
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--cd-bg-canvas);
+  color: var(--cd-text-primary);
+  font-family: var(--cd-font-ui);
+  font-size: var(--cd-font-size-md);
+  line-height: var(--cd-line-normal);
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+img, svg {
+  display: block;
+  max-inline-size: 100%;
+}
+
+img {
+  block-size: auto;
+}
+
+:where(h1, h2, h3, p) {
+  overflow-wrap: break-word;
+}
+
+:where(button, input, select, textarea, a):focus-visible {
+  outline: 3px solid var(--cd-focus-ring);
+  outline-offset: 3px;
+}
+
+:where(button, [type=button], [type=submit], [type=reset]) {
+  min-block-size: var(--cd-touch-target-min);
+}
+
+:where(input:not([type=checkbox]):not([type=radio]), select, textarea) {
+  min-block-size: var(--cd-control-min-block-size);
+}
+
+.cd-visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.cd-container {
+  inline-size: min(100% - 2 * var(--cd-page-gutter), var(--cd-content-max));
+  margin-inline: auto;
+}
+
+.cd-reading {
+  max-inline-size: var(--cd-reading-max);
+}
+
+:target, :focus {
+  scroll-margin-block: 5rem;
+}
+
+.cd-enter {
+  animation: cd-enter var(--cd-duration-normal) var(--cd-ease-enter) both;
+}
+
+@keyframes cd-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --cd-duration-fast: 0ms;
+    --cd-duration-normal: 0ms;
+    --cd-duration-slow: 0ms;
+  }
+  .cd-enter {
+    animation: none;
+  }
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+}
