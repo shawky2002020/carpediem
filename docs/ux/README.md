@@ -1,5 +1,3 @@
 # UX & UI Design System
 
-Contains mobile-first responsive layout specifications, component wireframes, accessibility requirements (WCAG 2.2 AA where applicable), and interaction guidelines.
-
-- **Primary Persona**: UX/Product Designer
+Start with [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md). It links the discovery, brand, typography, color, tokens, mobile layout, component, motion, accessibility, and asset documents. The current foundation is proposed and awaits the Angular workspace and owner approval of high-impact brand choices.
