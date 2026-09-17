@@ -71,8 +71,13 @@
 - **Conceptual Sub-Component: StaffingCycle (Schedule Revision)**:
   - *Responsibility*: Scopes availability responses and team assignments to a specific scheduled event date.
   - When an event date is changed, the current `StaffingCycle` is archived historically, and a fresh `StaffingCycle` opens for the new date, preventing state corruption.
-- **Unresolved Questions**:
-  - What are the mandatory fields at creation time?
+  - Minimum Creation Fields (RATIFIED per [CHANGE-002](file:///c:/dev/web/Carpediem/docs/decisions/CHANGE-002-draft-event-minimum-fields.md)):
+    - `Title`: Required string.
+    - `StartDateTime`: Required UTC timestamp.
+    - `EndDateTime`: Required UTC timestamp (`StartDateTime < EndDateTime`).
+    - `Location`: Required string (venue/location description).
+    - `Notes`: Optional string.
+  - Extended metadata (capacity, venue taxonomy, tags, virtual links, equipment checklists) remains deferred to future feature specifications.
 
 ### ChiefLeaderAssignment
 - **Responsibility**: Manages the formal appointment, notification, acceptance/decline workflow, and operational ownership of a Chief Leader for an Event.
