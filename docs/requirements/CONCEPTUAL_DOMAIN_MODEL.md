@@ -29,10 +29,11 @@
   - Exactly three distinct roles exist in V1 (`Admin`, `Chief Leader`, `Leader`).
   - Chief Leaders are a predefined set of people in the organization. They are not Leaders who become qualified through the system, and there is no system qualification workflow.
   - Admins choose one of these known Chief Leaders for an event, initiating a `Pending` assignment that requires explicit acceptance (or audited external confirmation) to become `Active`.
-  - Exclusive Leadership Role (APPROVED - Blocker 2): Chief Leaders exclusively lead events. They cannot mark availability, apply, or participate as normal Leaders on any event.
+  - Role Exclusivity Model (SUPERSEDED by [CHANGE-001](file:///c:/dev/web/Carpediem/docs/decisions/CHANGE-001-chief-leader-dual-role-participation.md)): *Originally locked under Decision Blocker 2 ("Chief Leaders exclusively lead events. They cannot mark availability, apply, or participate as normal Leaders on any event").* Superseded by CHANGE-001: Role membership is non-exclusive; a user belonging to the predefined Chief Leader pool may also hold the `Leader` role if granted by an Admin. Dual-role users can participate as normal Leaders on events where they are not the active Chief Leader.
+  - Same-Event Exclusivity Invariant (LOCKED per CHANGE-001): For any Event $E$ and User $U$, holding an `Active` `ChiefLeaderAssignment(E)` and an `Active` `TeamAssignment(E)` is strictly mutually exclusive ($\text{Active ChiefLeaderAssignment}(E, U) \implies \neg\text{Active TeamAssignment}(E, U)$). Any active team assignment for $U$ on $E$ must be resolved before a `Pending` Chief Leader assignment can transition to `Active`.
   - Role-based permissions are enforced server-side.
 - **Unresolved Questions**:
-  - Can an Admin also hold Leader capabilities, or are roles strictly single-role per user in V1?
+  - Can an Admin also hold Leader capabilities, or are roles strictly single-role per user in V1 (outside the approved ChiefLeader + Leader dual-role model)?
 
 ### LeaderProfile
 - **Responsibility**: Holds operational domain information regarding a Leader (contact details, qualifications, participation history, factual commitment indicators).

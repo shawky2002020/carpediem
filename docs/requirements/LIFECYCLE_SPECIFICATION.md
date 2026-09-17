@@ -150,6 +150,10 @@ Manages the appointment, acceptance/decline workflow, and operational ownership 
 6. **Post-Publish Replacement Boundary**:
    - The initial appointment and acceptance workflow is locked.
    - Emergency reassignment or replacement of an `Active` Chief Leader after an event is already `Published` is non-blocking for core lifecycles and is formally deferred to the Event Management feature specification.
+7. **Same-Event Exclusivity Invariant ([CHANGE-001](file:///c:/dev/web/Carpediem/docs/decisions/CHANGE-001-chief-leader-dual-role-participation.md))**:
+   - For any Event $E$ and User $U$: holding an `Active` `ChiefLeaderAssignment(E)` and an `Active` `TeamAssignment(E)` is strictly mutually exclusive ($\text{Active ChiefLeaderAssignment}(E, U) \implies \neg\text{Active TeamAssignment}(E, U)$).
+   - An active Chief Leader on Event $E$ cannot hold an `Active` `TeamAssignment` on Event $E$.
+   - No additional restriction has been defined for a Pending ChiefLeaderAssignment. Behavior remains governed by existing Leader participation rules until activation. However, if the user currently has an Active TeamAssignment for the same Event, that TeamAssignment must be resolved before the Pending ChiefLeaderAssignment may transition to Active.
 
 ### C. Transition Table
 
@@ -280,7 +284,7 @@ Factual ground-truth record of physical event service for an assigned Leader.
 
 | Approved Decision | Lifecycle Impact & Concrete Rule | Grounding Document |
 | :--- | :--- | :--- |
-| **Chief Leader Role Model** | Predefined pool; assigned by Admin; exclusive leadership role (cannot be standard Leader on any event). | Section 2 & Blocker 2 |
+| **Chief Leader Role Model** | Predefined pool; assigned by Admin; non-exclusive role membership per [CHANGE-001](file:///c:/dev/web/Carpediem/docs/decisions/CHANGE-001-chief-leader-dual-role-participation.md) (supersedes Decision Blocker 2). Dual-role users may participate as Leaders on non-assigned events. **Same-Event Exclusivity Invariant**: On any single event, holding an `Active` `ChiefLeaderAssignment` and an `Active` `TeamAssignment` is strictly mutually exclusive. | Section 2, Blocker 2, CHANGE-001 |
 | **Chief Leader Assignment Flow** | Admin appoints (`Pending`); Chief Leader accepts (`Active`) or declines (`Declined`); external acceptance recorded by Admin with mandatory audit log; `Declined` preserved in history. | Chief Leader Flow Decision |
 | **Publishing Prerequisite** | An Event cannot be published unless it possesses an accepted, `Active` Chief Leader assignment (`Event.Status == Published => Event has exactly one active accepted ChiefLeaderAssignment`). | Decision 1 & Chief Leader Flow |
 | **Availability vs. Application** | Single unified response (`Available` / `NotAvailable`); marking `Available` directly qualifies for selection; no separate Application form. | Decision Group 2 |
@@ -295,11 +299,11 @@ Factual ground-truth record of physical event service for an assigned Leader.
 
 ---
 
-## 8. Governance Status: LOCKED & RATIFIED
+## 8. Governance Status: LOCKED & RE-RATIFIED
 
 > [!CAUTION]
-> **Lifecycle Foundation Locked — Architecture Modeling Authorized; Code Implementation Remains Blocked.**
-> This document completes and formally locks the Carpediem text-level lifecycle and state machine discovery.
+> **Lifecycle Foundation Locked & Re-Ratified — Reconciled with CHANGE-001; Code Implementation Remains Blocked.**
+> This document formally locks and re-ratifies the Carpediem normalized lifecycle foundation, incorporating stakeholder-approved [CHANGE-001](file:///c:/dev/web/Carpediem/docs/decisions/CHANGE-001-chief-leader-dual-role-participation.md).
 > In compliance with Carpediem governance:
 > - **AUTHORIZED**: Architectural modeling (C4 Context, C4 Container, Modular Monolith boundaries, ADR backlog).
 > - **BLOCKED**: No ASP.NET Core entity models, DbContext classes, or EF migrations.
