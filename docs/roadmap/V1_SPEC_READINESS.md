@@ -30,8 +30,8 @@ Every feature slice is evaluated and assigned to exactly one of the five standar
 | **`SLICE-05`** | Chief Leader Admin Acceptance | **DEPENDS ON EARLIER FEATURE** | Requires `SLICE-03` (Pending assignment record). |
 | **`SLICE-06`** | Event Publication Invariant | **DEPENDS ON EARLIER FEATURE** | Requires `SLICE-02` and (`SLICE-04` or `SLICE-05`). |
 | **`SLICE-07`** | Leader Availability Declaration | **DEPENDS ON EARLIER FEATURE** | Requires `SLICE-06` (Published Event). |
-| **`SLICE-08`** | Team Selection from Available Pool | **DEPENDS ON EARLIER FEATURE** | Requires `SLICE-06` (Published Event) and `SLICE-07` (Available pool). |
-| **`SLICE-09`** | Direct Leader Assignment | **DEPENDS ON EARLIER FEATURE** | Requires `SLICE-06` (Published Event). |
+| **`SLICE-08`** | Team Selection from Available Pool | **DEPENDS ON EARLIER FEATURE** | Requires `SLICE-06` and `SLICE-07`. Decision provenance: Decision Group 5 (immediate `Active` assignment; zero redundant confirmation). |
+| **`SLICE-09`** | Direct Leader Assignment | **DEPENDS ON EARLIER FEATURE** | Requires `SLICE-06`. Decision provenance: Decision Group 5 and Blocker 1 (immediate `Active` assignment). |
 | **`SLICE-10`** | Leader Self-Cancellation | **DEPENDS ON EARLIER FEATURE** | Requires `SLICE-08` or `SLICE-09` (Active assignment). |
 | **`SLICE-11`** | Replacement Leader Assignment | **DEPENDS ON EARLIER FEATURE** | Requires `SLICE-10` (Cancelled assignment). |
 | **`SLICE-12`** | Event Reschedule & Cycle Rotation | **DEPENDS ON EARLIER FEATURE** | Requires `SLICE-06` (Published Event). |
@@ -40,7 +40,7 @@ Every feature slice is evaluated and assigned to exactly one of the five standar
 | **`SLICE-15`** | Chief Leader Attendance Recording | **DEPENDS ON EARLIER FEATURE** | Requires `SLICE-08` or `SLICE-09` (Active assignment). Independent of `SLICE-14`. |
 | **`SLICE-16`** | Admin Attendance Correction & Audit | **DEPENDS ON EARLIER FEATURE** | Requires `SLICE-15` (Recorded attendance outcome). |
 | **`SLICE-17`** | In-Platform Notification Delivery | **DEPENDS ON EARLIER FEATURE** | Requires `FOUNDATION-01` and business workflows (`SLICE-03`, `SLICE-08`). |
-| **`SLICE-18`** | Leader Profile & Factual History | **DEPENDS ON EARLIER FEATURE** | Requires `SLICE-15` and `SLICE-10` (Factual counts from core tables). |
+| **`SLICE-18`** | Leader Profile & Factual History | **DEPENDS ON EARLIER FEATURE** | Requires `SLICE-15` (attendance counts) and `SLICE-10` (cancellation counts). |
 | **`SLICE-19`** | Operational Dashboard | **DEPENDS ON EARLIER FEATURE** | Requires `SLICE-06`, `SLICE-08`, `SLICE-14`, `SLICE-15` (Derived projections). |
 | **`SLICE-20`** | Account & Role Administration | **NEEDS STAKEHOLDER DECISION FIRST** | Production onboarding, invitation mechanism, and lifecycle states unratified. |
 | **`SLICE-21`** | Post-Event Feedback & Evaluations | **NEEDS STAKEHOLDER DECISION FIRST** | Survey rubric, rating scales, anonymity, and visibility rules unratified. |

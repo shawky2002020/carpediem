@@ -17,7 +17,7 @@
    - AvailabilityResponse: `Available`, `NotAvailable`.
    - TeamAssignment: `Active`, `Cancelled`.
    - AttendanceOutcome: `Attended`, `NoShow` (Absence of row = `Unrecorded`).
-4. **Immediate Team Placement**: Chief Leader selection immediately produces an `Active` `TeamAssignment`. Redundant "invited" or "confirmation" steps are forbidden.
+4. **Immediate Team Placement**: Chief Leader selection immediately produces an `Active` `TeamAssignment`. Redundant "invited" or "confirmation" steps are forbidden. (Ratified per Decision Group 5 in `PRODUCT_DISCOVERY.md` Item 8, `LIFECYCLE_SPECIFICATION.md` Section 5 & 7, and `ROLE_PERMISSION_MATRIX.md` Capability 11).
 5. **Direct Leader Assignment Authority**: Support immediate `Active` assignment for Leaders who did not respond or marked `NotAvailable` without treating Chief Leader assignment as an override.
 6. **Native Asynchronous Lifecycle Execution**: Event completion post-`EndTime` is executed by a lightweight native ASP.NET Core `BackgroundService` per ADR-007. Zero external schedulers (no Hangfire, Quartz).
 7. **Relational Notification Strategy**: Notifications are persisted in SQL Server and retrieved via Angular lifecycle refreshes and polling per ADR-006. Zero SignalR dependencies in V1.
@@ -32,8 +32,8 @@
 The first business implementation slice (`SLICE-02`) carries the foundational application scaffolding:
 - **Host Infrastructure**: ASP.NET Core 10 Web API host with Modular Monolith folder/assembly boundaries.
 - **Database Baseline**: Microsoft SQL Server 2025 connection, RCSI enabled (`READ_COMMITTED_SNAPSHOT ON`), and EF Core single-host `CarpediemDbContext`.
-- **Security & Session**: HTTP-only session cookie authentication handler, sliding expiration, and Antiforgery validation.
-- **Client Foundation**: Angular 20 SPA application shell, navigation frame, and authentication session state interceptor.
+- **Security & Session**: ASP.NET Core Identity cookie authentication (`AddIdentityCookies`, `HttpOnly = true`, `SameSite = Lax`, `Secure = true`), sliding expiration (14 days), `SecurityStampValidator` revocation, and Antiforgery validation per ADR-002.
+- **Client Foundation**: Angular 22 SPA application shell, navigation frame, and authentication session state interceptor.
 - **Developer Fixtures**: Deterministic development accounts (1 Operations Admin, 2 Chief Leaders, 5 Leaders).
 
 ---
@@ -50,22 +50,22 @@ The first business implementation slice (`SLICE-02`) carries the foundational ap
 5. **`SLICE-05`**: Chief Leader Admin-Recorded External Acceptance *(Administrative fallback)*
 6. **`SLICE-06`**: Event Publication & Publishing Prerequisite Invariant *(Publishing gate)*
 7. **`SLICE-07`**: Leader Availability Declaration *(Volunteer schedule submission)*
-8. **`SLICE-08`**: Chief Leader Team Selection from Available Pool *(Immediate active roster placement)*
+8. **`SLICE-08`**: Chief Leader Team Selection from Available Pool *(Immediate active roster placement per Decision Group 5)*
 9. **`SLICE-09`**: Direct Leader Assignment *(Direct assignment of non-respondents)*
 
-### P1: Operational Execution, Attendance & Churn (Milestones M2 & M3)
-*Objective: Deliver attendance roll call, operational dashboards, churn management, and in-platform notifications.*
+### P1: Operational Execution, Churn & Lifecycle (Milestones M2 & M3)
+*Objective: Deliver volunteer churn handling, scheduled completion, on-site attendance, and operational dashboards.*
 
-**Milestone M2: Completion, Attendance & Operational Visibility**
-10. **`SLICE-14`**: Event Scheduled Completion & Closeout *(Native BackgroundService / Admin closeout)*
-11. **`SLICE-15`**: Chief Leader On-Site Attendance Recording *(Roll call finalization; independent of completion)*
-12. **`SLICE-16`**: Admin Attendance Correction & Audit Logging *(Audited corrections)*
-13. **`SLICE-18`**: Leader Profile & Factual Participation History *(Factual participation counts)*
-14. **`SLICE-19`**: Admin & Chief Leader Operational Dashboard *(Derived/request-time operational evaluation)*
+**Milestone M2: Volunteer Churn & Replacement**
+10. **`SLICE-10`**: Leader Self-Cancellation with Mandatory Justification *(Controlled self-cancellation; provides cancellation counts for SLICE-18)*
+11. **`SLICE-11`**: Replacement Leader Assignment *(Selecting replacement for cancelled slot)*
 
-**Milestone M3: Volunteer Churn, Rescheduling & Notification Center**
-15. **`SLICE-10`**: Leader Self-Cancellation with Mandatory Justification *(Controlled self-cancellation)*
-16. **`SLICE-11`**: Replacement Leader Assignment *(Selecting replacement for cancelled slot)*
+**Milestone M3: Completion, Attendance, Profiling & Dashboards**
+12. **`SLICE-14`**: Event Scheduled Completion & Closeout *(Native BackgroundService / Admin closeout)*
+13. **`SLICE-15`**: Chief Leader On-Site Attendance Recording *(Roll call finalization; independent of completion)*
+14. **`SLICE-16`**: Admin Attendance Correction & Audit Logging *(Audited corrections)*
+15. **`SLICE-18`**: Leader Profile & Factual Participation History *(Factual counts; topologically depends on SLICE-10 and SLICE-15)*
+16. **`SLICE-19`**: Admin & Chief Leader Operational Dashboard *(Derived/request-time operational evaluation; evaluates SLICE-06, 08, 14, 15)*
 17. **`SLICE-12`**: Event Reschedule & Staffing Cycle Rotation *(Material date change governance)*
 18. **`SLICE-17`**: In-Platform Notification Delivery & Inbox Management *(Inbox & polling refresh)*
 
@@ -94,7 +94,7 @@ The first business implementation slice (`SLICE-02`) carries the foundational ap
   6. Volunteer Leaders view the published Event and submit `Available` or `NotAvailable` (`SLICE-07`).
   7. Chief Leader views the available pool and selects team members (`SLICE-08`).
   8. Chief Leader or Admin directly assigns any required non-respondents (`SLICE-09`).
-  9. Selected Leaders are **immediately placed on the active team roster** in `Active` status without redundant confirmation gates.
+  9. Selected Leaders are **immediately placed on the active team roster** in `Active` status without redundant confirmation gates (ratified per Decision Group 5).
 
 ---
 

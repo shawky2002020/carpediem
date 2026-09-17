@@ -16,10 +16,10 @@ Carpediem strictly distinguishes between **technical scaffolding** and **busines
 - **Purpose**: Accompanies `SLICE-02` during initial implementation to establish the executing environment.
 - **Included Scaffolding**:
   - ASP.NET Core 10 Web API host and Modular Monolith directory/assembly structure.
-  - Angular 20 SPA application shell, navigation frame, and theme layout.
+  - Angular 22 SPA application shell, navigation frame, and theme layout.
   - Microsoft SQL Server 2025 connectivity with RCSI enabled (`READ_COMMITTED_SNAPSHOT ON`).
   - Single-host `CarpediemDbContext` and EF Core migrations baseline.
-  - ASP.NET Core Identity cookie authentication handler with sliding expiration and Antiforgery middleware.
+  - ASP.NET Core Identity cookie authentication (`AddIdentityCookies`, `HttpOnly = true`, `SameSite = Lax`, `Secure = true`), sliding expiration (14 days), `SecurityStampValidator` revocation, and Antiforgery middleware per ADR-002.
   - Standardized `ProblemDetails` exception handling, structured logging, and health endpoint baselines.
   - Integration and End-to-End (E2E) testing harness.
   - Deterministic seed/test user fixtures (1 Operations Administrator, 2 Chief Leaders, 5 Leaders).
@@ -125,14 +125,14 @@ Total Business Feature Slices: **21**.
 ### SLICE-08: Chief Leader Team Selection from Available Pool
 - **Owning Module**: `Staffing`
 - **Primary Persona**: Chief Leader
-- **Business Scope**: Chief Leader views the pool of `Available` Leaders and selects a volunteer. Selection **immediately** creates an `Active` `TeamAssignment`. The volunteer is placed directly on the active team roster without redundant confirmation steps. Enforces CHANGE-001 same-event exclusivity invariant.
+- **Business Scope**: Chief Leader views the pool of `Available` Leaders and selects a volunteer. Selection **immediately** creates an `Active` `TeamAssignment` (ratified per Decision Group 5 in `PRODUCT_DISCOVERY.md` Item 8 and `LIFECYCLE_SPECIFICATION.md` Section 5 & 7). The volunteer is placed directly on the active team roster without redundant confirmation steps. Enforces CHANGE-001 same-event exclusivity invariant.
 - **Persisted Entity States**: `staffing.TeamAssignments` (`Status = 'Active'`).
 - **Audit & Notification**: Audit logged (`VolunteerSelected`). Notification intent created to inform volunteer of active placement. Filtered index `UX_TeamAssignments_ActiveLeaderPerCycle` prevents duplicate active assignments.
 
 ### SLICE-09: Direct Leader Assignment
 - **Owning Module**: `Staffing`
 - **Primary Persona**: Chief Leader, Platform Administrator
-- **Business Scope**: Chief Leader or Admin directly assigns a Leader who has not responded or who marked `NotAvailable`. Chief Leader assignment is a standard direct staffing action; Admin assignment is an audited administrative action. Both create an immediate `Active` `TeamAssignment` and notify the Leader. Enforces CHANGE-001 same-event exclusivity invariant.
+- **Business Scope**: Chief Leader or Admin directly assigns a Leader who has not responded or who marked `NotAvailable`. Chief Leader assignment is a standard direct staffing action; Admin assignment is an audited administrative action. Both create an immediate `Active` `TeamAssignment` (ratified per Decision Group 5 and Blocker 1 in `LIFECYCLE_SPECIFICATION.md` Section 5 & 7) and notify the Leader. Enforces CHANGE-001 same-event exclusivity invariant.
 - **Persisted Entity States**: `staffing.TeamAssignments` (`Status = 'Active'`).
 - **Audit & Notification**: Audit logged (`DirectLeaderAssignmentExecuted`, noting non-response/NotAvailable state). Notification intent created for volunteer.
 

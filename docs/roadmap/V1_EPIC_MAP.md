@@ -70,8 +70,8 @@ Carpediem V1 comprises **13 Business Epics** mapped to modular monolith boundari
 ### EPIC-01: Platform Access & Authorized Account Administration
 - **Owning Module**: `Identity & Access`
 - **Primary Persona**: Platform Administrator, Chief Leader, Leader
-- **Business Capability**: Enables secure user access to the Carpediem web application via secure, HTTP-only session cookies with sliding expiration. Governs Admin management of authorized accounts and roles. Early delivery utilizes deterministic seed fixtures (`FOUNDATION-01`) to bootstrap development without blocking on unresolved production onboarding workflows.
-- **Architectural Reference**: ADR-002 (Session Auth, sliding expiration, Antiforgery protection).
+- **Business Capability**: Enables secure user access to the Carpediem web application via ASP.NET Core Identity cookie authentication (`HttpOnly`, `SameSite=Lax`, `Secure`) with sliding expiration and `SecurityStamp` revocation per ADR-002. Governs Admin management of authorized accounts and roles. Early delivery utilizes deterministic seed fixtures (`FOUNDATION-01`) to bootstrap development without blocking on unresolved production onboarding workflows.
+- **Architectural Reference**: ADR-002 (Identity Cookie Auth, sliding expiration, Antiforgery protection).
 
 ### EPIC-02: Event Planning & Lifecycle Management
 - **Owning Module**: `Events`
@@ -95,7 +95,7 @@ Carpediem V1 comprises **13 Business Epics** mapped to modular monolith boundari
 ### EPIC-05: Team Staffing & Direct Leader Assignment
 - **Owning Module**: `Staffing`
 - **Primary Persona**: Chief Leader, Platform Administrator
-- **Business Capability**: Grants the assigned Chief Leader primary authority to select team members from the `Available` volunteer pool. Selection immediately creates an `Active` `TeamAssignment` and notifies the Leader. Also grants Chief Leaders and Admins the authority to directly assign any active Leader who has not responded or declared `NotAvailable` (Direct Leader Assignment). Zero redundant confirmation steps exist.
+- **Business Capability**: Grants the assigned Chief Leader primary authority to select team members from the `Available` volunteer pool. Selection immediately creates an `Active` `TeamAssignment` (ratified per Decision Group 5 in `PRODUCT_DISCOVERY.md` Item 8 and `LIFECYCLE_SPECIFICATION.md` Section 5 & 7) and notifies the Leader. Also grants Chief Leaders and Admins the authority to directly assign any active Leader who has not responded or declared `NotAvailable` (Direct Leader Assignment). Zero redundant confirmation steps exist.
 - **Persisted States**: `Active` (Absence of row = Unassigned).
 
 ### EPIC-06: Volunteer Cancellation & Replacement
