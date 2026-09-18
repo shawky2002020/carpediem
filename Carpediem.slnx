@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Carpediem.Web/Carpediem.Web.csproj" />
+  </Folder>
+  <Folder Name="/src/Infrastructure/">
+    <Project Path="src/Infrastructure/Carpediem.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Events/">
+    <Project Path="src/Modules/Events/Carpediem.Modules.Events.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Identity/">
+    <Project Path="src/Modules/Identity/Carpediem.Modules.Identity.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Carpediem.Api.IntegrationTests/Carpediem.Api.IntegrationTests.csproj" />
+    <Project Path="tests/Carpediem.Domain.Tests/Carpediem.Domain.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,12 @@
+@use '../../design-system/styles/index';
+
+:root {
+  --cd-font-display: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --cd-font-ui: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+html, body { min-block-size: 100%; }
+body { min-inline-size: 20rem; }
+a { color: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: wait; opacity: var(--cd-opacity-disabled); }
