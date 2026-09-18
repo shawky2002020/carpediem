@@ -9,11 +9,11 @@
 | Category | Small v1 scale or contract |
 | --- | --- |
 | Color | Brand and neutral Sass primitives; semantic CSS variables such as `--cd-bg-canvas`, `--cd-text-primary`, `--cd-action-primary`, `--cd-status-danger-fg`. |
-| Font family | One provisional system stack; swap to owner-approved, self-hosted variable UI face later. |
+| Font family | Proposed two-role system: Bricolage Grotesque 600 for display moments; Hanken Grotesk 400–700 for body, forms, controls, metadata, and data. |
 | Font size | 12, 14, 16, 20, 24, 32 px. Body remains 16 px; 12 px is restricted to noncritical supporting text. |
 | Weight | 400, 500, 600, 700. |
 | Line height | 1.25 headings, 1.5 body/controls, 1.6 longer reading. |
-| Letter spacing | Normal body; optional 0.04em for short uppercase labels only. No tracked long-form text. |
+| Letter spacing | Normal body; display text may use careful negative tracking at large sizes. Do not turn supporting labels into tracked uppercase decoration. |
 | Spacing | 0, 4, 8, 12, 16, 20, 24, 32, 40, 48 px. Use 8/16/24 rhythm most often. |
 | Size | 48 px default field minimum, 44 px target minimum, 672 px reading maximum, 1152 px content maximum. |
 | Radius | 8 px control, 12 px panel, full pill badge. |
@@ -28,7 +28,7 @@
 
 - Public CSS variables use `--cd-<role>-<detail>` and logical dimensions (`inline`, `block`) wherever possible.
 - Component CSS must use semantic color variables. Never bind brand orange to `warning` or logo red to `danger` by name coincidence.
-- The provisional palette and system font stack are a safe integration skeleton, not a brand lock. Future Angular global styles can import `design-system/styles/index.scss` once the application exists.
+- Font family tokens name the proposed pair but do not ship font files into application runtime. After approval, self-host only the licensed subsets needed by the application and define `@font-face` at the global style boundary. Future Angular global styles can import `design-system/styles/index.scss` once the application exists.
 - Runtime theming remains possible because semantic values are CSS properties. There is no dark theme or theme switch in v1.
 
 ## Governance

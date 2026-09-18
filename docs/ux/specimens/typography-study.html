@@ -1,75 +1,25 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Carpediem typography candidates</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="foundation.css">
-  <style>
-    body { padding-block: 1.5rem 4rem; }
-    main { max-inline-size: 72rem; margin-inline: auto; padding-inline: var(--cd-page-gutter); }
-    .intro { max-inline-size: 42rem; margin-block-end: 2rem; }
-    .intro h1 { font-size: clamp(1.5rem, 5vw, 2rem); line-height: 1.2; margin: 0 0 .5rem; }
-    .intro p { color: var(--cd-text-secondary); margin: 0; }
-    .grid { display: grid; gap: 1rem; }
-    .specimen { min-inline-size: 0; background: var(--cd-bg-surface); border: 1px solid var(--cd-border-default); border-radius: var(--cd-radius-panel); padding: 1rem; }
-    .specimen[data-font="dm"] { font-family: 'DM Sans', sans-serif; }
-    .specimen[data-font="source"] { font-family: 'Source Sans 3', sans-serif; }
-    .specimen[data-font="jakarta"] { font-family: 'Plus Jakarta Sans', sans-serif; }
-    .option { color: var(--cd-text-secondary); font: 600 .75rem/1.5 system-ui, sans-serif; letter-spacing: .04em; text-transform: uppercase; }
-    .specimen h2 { font-size: 1.5rem; line-height: 1.25; margin: .25rem 0 .75rem; overflow-wrap: anywhere; }
-    .metadata { display: flex; flex-wrap: wrap; gap: .25rem .75rem; font-size: .875rem; color: var(--cd-text-secondary); }
-    .status { display: inline-flex; align-items: center; border-radius: var(--cd-radius-pill); background: var(--cd-status-warning-bg); color: var(--cd-status-warning-fg); padding: .25rem .75rem; margin-block: 1rem; font-size: .875rem; font-weight: 600; }
-    .field label { display: block; font-size: .875rem; font-weight: 600; margin-block-end: .375rem; }
-    .field input { inline-size: 100%; border: 1px solid var(--cd-border-strong); border-radius: var(--cd-radius-control); padding: .75rem; color: var(--cd-text-primary); background: var(--cd-bg-surface); }
-    .field .hint { color: var(--cd-text-secondary); font-size: .875rem; margin: .375rem 0 0; }
-    .field .error { color: var(--cd-status-danger-fg); font-size: .875rem; margin: .25rem 0 0; }
-    .roster { border-block: 1px solid var(--cd-border-default); margin-block: 1.25rem; padding-block: .75rem; display: flex; justify-content: space-between; gap: .5rem; font-size: .875rem; }
-    .roster strong { white-space: nowrap; font-variant-numeric: tabular-nums; }
-    .actions { display: flex; flex-wrap: wrap; gap: .5rem; }
-    .actions button { border: 0; border-radius: var(--cd-radius-control); padding: .625rem 1rem; background: var(--cd-action-primary); color: var(--cd-text-inverse); font-weight: 600; }
-    .actions button.secondary { background: var(--cd-bg-subtle); color: var(--cd-text-primary); }
-    @media (min-width: 75rem) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-  </style>
+  <meta name="description" content="Carpediem typography in use across display text, interface copy, operational data and a form field.">
+  <title>Carpediem — type in use</title>
+  <link rel="icon" href="logo-reference.png" type="image/png">
+  <link rel="preload" href="fonts/hanken-grotesk-latin-variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="direction.css">
 </head>
-<body>
-  <main>
-    <header class="intro">
-      <h1>Carpediem type study</h1>
-      <p>Three candidate UI families on the same neutral operational specimen. Typography and palette are proposals awaiting owner approval.</p>
-    </header>
-    <div class="grid">
-      <section class="specimen" data-font="dm" aria-labelledby="dm-title">
-        <span class="option">Option A · DM Sans</span>
-        <h2 id="dm-title">Mango Tree Campsite - East Activity Grove</h2>
-        <div class="metadata"><span>Sat, 24 Oct 2026</span><span>08:30–17:00</span><span>New Cairo</span></div>
-        <span class="status">Response needed</span>
-        <div class="field"><label for="dm-location">Event location</label><input id="dm-location" value="Mango Tree Campsite - East Activity Grove"><p class="hint">Use the full location name.</p><p class="error" aria-hidden="true">Validation sample: A location is required.</p></div>
-        <div class="roster"><span>Leader availability</span><strong>11 / 12</strong></div>
-        <div class="actions"><button type="button">Continue</button><button type="button" class="secondary">Save for later</button></div>
-      </section>
-      <section class="specimen" data-font="source" aria-labelledby="source-title">
-        <span class="option">Option B · Source Sans 3</span>
-        <h2 id="source-title">Mango Tree Campsite - East Activity Grove</h2>
-        <div class="metadata"><span>Sat, 24 Oct 2026</span><span>08:30–17:00</span><span>New Cairo</span></div>
-        <span class="status">Response needed</span>
-        <div class="field"><label for="source-location">Event location</label><input id="source-location" value="Mango Tree Campsite - East Activity Grove"><p class="hint">Use the full location name.</p><p class="error" aria-hidden="true">Validation sample: A location is required.</p></div>
-        <div class="roster"><span>Leader availability</span><strong>11 / 12</strong></div>
-        <div class="actions"><button type="button">Continue</button><button type="button" class="secondary">Save for later</button></div>
-      </section>
-      <section class="specimen" data-font="jakarta" aria-labelledby="jakarta-title">
-        <span class="option">Option C · Plus Jakarta Sans</span>
-        <h2 id="jakarta-title">Mango Tree Campsite - East Activity Grove</h2>
-        <div class="metadata"><span>Sat, 24 Oct 2026</span><span>08:30–17:00</span><span>New Cairo</span></div>
-        <span class="status">Response needed</span>
-        <div class="field"><label for="jakarta-location">Event location</label><input id="jakarta-location" value="Mango Tree Campsite - East Activity Grove"><p class="hint">Use the full location name.</p><p class="error" aria-hidden="true">Validation sample: A location is required.</p></div>
-        <div class="roster"><span>Leader availability</span><strong>11 / 12</strong></div>
-        <div class="actions"><button type="button">Continue</button><button type="button" class="secondary">Save for later</button></div>
-      </section>
-    </div>
+<body class="type-study">
+  <header class="study-header"><a href="direction.html">← Design direction</a><span>Carpediem / type in use</span></header>
+  <main class="study-main">
+    <p class="section-index">01 / Typography</p>
+    <h1>Character where it counts.<br><span>Clarity everywhere else.</span></h1>
+    <p class="study-lead">Bricolage Grotesque gives the identity a human, slightly irregular voice. Hanken Grotesk keeps schedules, forms and labels clear at working sizes. This is a proposal for owner review.</p>
+    <div class="type-rule"><span>Display / Bricolage Grotesque</span><strong class="display-sample">A day outside,<br>well held.</strong><small>Single 600 face · use sparingly at large sizes</small></div>
+    <div class="type-rule"><span>Interface / Hanken Grotesk</span><strong class="interface-sample">Mango Tree Campsite — East Activity Grove</strong><small>16 px body · 500/600 for clear hierarchy · tabular figures for time and counts</small></div>
+    <div class="type-rule type-data"><span>Working data / Hanken Grotesk</span><div><b>08:30–17:00</b><b>11 / 12</b><b>24 Oct 2026</b></div><small>Data is aligned and never squeezed to avoid wrapping.</small></div>
+    <div class="type-rule"><span>Field / Hanken Grotesk</span><div class="field-demo"><label for="study-location">Event location</label><input id="study-location" type="text" value="Mango Tree Campsite — East Activity Grove"><p>Use the complete location name.</p></div><small>Visible label, 48 px control, 16 px input text</small></div>
+    <p class="study-foot">The logo lettering remains the original artwork. These Latin fonts do not settle Arabic typography; that needs a separate bilingual test.</p>
   </main>
 </body>
 </html>

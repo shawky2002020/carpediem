@@ -1,0 +1,17 @@
+// Semantic patterns stay component-scoped. Transform and opacity only for movement.
+.cd-enter {
+  animation: cd-enter var(--cd-duration-normal) var(--cd-ease-enter) both;
+}
+@keyframes cd-enter {
+  from { opacity: 0; transform: translateY(0.5rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --cd-duration-fast: 0ms;
+    --cd-duration-normal: 0ms;
+    --cd-duration-slow: 0ms;
+  }
+  .cd-enter { animation: none; }
+  html:focus-within { scroll-behavior: auto; }
+}
