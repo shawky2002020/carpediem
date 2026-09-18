@@ -1,29 +1,44 @@
-# Typography study — approval pending
-
-## Realistic content used
-
-The study uses an event/location title (`Mango Tree Campsite - East Activity Grove`), a date/time (`Sat, 24 Oct 2026  08:30-17:00`), a status (`Response needed`), and a form label (`Leader availability`). All widths below are offline font metrics at 16 px, regular weight from the official variable TTF files. They predict wrapping; they do not prove Windows, Android, iOS, or browser rendering.
-
-At 320 px with 16 px page gutters, the content width is 288 px. At 360 px it is 328 px; at 390 px it is 358 px. Long location names must be allowed to wrap. Data columns must not require this full string on one line.
-
-| Option | 16 px title width | 16 px date/time width | Normal variable TTF size | Character and tradeoff |
-| --- | ---: | ---: | ---: | --- |
-| A — DM Sans | 324 px | 229 px | 240,164 B | Friendly geometric structure with a useful optical-size axis. Title wraps at 320 px and fits at 360 px. Best brand warmth in this set. |
-| B — Source Sans 3 | 266 px | 185 px | 646,340 B | Compact, very clear operational text; title fits at 320 px. Less distinctive. Raw TTF is largest; an actual WOFF2 subset budget must be checked. |
-| C — Plus Jakarta Sans | 320 px | 233 px | 176,288 B | Contemporary and expressive; title wraps at 320 px. Wider status and metadata text can reduce roster density. |
-
-All three are listed as OFL families with variable weight in the official [DM Sans metadata](https://github.com/google/fonts/blob/main/ofl/dmsans/METADATA.pb), [Source Sans 3 metadata](https://github.com/google/fonts/blob/main/ofl/sourcesans3/METADATA.pb), and [Plus Jakarta Sans metadata](https://github.com/google/fonts/blob/main/ofl/plusjakartasans/METADATA.pb). They are Latin-script choices; none is an Arabic solution. The logo lettering is artwork and is not a UI font.
+# Typography direction — owner approval pending
 
 ## Recommendation
 
-**Option A, DM Sans**, is the leading identity choice. Use one variable family for headings, body, forms, metadata, and controls; restrict weights to 400, 500, 600, and 700 in application CSS. Keep tabular numerals for roster counts and times if the selected font supports them in the shipped subset. Use the system font stack in the provisional SCSS until approval and font packaging.
+Use a deliberate two-role system rather than a neutral all-purpose sans:
 
-Option B is the practical alternative if dense roster testing favors compact text. Option C is best kept as a visual comparison candidate. Do not combine families without a measured need because each additional face adds payload and fallback complexity.
+| Role | Family | Use | Shipped review subset |
+| --- | --- | --- | ---: |
+| Display | **Bricolage Grotesque 600** | Page titles, section statements, and rare brand-led moments above 24 px. Its irregular grotesque details connect to the hand-painted huts and the handmade logo without copying either. | 40,016 B WOFF2 |
+| Interface | **Hanken Grotesk 400–700 variable** | Body, labels, controls, metadata, dates, times, counts, and dense working surfaces. Its forms stay calm beside the display face and its documented tabular figures support operational data. | 34,704 B WOFF2 |
 
-## Browser specimen evidence
+The total Latin review payload is **74,720 bytes**. Hanken is preloaded because it sets the first body text. Bricolage is requested by the first display heading; do not preload both without LCP evidence. Both files use `font-display: swap`. The specimen licenses are stored beside the files.
 
-The [comparison specimen](specimens/typography-study.html) renders all three candidates against the proposed token CSS. In the Codex in-app browser on Windows, all three web fonts loaded. At 320 px, the 24 px location title occupied three lines in DM Sans, two in Source Sans 3, and three in Plus Jakarta Sans. At 360, 390, and 430 px, each occupied two lines; at a 768 px single-column layout, each fit one line. At 1280 px, the three-column comparison gave each title two lines. No horizontal document overflow was observed at the tested widths. The narrowest buttons were 44 px high and inputs 49 px high. Keyboard focus on the first input showed the 3 px forest outline and offset. This verifies the **specimen** only, not an Angular app.
+The official logo lettering remains artwork and is never typeset with either family. These are Latin subsets. Arabic typography, bilingual metrics, bidi behavior, and numeral policy require a separate design and language pass before Arabic ships.
 
-## Required rendered acceptance pass
+## Why this pair
 
-At 320, 360, 390, 430 px, tablet, and desktop, compare each option using: a long event title, the location string above, form labels and inputs, validation text, `08:30–17:00`, `11/12`, status labels, two-line buttons, and dense roster rows. Check wrapping at 200% zoom, numeral alignment, punctuation, Windows ClearType, Android Chrome, and iOS Safari. If Arabic enters approved scope, test Arabic font pairing, bidi/RTL, numerals, line height, and font metrics before adding production weight. This cross-browser pass is deferred until the Angular foundation exists.
+- Bricolage Grotesque has enough character to make the system recognizably Carpediem, while a single 600 face prevents display typography from becoming theatrical or expensive.
+- Hanken Grotesk was designed for interface, web, mobile, signage, and reading contexts. Use tabular figures for time, dates, capacity, and cross-row numeric comparison.
+- The pair separates expression from work. Large statements can feel outdoor and human; controls and operational data remain predictable.
+- The pairing avoids the generic geometric-sans look rejected during direction review.
+
+Both projects are released under the SIL Open Font License 1.1. See the official [Bricolage Grotesque project](https://github.com/ateliertriay/bricolage), [Google Fonts Bricolage metadata](https://github.com/google/fonts/blob/main/ofl/bricolagegrotesque/METADATA.pb), [Hanken Grotesk project](https://github.com/marcologous/hanken-grotesk), and [Google Fonts Hanken metadata](https://github.com/google/fonts/blob/main/ofl/hankengrotesk/METADATA.pb).
+
+## Typesetting contract
+
+| Content | Rule |
+| --- | --- |
+| Display | Bricolage 600; fluid size with a defined cap; line height about 0.96–1.08; careful negative tracking only at large sizes; balance short statements. |
+| UI body | Hanken 400; 16 px default; line height 1.5–1.6. Never reduce essential body copy to 12 px. |
+| Labels and actions | Hanken 600–700; sentence case; no decorative all-caps eyebrow system. |
+| Data | Hanken 500–600 with `font-variant-numeric: tabular-nums`; keep time and short counts together; let long locations wrap or truncate only where the full value remains available. |
+| Long headings | Prefer natural lines. Do not force awkward `<br>` elements in production content; the specimen uses authored line breaks to demonstrate art direction. |
+| Fallback | Display: Trebuchet MS, sans-serif. UI: Segoe UI, sans-serif. Measure fallback shift before production release. |
+
+## Rendered evidence
+
+The [design direction](specimens/direction.html) shows the pair across an editorial identity moment and a restrained component board. The [type-in-use specimen](specimens/typography-study.html) isolates display, working text, data, and a form field.
+
+In the Codex in-app browser on Windows, both local WOFF2 files loaded. At 320 px the type specimen had no horizontal overflow, the field stayed 48 px high, and the long location remained within the content column. The design direction was also checked at 320, 360, 390, 430, 768, and 1280 px. Review still needs 200% text zoom, Android Chrome, iOS Safari, and real application data after the Angular workspace exists.
+
+## Approval decision
+
+Owner review should answer one question: **Does the Bricolage/Hanken pairing feel like Carpediem while remaining calm enough for daily operations?** Approval promotes the two family tokens and their licensed subsets into the application font boundary. Rejection returns to a new rendered study; it should not silently fall back to a generic UI identity.
