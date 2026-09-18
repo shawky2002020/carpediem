@@ -1,0 +1,284 @@
+openapi: 3.1.0
+info:
+  title: Carpediem Draft Event Authoring
+  version: 0.1.0
+  description: >-
+    SLICE-02 only. Every operation requires an authenticated Admin session.
+    Mutations require the established antiforgery token. Local date/time input
+    and output use Africa/Cairo; canonical Event timestamps are UTC.
+servers:
+  - url: /
+security:
+  - cookieAuth: []
+paths:
+  /api/events/drafts:
+    get:
+      operationId: listDraftEvents
+      summary: List Draft Events for Admin authoring
+      description: Admin role required. Returns only Draft Events; this is a navigation list.
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: pageSize
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+      responses:
+        '200':
+          description: Draft summaries
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, page, pageSize]
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/DraftSummary' }
+                  page: { type: integer }
+                  pageSize: { type: integer }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '500': { $ref: '#/components/responses/ServerError' }
+    post:
+      operationId: createDraftEvent
+      summary: Create one Draft Event and its initial current staffing context
+      description: >-
+        Admin role and antiforgery required. A fresh Idempotency-Key represents
+        one creation intent. Identical replay returns the same Event and 200;
+        first successful creation returns 201. The key must be reused after an
+        uncertain network result. Resolve that intent before changed content
+        starts a new creation intent with a new key.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/AntiforgeryToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DraftWrite' }
+      responses:
+        '201':
+          description: Draft created
+          headers:
+            Location:
+              schema: { type: string }
+              description: URI for the created Draft
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DraftEvent' }
+        '200':
+          description: Identical creation intent replayed; no second Event created
+          headers:
+            Idempotent-Replay:
+              schema: { type: boolean, const: true }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DraftEvent' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/Validation' }
+        '500': { $ref: '#/components/responses/ServerError' }
+  /api/events/drafts/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      operationId: getDraftEvent
+      summary: Open a Draft Event for Admin editing
+      description: Admin role required. An existing Event outside Draft returns not_draft conflict.
+      responses:
+        '200':
+          description: Draft Event with opaque edit version
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DraftEvent' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/ServerError' }
+    put:
+      operationId: updateDraftEvent
+      summary: Save a complete set of Draft authoring fields
+      description: >-
+        Admin role and antiforgery required. The version read with the Draft is
+        mandatory. Stale versions and Events no longer in Draft return 409;
+        no submitted values are persisted on failure.
+      parameters:
+        - $ref: '#/components/parameters/AntiforgeryToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DraftUpdate' }
+      responses:
+        '200':
+          description: Updated Draft with new version
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DraftEvent' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/Validation' }
+        '500': { $ref: '#/components/responses/ServerError' }
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: Carpediem.Session
+      description: Illustrative session-cookie name; actual name comes from the Identity host configuration.
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string, format: uuid }
+    AntiforgeryToken:
+      name: X-XSRF-TOKEN
+      in: header
+      required: true
+      description: Antiforgery request token; header name follows host/client configuration.
+      schema: { type: string }
+  schemas:
+    CairoLocalTime:
+      type: object
+      description: >-
+        A local calendar time in Africa/Cairo. Offset is normally omitted;
+        an ambiguous local time requires one of the server-provided valid offsets.
+      required: [localDateTime]
+      properties:
+        localDateTime:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,7})?)?$'
+          description: ISO local date/time without Z or device offset; seconds and up to seven fractional digits are optional.
+          example: '2026-10-10T14:30:00'
+        offset:
+          type: [string, 'null']
+          description: Optional explicit offset for a Cairo DST overlap, for example +02:00.
+          example: '+02:00'
+    CairoResolvedTime:
+      type: object
+      description: Server-resolved Cairo local time and its actual offset for this instant.
+      required: [localDateTime, offset]
+      properties:
+        localDateTime: { type: string, example: '2026-10-10T14:30:00' }
+        offset: { type: string, example: '+03:00' }
+    DraftWrite:
+      type: object
+      required: [title, start, end, location]
+      properties:
+        title: { type: string, maxLength: 200, description: Required; not whitespace-only. Accepted nonblank text is preserved. }
+        start: { $ref: '#/components/schemas/CairoLocalTime' }
+        end: { $ref: '#/components/schemas/CairoLocalTime' }
+        location: { type: string, description: Required descriptive location; not whitespace-only. Accepted nonblank text is preserved. }
+        notes: { type: [string, 'null'], description: Optional; blank or null permitted and preserved. }
+    DraftUpdate:
+      allOf:
+        - $ref: '#/components/schemas/DraftWrite'
+        - type: object
+          required: [version]
+          properties:
+            version: { type: string, description: Opaque Base64 representation of Events.RowVersion. }
+    DraftEvent:
+      type: object
+      required: [id, title, start, end, startDateTimeUtc, endDateTimeUtc, location, status, version]
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        start: { $ref: '#/components/schemas/CairoResolvedTime' }
+        end: { $ref: '#/components/schemas/CairoResolvedTime' }
+        startDateTimeUtc: { type: string, format: date-time, description: UTC instant with Z suffix. }
+        endDateTimeUtc: { type: string, format: date-time, description: UTC instant with Z suffix. }
+        location: { type: string }
+        notes: { type: [string, 'null'] }
+        status: { type: string, const: Draft }
+        version: { type: string, description: Opaque edit version. }
+    DraftSummary:
+      type: object
+      required: [id, title, start, location, status]
+      properties:
+        id: { type: string, format: uuid }
+        title: { type: string }
+        start: { $ref: '#/components/schemas/CairoResolvedTime' }
+        location: { type: string }
+        status: { type: string, const: Draft }
+    Problem:
+      type: object
+      required: [type, title, status, code, traceId]
+      properties:
+        type: { type: string }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        code:
+          type: string
+          description: Stable application error code.
+          enum: [malformed_request, antiforgery_failed, unauthenticated, forbidden, event_not_found, not_draft, stale_draft, idempotency_key_reused, validation_failed, unexpected_error]
+        traceId: { type: string }
+    ValidationProblem:
+      allOf:
+        - $ref: '#/components/schemas/Problem'
+        - type: object
+          required: [errors]
+          properties:
+            errors:
+              type: object
+              additionalProperties:
+                type: array
+                items: { type: string }
+              description: Field-addressable messages keyed by title, start, end, location, or notes.
+            allowedOffsets:
+              type: object
+              additionalProperties:
+                type: array
+                items: { type: string }
+              description: Only for ambiguous Cairo local times; keyed by start or end.
+  responses:
+    BadRequest:
+      description: Malformed request, missing required control header, or invalid antiforgery token
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Unauthenticated:
+      description: Session missing or expired
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Forbidden:
+      description: Authenticated actor lacks Admin authority
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    NotFound:
+      description: No Event exists at the identifier
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Conflict:
+      description: >-
+        Stable code distinguishes stale_draft, not_draft, or idempotency_key_reused;
+        no attempted mutation is committed.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Validation:
+      description: Field validation failed, including required/blank/order/Cairo time errors
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ValidationProblem' }
+    ServerError:
+      description: Safe unexpected failure with trace ID; no internal details
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }

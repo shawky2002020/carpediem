@@ -1,0 +1,114 @@
+openapi: 3.1.0
+info:
+  title: Carpediem Minimal Session Bootstrap
+  version: 0.1.0
+  description: >-
+    FOUNDATION-01 support for the first Draft Event slice. These operations
+    establish an authenticated cookie session and antiforgery token only;
+    invitation, account provisioning, and role administration are excluded.
+servers:
+  - url: /
+paths:
+  /api/session/antiforgery:
+    get:
+      operationId: getAntiforgeryToken
+      summary: Bootstrap antiforgery for same-origin mutations
+      responses:
+        '200':
+          description: Request token available to the client
+          headers:
+            Cache-Control:
+              schema: { type: string, const: no-store }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [requestToken]
+                properties:
+                  requestToken: { type: string }
+  /api/session/login:
+    post:
+      operationId: login
+      summary: Sign in an existing authorized account
+      parameters:
+        - $ref: '#/components/parameters/AntiforgeryToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userName, password]
+              properties:
+                userName: { type: string }
+                password: { type: string, format: password }
+      responses:
+        '200':
+          description: Cookie session established
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Session' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+  /api/session/me:
+    get:
+      operationId: getSession
+      summary: Read current identity and role flags for navigation
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Current session
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Session' }
+        '401': { $ref: '#/components/responses/Problem' }
+  /api/session/logout:
+    post:
+      operationId: logout
+      summary: End the current session
+      security:
+        - cookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AntiforgeryToken'
+      responses:
+        '204': { description: Session ended }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: Carpediem.Session
+  parameters:
+    AntiforgeryToken:
+      name: X-XSRF-TOKEN
+      in: header
+      required: true
+      schema: { type: string }
+  schemas:
+    Session:
+      type: object
+      required: [userId, userName, roles]
+      properties:
+        userId: { type: string, format: uuid }
+        userName: { type: string }
+        roles:
+          type: array
+          items: { type: string, enum: [Admin, ChiefLeader, Leader] }
+    Problem:
+      type: object
+      required: [type, title, status]
+      properties:
+        type: { type: string }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        traceId: { type: string }
+  responses:
+    Problem:
+      description: Safe RFC 7807 error; credentials and internal details are not disclosed
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
