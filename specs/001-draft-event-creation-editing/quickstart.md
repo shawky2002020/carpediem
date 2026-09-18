@@ -4,7 +4,7 @@ This is a run-and-verify guide for the planned first vertical slice, to be used 
 
 ## Prerequisites
 
-- .NET 10 SDK, Node.js version supported by Angular 22, Docker with Compose, and a browser supported by Playwright.
+- .NET 10 SDK, Node.js version supported by Angular 22, Docker with Compose, k6, and a browser supported by Playwright.
 - Local SQL Server 2025 container configured by the implementation's `compose.yaml`, with `READ_COMMITTED_SNAPSHOT ON`.
 - Development-only deterministic fixtures enabled: one Admin, two Chief Leaders, five Leaders. Use the generated/locally configured fixture credentials; do not put them in this document or commit secrets.
 - Host environment has ICU/time-zone data for `Africa/Cairo`.
@@ -41,5 +41,6 @@ These paths and commands describe the planned source layout; if the implementati
 | Angular | `npm --prefix frontend test` | Form validation, state transitions, field/global errors, retained input |
 | Browser | `npx playwright test` from `tests/e2e` | Admin Cairo create→open→edit journey plus focused mobile/keyboard and negative flows |
 | Contract | Validate generated OpenAPI against [contract](contracts/draft-events.openapi.yaml) | Success schemas, 400/401/403/404/409/422/500 error cases |
+| Performance baseline | `k6 run tests/performance/draft-events.k6.js` | Draft list/read/create/update response and error metrics at the constitution's approximate 100–150-user project scale; no unapproved latency threshold |
 
 Review the migration SQL script before applying it outside local development. Do not rely on automatic production migration at app startup. The app must expose a healthy `/healthz` response without leaking credentials or submitted form text in logs.

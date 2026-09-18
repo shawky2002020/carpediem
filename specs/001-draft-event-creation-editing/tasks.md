@@ -50,7 +50,7 @@ description: "Dependency-ordered implementation tasks for SLICE-02 Draft Event C
 - [ ] T014 Add deterministic development-only fixtures for one Admin, two Chief Leaders, and five Leaders without committed credentials in `src/Modules/Identity/Infrastructure/DevelopmentIdentitySeeder.cs`
 - [ ] T015 [P] Create the Angular application shell, authenticated routes, and role-aware navigation in `frontend/src/app/app.config.ts`, `frontend/src/app/app.routes.ts`, and `frontend/src/app/layout/app-shell.component.ts`
 - [ ] T016 Implement Angular session bootstrap, Admin route guard, credentials-enabled HTTP, antiforgery header handling, and correlation/error primitives in `frontend/src/app/core/auth/session.service.ts`, `frontend/src/app/core/auth/admin.guard.ts`, and `frontend/src/app/core/http/api.interceptor.ts`
-- [ ] T017 [P] Establish only the mobile form, focus, status, contrast, spacing, and touch-target tokens needed by SLICE-02 from committed approved UX documentation, without depending on provisional untracked design assets, in `frontend/src/styles.scss` and `frontend/src/styles/_tokens.scss`
+- [ ] T017 [P] Import the committed `design-system/styles/index.scss` token foundation for stable mobile form, focus, status, contrast, spacing, and touch-target roles; keep a system-font application override until typography approval and exclude review-only imagery in `frontend/src/styles.scss`
 - [ ] T018 [P] Create the SQL Server Testcontainers/WebApplicationFactory harness with isolated database reset and configurable authenticated test principals in `tests/Carpediem.Api.IntegrationTests/Infrastructure/CarpediemWebApplicationFactory.cs` and `tests/Carpediem.Api.IntegrationTests/Infrastructure/SqlServerFixture.cs`
 - [ ] T019 [P] Configure Angular unit testing and Playwright projects for 320, 360, 390, and 430 CSS-pixel mobile viewports plus desktop in `frontend/vitest.config.ts` and `tests/e2e/playwright.config.ts`
 
@@ -185,9 +185,10 @@ description: "Dependency-ordered implementation tasks for SLICE-02 Draft Event C
 - [ ] T076 Compare generated OpenAPI with both approved contracts, correct implementation drift to match them, and change a contract only through an approved artifact correction in `specs/001-draft-event-creation-editing/contracts/draft-events.openapi.yaml` and `specs/001-draft-event-creation-editing/contracts/session-bootstrap.openapi.yaml`
 - [ ] T077 Generate and inspect the idempotent deployment SQL for FK/check/index names, zero-offset constraints, RCSI, reversibility, and absence of destructive or future-slice schema changes in `src/Infrastructure/Persistence/Migrations/` and `artifacts/migrations/001-draft-event-creation-editing.sql`
 - [ ] T078 Audit structured logs, traces, metrics, health output, and audit history to ensure correlation is present while credentials, form contents, Notes text, and raw requests remain absent in `src/Carpediem.Web/Observability/ObservabilityConfiguration.cs` and `src/Infrastructure/Audit/EventAuditWriter.cs`
-- [ ] T079 Run the full .NET, Angular, contract, SQL Server integration, Playwright, accessibility, and responsive suites and record command evidence in `specs/001-draft-event-creation-editing/quickstart.md`
-- [ ] T080 Execute the complete quickstart manually from a clean local environment, reconcile any command/path drift, and record final results in `specs/001-draft-event-creation-editing/quickstart.md`
-- [ ] T081 Review the implementation against FR-001–FR-028, all 20 acceptance scenarios, SC-001–SC-007, and the SLICE-02 scope exclusions; record traceability and escalate any deviation for formal clarification in `specs/001-draft-event-creation-editing/implementation-review.md`
+- [ ] T079 [P] Add and run a k6 Draft list/read/create/update baseline against an isolated environment at the constitution's approximate 100–150-user project scale, recording response/error metrics without an invented latency threshold in `tests/performance/draft-events.k6.js` and `specs/001-draft-event-creation-editing/quickstart.md`
+- [ ] T080 Run the full .NET, Angular, contract, SQL Server integration, Playwright, accessibility, and responsive suites and record command evidence in `specs/001-draft-event-creation-editing/quickstart.md`
+- [ ] T081 Execute the complete quickstart manually from a clean local environment, reconcile any command/path drift, and record final results in `specs/001-draft-event-creation-editing/quickstart.md`
+- [ ] T082 Review the implementation against FR-001–FR-028, all 20 acceptance scenarios, SC-001–SC-007, and the SLICE-02 scope exclusions; record traceability and escalate any deviation for formal clarification in `specs/001-draft-event-creation-editing/implementation-review.md`
 
 **Checkpoint**: The implemented slice satisfies the approved requirements, contracts, constitution, and quickstart with no later-slice capability added.
 
@@ -278,7 +279,7 @@ Task T034: Cairo time resolver
 | Duplicate creation and stale edits (FR-018–019) | T022, T029, T032, T035–T036, T056–T063 |
 | Feedback, abandonment, missing data, and recovery (FR-020–024) | T041–T043, T049–T053, T058–T073 |
 | Mobile and WCAG 2.2 AA (FR-025–028) | T017, T019, T041, T049, T074–T075 |
-| Success criteria and complete acceptance evidence (SC-001–007) | T045, T054, T065, T073, T074–T081 |
+| Success criteria and complete acceptance evidence (SC-001–007) | T045, T054, T065, T073, T074–T082 |
 
 ## Notes
 

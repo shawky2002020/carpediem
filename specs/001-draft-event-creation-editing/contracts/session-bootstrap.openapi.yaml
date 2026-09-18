@@ -99,12 +99,16 @@ components:
           items: { type: string, enum: [Admin, ChiefLeader, Leader] }
     Problem:
       type: object
-      required: [type, title, status]
+      required: [type, title, status, code, traceId]
       properties:
         type: { type: string }
         title: { type: string }
         status: { type: integer }
         detail: { type: string }
+        code:
+          type: string
+          description: Stable application error code.
+          enum: [malformed_request, antiforgery_failed, invalid_credentials, unauthenticated, unexpected_error]
         traceId: { type: string }
   responses:
     Problem:

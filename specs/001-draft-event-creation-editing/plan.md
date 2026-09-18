@@ -129,7 +129,7 @@ See [data-model.md](data-model.md). The first feature migration establishes only
 
 ## Mobile-First Frontend and Accessibility
 
-- Compact Draft list and create/edit routes use one column from 320 CSS px, following the current [mobile layout foundation](../../docs/ux/MOBILE_FIRST_RULES.md), with short labeled fields, Cairo zone help, no normal horizontal scrolling, at least 48px-high form controls and 44×44px targets, and a visible reachable primary action. The list specifies empty, loading, and recoverable-error presentations. Verify 320/360/390/430 px, text zoom, and tablet/desktop expansion. Use the [semantic token foundation](../../docs/ux/DESIGN_TOKENS.md) only after it is available in the committed application baseline; do not make provisional branding or rights-unclear imagery a dependency of this operational form.
+- Compact Draft list and create/edit routes use one column from 320 CSS px, following the current [mobile layout foundation](../../docs/ux/MOBILE_FIRST_RULES.md), with short labeled fields, Cairo zone help, no normal horizontal scrolling, at least 48px-high form controls and 44×44px targets, and a visible reachable primary action. The list specifies empty, loading, and recoverable-error presentations. Verify 320/360/390/430 px, text zoom, and tablet/desktop expansion. Import the committed [semantic token foundation](../../docs/ux/DESIGN_TOKENS.md) as the shared source for stable operational spacing, sizing, focus, status, and color roles. Keep the application on the system font stack until the proposed typography receives owner approval, and do not make review-only or rights-unclear imagery a runtime dependency.
 - Reactive Forms own values/validation; a feature service owns HTTP. Signals represent local loading/saving/success/error; RxJS manages requests. NgRx is unnecessary.
 - Keep one creation token with the active form intent. Disable duplicate submit during save; retain token/values on uncertain result and resolve that result before starting a new intent. Successful edit updates version; stale conflict preserves unsaved values and offers reload/review.
 - Track form dirtiness for create and edit routes. A cancel action or navigation away from unsaved changes requires an accessible discard decision; choosing to remain preserves the form, while confirmed discard creates or updates nothing. After a successful save, clear the dirty state before navigation.
@@ -149,7 +149,7 @@ See [data-model.md](data-model.md). The first feature migration establishes only
 | FR-020–024; US1.3, US4.1–5 | ProblemDetails and form state | 400/401/403/404/409/422/500; no invalid write | Contract tests, frontend recovery tests, focused negative E2E |
 | FR-025–028; all user journeys | Responsive semantic form | Field error mapping/status representation | Narrow viewport/keyboard Playwright; automated/manual WCAG 2.2 AA, zoom and screen-reader check |
 
-Use `WebApplicationFactory` with SQL Server Testcontainers for persistence/authorization/atomicity/retries. Contract tests compare OpenAPI and error shapes. Critical E2E signs in as seeded Admin, enters Cairo-local values, creates a Draft, reopens, edits, and verifies displayed Cairo time and persisted UTC instant. Keep high-value negative E2E focused; prove most edge cases at unit/integration level.
+Use `WebApplicationFactory` with SQL Server Testcontainers for persistence/authorization/atomicity/retries. Contract tests compare OpenAPI and error shapes. Critical E2E signs in as seeded Admin, enters Cairo-local values, creates a Draft, reopens, edits, and verifies displayed Cairo time and persisted UTC instant. Keep high-value negative E2E focused; prove most edge cases at unit/integration level. Add a k6 baseline workload for Draft list/read/create/update against an isolated test environment at the constitution's approximate 100–150-user project scale. Record response and error metrics without inventing a pass/fail latency threshold that no approved NFR defines.
 
 ### Success criteria traceability
 
@@ -174,7 +174,7 @@ Use `WebApplicationFactory` with SQL Server Testcontainers for persistence/autho
 | Access | Cookie sign-in/out/session, Admin policy, deterministic development fixtures (1 Admin, 2 Chief Leaders, 5 Leaders), antiforgery |
 | API | Same-origin proxy, typed REST DTOs, OpenAPI, ProblemDetails, request correlation |
 | UI | Small shell, authenticated navigation, Draft list/create/edit routes, minimal reusable form styling using approved tokens when available |
-| Quality/ops | xUnit, WebApplicationFactory + SQL Server Testcontainers, Angular tests, Playwright, structured logging/tracing, `/healthz` |
+| Quality/ops | xUnit, WebApplicationFactory + SQL Server Testcontainers, Angular tests, Playwright, k6 baseline workload, structured logging/tracing, `/healthz` |
 
 ### DEFERRED
 
@@ -222,7 +222,8 @@ frontend/src/app/
 tests/
 ├── Carpediem.Domain.Tests/
 ├── Carpediem.Api.IntegrationTests/
-└── e2e/
+├── e2e/
+└── performance/
 ```
 
 **Structure decision**: One deployable host references the minimum Identity, Events, and Infrastructure projects; module EF configurations are discovered by the host DbContext as ADR-009 describes. This follows [module boundaries](../../docs/architecture/MODULE_BOUNDARIES.md) while keeping only one deployable unit and one migration history. These paths are planned, not created by `/plan`.
