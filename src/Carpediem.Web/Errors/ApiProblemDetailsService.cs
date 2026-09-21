@@ -2,6 +2,18 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Carpediem.Web.Errors;
 
+public sealed class ApiProblemResponse
+{
+    public required string Type { get; init; }
+    public required string Title { get; init; }
+    public required int Status { get; init; }
+    public string? Detail { get; init; }
+    public required string Code { get; init; }
+    public required string TraceId { get; init; }
+    public IReadOnlyDictionary<string, string[]>? Errors { get; init; }
+    public IReadOnlyDictionary<string, string[]>? AllowedOffsets { get; init; }
+}
+
 public static class ApiProblemDetailsService
 {
     public static IResult Problem(

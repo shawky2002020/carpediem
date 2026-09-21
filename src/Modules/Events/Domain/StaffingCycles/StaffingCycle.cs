@@ -22,5 +22,16 @@ public sealed class StaffingCycle
             CreatedAt = createdAt,
         };
 
+    internal static StaffingCycle CreateNext(Guid eventId, int cycleNumber, DateOnly effectiveEventDate, DateTimeOffset createdAt) =>
+        new()
+        {
+            Id = Guid.NewGuid(),
+            EventId = eventId,
+            CycleNumber = cycleNumber,
+            EffectiveEventDate = effectiveEventDate,
+            IsCurrent = true,
+            CreatedAt = createdAt,
+        };
+
     internal void MarkHistorical() => IsCurrent = false;
 }

@@ -3,6 +3,18 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Carpediem.Modules.Events.Domain.Events;
 
+public sealed class NotDraftException : Exception
+{
+    public NotDraftException() : base("The Event is not a Draft.") { }
+}
+
+public sealed record DraftEditChanges(
+    string PreviousTitle,
+    DateTimeOffset PreviousStartDateTime,
+    DateTimeOffset PreviousEndDateTime,
+    string PreviousLocation,
+    bool NotesChanged);
+
 [SuppressMessage("Naming", "CA1716:Identifiers should not match keywords", Justification = "Event is the locked Carpediem domain aggregate name.")]
 public sealed class Event
 {
@@ -32,14 +44,7 @@ public sealed class Event
         DateTimeOffset createdAt,
         DateOnly effectiveEventDate)
     {
-        var errors = new Dictionary<string, string[]>();
-        if (string.IsNullOrWhiteSpace(title)) errors["title"] = ["Title is required."];
-        else if (title.Length > 200) errors["title"] = ["Title exceeds the supported length."];
-        if (string.IsNullOrWhiteSpace(location)) errors["location"] = ["Location is required."];
-        if (startDateTime.Offset != TimeSpan.Zero) errors["start"] = ["Start time must resolve to UTC."];
-        if (endDateTime.Offset != TimeSpan.Zero) errors["end"] = ["End time must resolve to UTC."];
-        if (startDateTime >= endDateTime) errors["end"] = ["End time must be after start time."];
-        if (errors.Count > 0) throw new DraftValidationException(errors);
+        ValidateDraftValues(title, startDateTime, endDateTime, location);
         if (createdByUserId == Guid.Empty) throw new ArgumentException("A creator is required.", nameof(createdByUserId));
         if (createdAt.Offset != TimeSpan.Zero) throw new ArgumentException("Creation time must be UTC.", nameof(createdAt));
 
@@ -57,5 +62,53 @@ public sealed class Event
         };
         draft.staffingCycles.Add(StaffingCycle.CreateInitial(draft.Id, effectiveEventDate, createdAt));
         return draft;
+    }
+
+    public DraftEditChanges EditDraft(
+        string? title,
+        DateTimeOffset startDateTime,
+        DateTimeOffset endDateTime,
+        string? location,
+        string? notes,
+        DateOnly effectiveEventDate,
+        DateTimeOffset editedAt)
+    {
+        if (Status != EventStatus.Draft) throw new NotDraftException();
+        ValidateDraftValues(title, startDateTime, endDateTime, location);
+        if (editedAt.Offset != TimeSpan.Zero) throw new ArgumentException("Edit time must be UTC.", nameof(editedAt));
+        var currentCycle = staffingCycles.Single(cycle => cycle.IsCurrent);
+
+        var changes = new DraftEditChanges(Title, StartDateTime, EndDateTime, Location,
+            !string.Equals(Notes, notes, StringComparison.Ordinal));
+        Title = title!;
+        StartDateTime = startDateTime;
+        EndDateTime = endDateTime;
+        Location = location!;
+        Notes = notes;
+
+        if (currentCycle.EffectiveEventDate != effectiveEventDate)
+        {
+            currentCycle.MarkHistorical();
+            staffingCycles.Add(StaffingCycle.CreateNext(Id,
+                staffingCycles.Max(cycle => cycle.CycleNumber) + 1, effectiveEventDate, editedAt));
+        }
+
+        return changes;
+    }
+
+    private static void ValidateDraftValues(
+        string? title,
+        DateTimeOffset startDateTime,
+        DateTimeOffset endDateTime,
+        string? location)
+    {
+        var errors = new Dictionary<string, string[]>();
+        if (string.IsNullOrWhiteSpace(title)) errors["title"] = ["Title is required."];
+        else if (title.Length > 200) errors["title"] = ["Title exceeds the supported length."];
+        if (string.IsNullOrWhiteSpace(location)) errors["location"] = ["Location is required."];
+        if (startDateTime.Offset != TimeSpan.Zero) errors["start"] = ["Start time must resolve to UTC."];
+        if (endDateTime.Offset != TimeSpan.Zero) errors["end"] = ["End time must resolve to UTC."];
+        if (startDateTime >= endDateTime) errors["end"] = ["End time must be after start time."];
+        if (errors.Count > 0) throw new DraftValidationException(errors);
     }
 }

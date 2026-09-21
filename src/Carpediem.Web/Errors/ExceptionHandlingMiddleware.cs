@@ -16,6 +16,17 @@ public sealed class ExceptionHandlingMiddleware(
         {
             await next(context);
         }
+        catch (BadHttpRequestException exception) when (exception.StatusCode == StatusCodes.Status400BadRequest)
+        {
+            context.Response.Clear();
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            await ApiProblemDetailsService.Problem(
+                context,
+                StatusCodes.Status400BadRequest,
+                "malformed_request",
+                "The request body is malformed.")
+                .ExecuteAsync(context);
+        }
         catch (Exception exception)
         {
             LogUnhandledRequestFailure(logger, context.TraceIdentifier, exception);

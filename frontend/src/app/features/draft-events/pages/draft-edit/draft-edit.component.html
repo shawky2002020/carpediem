@@ -1,0 +1,48 @@
+<a class="back-link" routerLink="/draft-events">← Back to Draft Events</a>
+<div class="page-heading">
+  <p class="eyebrow">Private Draft</p>
+  <h1>{{ draft()?.title || 'Edit Draft Event' }}</h1>
+  <p>Changes keep this Event in Draft.</p>
+</div>
+<div class="save-status" aria-live="polite" role="status">
+  @if (loading()) { Loading Draft Event… }
+  @else if (saving()) { Saving changes… }
+  @else if (savedNotice()) { {{ savedNotice() }} }
+</div>
+
+@if (problem() && !draft()) {
+  <section class="error-panel" role="alert">
+    <h2>{{ problem()?.title }}</h2>
+    @if (problem()?.code === 'event_not_found') { <p>This Draft may have been removed or the link may be incorrect.</p> }
+    @else if (problem()?.code === 'not_draft') { <p>This Event is no longer editable in the Draft workflow.</p> }
+    @else { <p>Try again. @if (problem()?.traceId) { Reference: {{ problem()?.traceId }} }</p><button type="button" (click)="load()">Retry</button> }
+  </section>
+} @else if (draft(); as loadedDraft) {
+  @if (problem()?.code === 'unauthenticated') {
+    <section class="error-panel" role="alert">
+      <h2>Your session has expired</h2>
+      <p>Your unsaved values remain in this form. Sign in again before saving them.</p>
+      <a routerLink="/sign-in" target="_blank" rel="noopener">Open sign in</a>
+    </section>
+  } @else if (problem()?.code === 'forbidden') {
+    <section class="error-panel" role="alert">
+      <h2>Draft Event access is denied</h2>
+      <p>Your unsaved values remain in this form. Contact an administrator if your access should have changed.</p>
+    </section>
+  }
+  @if (problem()?.code === 'stale_draft') {
+    <section class="conflict-panel" role="alert">
+      <h2>The Draft changed since you opened it</h2>
+      <p>Your unsaved values remain below. Open the latest Draft in another tab before deciding what to reapply.</p>
+      <a [routerLink]="['/draft-events', loadedDraft.id]" target="_blank" rel="noopener">Open latest Draft</a>
+    </section>
+  }
+  <app-draft-event-form
+    [initial]="loadedDraft"
+    [saving]="saving()"
+    submitLabel="Save Changes"
+    [serverProblem]="problem()?.code === 'unauthenticated' || problem()?.code === 'forbidden' ? null : problem()"
+    (saveDraft)="save($event)"
+    (formChanged)="savedNotice.set(null)"
+    (cancel)="cancel()" />
+}

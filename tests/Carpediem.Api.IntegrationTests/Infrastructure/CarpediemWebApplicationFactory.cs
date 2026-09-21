@@ -15,6 +15,7 @@ public sealed class CarpediemWebApplicationFactory(string connectionString) : We
 {
     public Guid? ActorUserId { get; set; }
     public string? ActorRole { get; set; }
+    public Action<IServiceCollection>? ConfigureServicesForTest { get; set; }
 
     public HttpClient CreateHttpsClient() => CreateClient(new WebApplicationFactoryClientOptions
     {
@@ -35,6 +36,7 @@ public sealed class CarpediemWebApplicationFactory(string connectionString) : We
                 options.DefaultAuthenticateScheme = TestAuthenticationHandler.SchemeName;
                 options.DefaultChallengeScheme = TestAuthenticationHandler.SchemeName;
             }).AddScheme<AuthenticationSchemeOptions, TestAuthenticationHandler>(TestAuthenticationHandler.SchemeName, _ => { });
+            ConfigureServicesForTest?.Invoke(services);
         });
     }
 }

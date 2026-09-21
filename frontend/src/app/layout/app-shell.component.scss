@@ -8,4 +8,8 @@ nav { display: flex; align-items: center; gap: var(--cd-space-4); }
 nav a { min-block-size: var(--cd-touch-target-min); display: inline-flex; align-items: center; }
 .identity { color: var(--cd-text-secondary); }
 .page-content { padding-block: var(--cd-space-8); }
-@media (max-width: 30rem) { .identity { display: none; } }
+@media (max-width: 30rem) {
+  .header-inner { align-items: flex-start; flex-direction: column; padding-block: var(--cd-space-3); }
+  nav { flex-wrap: wrap; inline-size: 100%; }
+  .identity { display: none; }
+}

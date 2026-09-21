@@ -6,7 +6,7 @@
 }
 
 html, body { min-block-size: 100%; }
-body { min-inline-size: 20rem; }
+body { min-inline-size: 320px; }
 a { color: inherit; }
 button { cursor: pointer; }
 button:disabled { cursor: wait; opacity: var(--cd-opacity-disabled); }

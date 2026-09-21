@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Carpediem.Api.IntegrationTests.Infrastructure;
 
 namespace Carpediem.Api.IntegrationTests.Foundation;
@@ -31,6 +32,10 @@ public sealed class SessionBootstrapTests
         var response = await client.GetAsync(new Uri("/api/session/me", UriKind.Relative));
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
+        using var body = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        Assert.Equal("unauthenticated", body.RootElement.GetProperty("code").GetString());
+        Assert.False(string.IsNullOrWhiteSpace(body.RootElement.GetProperty("traceId").GetString()));
     }
 
     [Fact]

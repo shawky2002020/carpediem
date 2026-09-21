@@ -1,46 +1,70 @@
 # Quickstart Validation: SLICE-02 Draft Events
 
-This is a run-and-verify guide for the planned first vertical slice, to be used after implementation. The repository currently has no application host or Angular workspace; these commands become runnable when the planned FOUNDATION-01 bootstrap is implemented. See [plan.md](plan.md), [data-model.md](data-model.md), and the [Draft Event API contract](contracts/draft-events.openapi.yaml) for expected behavior.
+This guide starts and verifies the implemented Draft Event creation and editing slice. See [plan.md](plan.md), [data-model.md](data-model.md), and the [Draft Event API contract](contracts/draft-events.openapi.yaml) for the approved design.
 
 ## Prerequisites
 
-- .NET 10 SDK, Node.js version supported by Angular 22, Docker with Compose, k6, and a browser supported by Playwright.
-- Local SQL Server 2025 container configured by the implementation's `compose.yaml`, with `READ_COMMITTED_SNAPSHOT ON`.
-- Development-only deterministic fixtures enabled: one Admin, two Chief Leaders, five Leaders. Use the generated/locally configured fixture credentials; do not put them in this document or commit secrets.
-- Host environment has ICU/time-zone data for `Africa/Cairo`.
+- .NET 10 SDK.
+- Node.js 24.15 or newer for Angular 22.
+- Docker with Compose.
+- k6.
+- A Playwright-supported browser.
+- ICU and time-zone data for `Africa/Cairo`.
 
 ## Start the feature locally
 
-1. Start the SQL Server Compose service: `docker compose up -d sqlserver`.
-2. Apply the first feature migration locally with the host DbContext: `dotnet ef database update --project src/Infrastructure/Carpediem.Infrastructure.csproj --startup-project src/Carpediem.Web/Carpediem.Web.csproj`. Confirm RCSI and migration status using the implementation's database checks.
-3. Start the API: `dotnet run --project src/Carpediem.Web/Carpediem.Web.csproj`.
-4. Install/start the Angular client: `npm --prefix frontend install`, then `npm --prefix frontend start`. The development proxy must keep `/api/*` same-origin from the browser's perspective.
-5. Open the app, sign in as the seeded Admin, and navigate to Draft Events. A Chief Leader or Leader fixture must not gain Draft authoring access.
+1. Copy `.env.example` to `.env` and replace all placeholder passwords with local values. Do not commit `.env`.
+2. Start SQL Server: `docker compose --env-file .env up -d sqlserver`.
+3. Load the environment values from `.env` into the shell, then restore the local EF tool: `dotnet tool restore`.
+4. Apply the migration:
 
-These paths and commands describe the planned source layout; if the implementation chooses different executable project names within the locked architecture, update this guide during implementation.
+   `dotnet ef database update --project src/Infrastructure/Carpediem.Infrastructure.csproj --startup-project src/Carpediem.Web/Carpediem.Web.csproj`
+
+5. Start the API with its HTTPS profile:
+
+   `dotnet run --project src/Carpediem.Web/Carpediem.Web.csproj --launch-profile https`
+
+6. Install and start the client: `npm --prefix frontend ci`, then `npm --prefix frontend start`. The checked-in proxy sends `/api` and `/healthz` to `https://localhost:7076`.
+7. Open `http://localhost:4200/sign-in`, sign in as `admin` with the local `DevelopmentSeed__Password`, and open **Draft Events**. Chief Leader and Leader fixture roles do not grant this access.
+
+Development fixtures create one Admin, two Chief Leaders, and five Leaders only when a local seed password is configured. Production account administration remains outside this slice.
 
 ## Manual acceptance walk-through
 
-1. Choose **Create Event**. Confirm a single-column narrow-mobile form, visible primary action, Cairo time-zone label, clear fields, no normal horizontal scroll, keyboard/focus order, and 44×44px touch targets.
-2. Enter Title, Location, Start and End as Cairo local times with Start before End; optionally enter Notes. Save. Confirm one Draft is created, success is announced, and the supplied values appear when reopened. Confirm the persisted timestamps represent the corresponding UTC instants and one initial current `StaffingCycle` exists.
-3. Repeat without Notes; creation must still succeed.
-4. Edit the Draft, including a changed schedule. Save and reopen. Confirm values persist and status remains `Draft`. A Cairo calendar-date change must leave exactly one current cycle; the previous cycle remains historical.
+1. Choose **Create Event**. Confirm a single-column form at 320 CSS pixels, a visible primary action, an `Africa/Cairo` label, clear fields, no horizontal scrolling, keyboard focus order, and touch-sized actions.
+2. Enter Title, Location, Start and End as Cairo local times with Start before End; optionally enter Notes. Save. Confirm one Draft is created, success is announced, and the values appear when reopened. The persisted timestamps represent the corresponding UTC instants and one initial current `StaffingCycle` exists.
+3. Repeat without Notes; creation succeeds.
+4. Edit the Draft, including a changed schedule. Save and reopen. Values persist and status remains `Draft`. A Cairo calendar-date change leaves exactly one current cycle while preserving the earlier cycle as history.
 5. Leave an unsaved creation after entering values. Confirm the loss warning and that no Event was created.
-6. Submit missing/whitespace-only required fields, equal dates, reversed dates, and unusable Cairo local time. Each case must identify the field, preserve entered values where practical, and leave persisted state unchanged. A valid past Draft schedule must not be rejected solely for being past.
-7. Simulate an uncertain create response and retry the same intent. The returned Event ID must match the first committed Event, with no duplicate Event or audit. A new deliberate creation with identical business values and a different intent key may create a separate Event.
-8. Open one Draft in two Admin sessions. Save from the first, then save stale values from the second. The second receives a conflict; its unsaved form remains available and the first saved values remain persisted.
-9. Attempt read/create/update as a Chief Leader and a Leader. Confirm safe 403 outcomes and no data changes. An unauthenticated session receives 401. An unknown Event receives 404; a non-Draft Event cannot be edited through this feature.
-10. Simulate recoverable network failure during create/edit. Confirm failure or uncertain-state feedback, retained form content where practical, and safe retry. Check that no incomplete Event/cycle/audit combination appears.
+6. Submit missing or whitespace-only required fields, equal dates, reversed dates, and an unusable Cairo local time. Each case identifies the field, preserves values for correction, and leaves persisted state unchanged. A valid past Draft schedule is accepted.
+7. Simulate an uncertain create response and retry the same intent. The returned Event ID matches the committed Event, with no duplicate Event or audit. A distinct intent may create another Event with identical business values.
+8. Open one Draft in two Admin sessions. Save from the first, then save stale values from the second. The second receives a conflict, retains its entered values, and does not overwrite the first save.
+9. Attempt Draft operations as Chief Leader, Leader, and anonymously. Confirm safe 403 or 401 outcomes and no data changes. An unknown Event returns 404; a non-Draft Event cannot be edited here.
+10. Interrupt create or edit responses. Confirm clear failure or uncertain-outcome feedback, retained form content, and safe retry.
 
 ## Automated verification
 
-| Layer | Planned command/path | Evidence |
-|---|---|
-| Domain | `dotnet test tests/Carpediem.Domain.Tests` | Required values, whitespace, date ordering, Draft state, Cairo gap/overlap |
-| API/SQL integration | `dotnet test tests/Carpediem.Api.IntegrationTests` | Real SQL Server constraints, atomicity, audit, authorization, rowversion conflicts, retry ledger |
-| Angular | `npm --prefix frontend test` | Form validation, state transitions, field/global errors, retained input |
-| Browser | `npx playwright test` from `tests/e2e` | Admin Cairo create→open→edit journey plus focused mobile/keyboard and negative flows |
-| Contract | Validate generated OpenAPI against [contract](contracts/draft-events.openapi.yaml) | Success schemas, 400/401/403/404/409/422/500 error cases |
-| Performance baseline | `k6 run tests/performance/draft-events.k6.js` | Draft list/read/create/update response and error metrics at the constitution's approximate 100–150-user project scale; no unapproved latency threshold |
+Run commands from the repository root unless a different directory is shown.
 
-Review the migration SQL script before applying it outside local development. Do not rely on automatic production migration at app startup. The app must expose a healthy `/healthz` response without leaking credentials or submitted form text in logs.
+| Layer | Command | Verified evidence (2026-09-21) |
+|---|---|---|
+| Build | `dotnet build Carpediem.slnx --configuration Release` | PASS, 0 warnings and 0 errors |
+| Domain | `dotnet test tests/Carpediem.Domain.Tests/Carpediem.Domain.Tests.csproj --configuration Release` | PASS, 25/25 |
+| API and SQL Server | `pwsh -NoProfile -File tests/run-sql-integration.ps1` | PASS, 40/40 against an isolated SQL Server 2025 container |
+| Angular | `npm --prefix frontend test` | PASS, 13/13 |
+| Angular production build | `npm --prefix frontend run build` | PASS |
+| Browser, mobile, accessibility | `npm --prefix tests/e2e test` | PASS, 75/75 across 320, 360, 390, 430 CSS-pixel and desktop projects; includes axe, 200% text, and reduced-motion checks |
+| Formatting | `git diff --check` and `dotnet format Carpediem.slnx --verify-no-changes --no-restore` | PASS |
+| OpenAPI | Compare `artifacts/openapi/generated-draft-events.json` with both approved contracts | PASS; cookie security and documented success/error responses present |
+| Migration | Inspect `artifacts/migrations/001-draft-event-creation-editing.sql` | PASS; named checks/FKs/indexes, UTC constraints, RCSI, rollback, and no later-slice schema |
+| Performance baseline | `k6 run --insecure-skip-tls-verify tests/performance/draft-events.k6.js` with `BASE_URL`, `CARPEDIEM_ADMIN_USERNAME`, and `CARPEDIEM_ADMIN_PASSWORD` set | PASS, 100 journeys and 700/700 checks; 0% HTTP errors; journey p95 1.60 s. This is observational because no latency threshold is approved. |
+| Real stack smoke | Angular 22 client → HTTPS API → SQL Server 2025 at 320 CSS pixels | PASS; sign-in, create, reopen, edit, success feedback, and no horizontal overflow |
+
+The integration script generates its own test credential, starts an isolated SQL Server container on an available local port, and removes it afterward. Review migration SQL before applying it outside local development; the application does not run production migrations automatically.
+
+## Story checkpoints
+
+- **US1 Create/reopen**: PASS through domain, SQL integration, Angular, browser, and real-stack smoke evidence.
+- **US2 Correct invalid input**: PASS for missing/Unicode-whitespace fields, malformed and unusable Cairo times, equal/reversed windows, retained values, and successful correction.
+- **US3 Edit Draft**: PASS for complete updates, unchanged Draft lifecycle, cycle history, audit allow-list, rowversion conflicts, and retained stale values.
+- **US4 Access/failures**: PASS for the role matrix, current-role and active-user checks, antiforgery, 401/403/404/409/500 contracts, uncertain create retry, and form retention.

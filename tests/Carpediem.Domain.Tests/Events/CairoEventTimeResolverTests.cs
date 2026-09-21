@@ -46,6 +46,19 @@ public sealed class CairoEventTimeResolverTests
         Assert.Contains("start", error.Errors.Keys);
     }
 
+    [Fact]
+    public void UtcInstantRoundTripsAcrossTheCairoCalendarBoundary()
+    {
+        var utc = new DateTimeOffset(2026, 10, 9, 22, 30, 0, TimeSpan.Zero);
+
+        var cairo = CairoEventTimeResolver.FromUtc(utc);
+        var roundTrip = CairoEventTimeResolver.Resolve(cairo.LocalDateTime,
+            CairoEventTimeResolver.FormatOffset(cairo.Offset), "start");
+
+        Assert.StartsWith("2026-10-10T", cairo.LocalDateTime, StringComparison.Ordinal);
+        Assert.Equal(utc, roundTrip.Utc);
+    }
+
     private static string FindTransition(Func<TimeZoneInfo, DateTime, bool> predicate, int year, int firstMonth, int lastMonth)
     {
         var zone = TimeZoneInfo.FindSystemTimeZoneById("Africa/Cairo");

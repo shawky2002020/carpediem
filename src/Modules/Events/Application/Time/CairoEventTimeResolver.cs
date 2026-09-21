@@ -71,6 +71,16 @@ public static class CairoEventTimeResolver
             utc);
     }
 
+    public static CairoResolvedTime FromUtc(DateTimeOffset utc)
+    {
+        if (utc.Offset != TimeSpan.Zero) throw new ArgumentException("A canonical UTC instant is required.", nameof(utc));
+        var cairo = TimeZoneInfo.ConvertTime(utc, Cairo);
+        return new CairoResolvedTime(
+            cairo.DateTime.ToString("yyyy-MM-dd'T'HH:mm:ss.FFFFFFF", CultureInfo.InvariantCulture),
+            cairo.Offset,
+            utc);
+    }
+
     public static string FormatOffset(TimeSpan offset) =>
         string.Create(CultureInfo.InvariantCulture, $"{(offset < TimeSpan.Zero ? '-' : '+')}{Math.Abs(offset.Hours):00}:{Math.Abs(offset.Minutes):00}");
 

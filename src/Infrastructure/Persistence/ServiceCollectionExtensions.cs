@@ -1,4 +1,5 @@
 using Carpediem.Modules.Identity.Domain;
+using Carpediem.Modules.Events.Application.Drafts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -19,6 +20,7 @@ public static class ServiceCollectionExtensions
                 sql.MigrationsAssembly(typeof(CarpediemDbContext).Assembly.FullName);
                 sql.EnableRetryOnFailure();
             }));
+        services.AddScoped<IDraftEventStore, EfDraftEventStore>();
 
         services
             .AddIdentityCore<CarpediemUser>(options =>

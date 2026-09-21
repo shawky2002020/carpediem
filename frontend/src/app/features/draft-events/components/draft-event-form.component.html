@@ -1,0 +1,58 @@
+<form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  @if (showValidationSummary) {
+    <div #errorSummary class="form-error-summary" role="alert" tabindex="-1">
+      <strong>Review the highlighted fields.</strong>
+      <span>Your entered values are still here.</span>
+    </div>
+  }
+  <div class="field">
+    <label for="title">Title <span aria-hidden="true">*</span></label>
+    <input id="title" formControlName="title" autocomplete="off" [attr.aria-invalid]="errorFor('title') ? 'true' : null" [attr.aria-describedby]="errorFor('title') ? 'title-error' : null">
+    @if (errorFor('title'); as message) { <p id="title-error" class="field-error">{{ message }}</p> }
+  </div>
+
+  <p class="zone-hint">Enter dates and times in <strong>Africa/Cairo</strong>.</p>
+  <div class="field">
+    <label for="startLocal">Start date and time <span aria-hidden="true">*</span></label>
+    <input id="startLocal" type="datetime-local" step="1" formControlName="startLocal" [attr.aria-invalid]="errorFor('start') ? 'true' : null" [attr.aria-describedby]="errorFor('start') ? 'start-error' : null">
+    @if (errorFor('start'); as message) { <p id="start-error" class="field-error">{{ message }}</p> }
+    @if (offsetsFor('start').length) {
+      <label for="startOffset">Start time Cairo offset</label>
+      <select id="startOffset" formControlName="startOffset">
+        <option [ngValue]="null">Choose an offset</option>
+        @for (offset of offsetsFor('start'); track offset) { <option [ngValue]="offset">{{ offset }}</option> }
+      </select>
+    }
+  </div>
+
+  <div class="field">
+    <label for="endLocal">End date and time <span aria-hidden="true">*</span></label>
+    <input id="endLocal" type="datetime-local" step="1" formControlName="endLocal" [attr.aria-invalid]="errorFor('end') ? 'true' : null" [attr.aria-describedby]="errorFor('end') ? 'end-error' : null">
+    @if (errorFor('end'); as message) { <p id="end-error" class="field-error">{{ message }}</p> }
+    @if (offsetsFor('end').length) {
+      <label for="endOffset">End time Cairo offset</label>
+      <select id="endOffset" formControlName="endOffset">
+        <option [ngValue]="null">Choose an offset</option>
+        @for (offset of offsetsFor('end'); track offset) { <option [ngValue]="offset">{{ offset }}</option> }
+      </select>
+    }
+  </div>
+
+  <div class="field">
+    <label for="location">Location <span aria-hidden="true">*</span></label>
+    <input id="location" formControlName="location" autocomplete="off" [attr.aria-invalid]="errorFor('location') ? 'true' : null" [attr.aria-describedby]="errorFor('location') ? 'location-error' : null">
+    @if (errorFor('location'); as message) { <p id="location-error" class="field-error">{{ message }}</p> }
+  </div>
+
+  <div class="field">
+    <label for="notes">Notes <span class="optional">Optional</span></label>
+    <textarea id="notes" formControlName="notes" rows="5"></textarea>
+  </div>
+
+  @if (serverProblem && !serverProblem.errors) { <p class="form-error" role="alert">{{ serverProblem.title }} @if (serverProblem.traceId) { <span>Reference: {{ serverProblem.traceId }}</span> }</p> }
+
+  <div class="form-actions">
+    <button type="button" class="secondary" (click)="cancel.emit()" [disabled]="saving">Cancel</button>
+    <button type="submit" class="primary" [disabled]="saving || locked">{{ saving ? 'Saving…' : submitLabel }}</button>
+  </div>
+</form>

@@ -1,0 +1,39 @@
+<header class="page-heading">
+  <div>
+    <p class="eyebrow">Event planning</p>
+    <h1>Draft Events</h1>
+    <p>Private working Events visible to authorized administrators.</p>
+  </div>
+  <a class="create-action" routerLink="new">Create Event</a>
+</header>
+
+<div class="status-space" aria-live="polite" role="status">
+  @if (loading()) { Loading Draft Events… }
+</div>
+
+@if (problem(); as error) {
+  <section class="error-panel" role="alert">
+    <h2>{{ error.title }}</h2>
+    <p>Try again. @if (error.traceId) { Reference: {{ error.traceId }} }</p>
+    <button type="button" (click)="load()">Retry</button>
+  </section>
+} @else if (!loading() && drafts().length === 0) {
+  <section class="empty-state">
+    <h2>No Draft Events yet</h2>
+    <p>Create the first Draft to begin planning.</p>
+    <a class="create-action" routerLink="new">Create Event</a>
+  </section>
+} @else {
+  <ul class="draft-list">
+    @for (draft of drafts(); track draft.id) {
+      <li>
+        <a class="draft-card" [routerLink]="['/draft-events', draft.id]">
+          <span class="status">{{ draft.status }}</span>
+          <strong>{{ draft.title }}</strong>
+          <span>{{ displayDate(draft.start.localDateTime) }}</span>
+          <span>{{ draft.location }}</span>
+        </a>
+      </li>
+    }
+  </ul>
+}

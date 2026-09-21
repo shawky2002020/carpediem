@@ -10,6 +10,27 @@ export interface ApiProblem {
   code: string;
   traceId: string;
   errors?: Record<string, string[]>;
+  allowedOffsets?: Record<string, string[]>;
+}
+
+export function toApiProblem(error: unknown, fallbackTitle: string): ApiProblem {
+  const wrapper = isRecord(error) ? error : {};
+  const candidate = wrapper['error'];
+  if (isRecord(candidate) && typeof candidate['title'] === 'string' &&
+      typeof candidate['code'] === 'string') {
+    return candidate as unknown as ApiProblem;
+  }
+  return {
+    type: '',
+    title: fallbackTitle,
+    status: typeof wrapper['status'] === 'number' ? wrapper['status'] : 0,
+    code: 'unexpected_error',
+    traceId: '',
+  };
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
 }
 
 const safeMethods = new Set(['GET', 'HEAD', 'OPTIONS']);
