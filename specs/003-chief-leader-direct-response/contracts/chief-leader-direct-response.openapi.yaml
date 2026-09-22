@@ -1,0 +1,141 @@
+openapi: 3.1.0
+info:
+  title: Carpediem Chief Leader Direct Response
+  version: 0.1.0
+  description: SLICE-04 candidate-only review and direct response to a Pending appointment.
+servers:
+  - url: /
+security:
+  - cookieAuth: []
+paths:
+  /api/chief-leader/appointments/{assignmentId}:
+    parameters:
+      - name: assignmentId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      operationId: getMyChiefLeaderAppointment
+      summary: Review my appointment and Draft Event context
+      responses:
+        '200':
+          description: Own appointment context
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ResponseContext' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '500': { $ref: '#/components/responses/ServerError' }
+  /api/chief-leader/appointments/{assignmentId}/accept:
+    parameters:
+      - $ref: '#/components/parameters/AssignmentId'
+    post:
+      operationId: acceptMyChiefLeaderAppointment
+      summary: Explicitly accept my Pending appointment
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+        - $ref: '#/components/parameters/Antiforgery'
+      responses:
+        '200':
+          description: Active assignment or same-action replay
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ResponseContext' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/ServerError' }
+  /api/chief-leader/appointments/{assignmentId}/decline:
+    parameters:
+      - $ref: '#/components/parameters/AssignmentId'
+    post:
+      operationId: declineMyChiefLeaderAppointment
+      summary: Explicitly decline my Pending appointment
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+        - $ref: '#/components/parameters/Antiforgery'
+      responses:
+        '200':
+          description: Declined assignment or same-action replay
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ResponseContext' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/ServerError' }
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: Carpediem.Session
+  parameters:
+    AssignmentId:
+      name: assignmentId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      schema: { type: string, description: Opaque version from GET }
+    Antiforgery:
+      name: X-XSRF-TOKEN
+      in: header
+      required: true
+      schema: { type: string }
+  schemas:
+    ResponseContext:
+      type: object
+      required: [id, eventId, eventTitle, startDateTime, endDateTime, location, status, appointedAt, version]
+      properties:
+        id: { type: string, format: uuid }
+        eventId: { type: string, format: uuid }
+        eventTitle: { type: string }
+        startDateTime: { type: string, format: date-time, description: UTC instant }
+        endDateTime: { type: string, format: date-time, description: UTC instant }
+        location: { type: string }
+        status: { type: string, enum: [Pending, Active, Declined] }
+        appointedAt: { type: string, format: date-time }
+        acceptedAt: { type: [string, 'null'], format: date-time }
+        declinedAt: { type: [string, 'null'], format: date-time }
+        version: { type: string, description: Opaque assignment version }
+    Problem:
+      type: object
+      required: [type, title, status, code, traceId]
+      properties:
+        type: { type: string }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        code:
+          type: string
+          enum: [malformed_request, antiforgery_failed, unauthenticated, forbidden, appointment_not_found, appointment_not_pending, appointment_conflict, team_assignment_conflict, unexpected_error]
+        traceId: { type: string }
+  responses:
+    BadRequest:
+      description: Malformed identifier, version, or antiforgery token
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    Unauthenticated:
+      description: Session missing or expired
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    Forbidden:
+      description: Actor is not an active appointed Chief Leader
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    NotFound:
+      description: Appointment does not exist
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    Conflict:
+      description: Assignment is ineligible, stale, or blocked by same-Event participation
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    ServerError:
+      description: Safe unexpected failure with correlation identifier
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
