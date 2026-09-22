@@ -12,7 +12,7 @@
 
 ### User Story 1 - Review My Pending Appointment (Priority: P1)
 
-An appointed Chief Leader signs in and sees enough information about their own Pending Event appointment to decide whether to accept or decline. A pending appointment is visible to its candidate even though the Event is still Draft and unavailable as a published Event to ordinary Leaders.
+An appointed Chief Leader signs in, finds their own Pending Event appointment, and sees enough information to decide whether to accept or decline. A pending appointment is visible to its candidate even though the Event is still Draft and unavailable as a published Event to ordinary Leaders.
 
 **Why this priority**: The candidate must understand the appointment before making an operational commitment.
 
@@ -20,7 +20,7 @@ An appointed Chief Leader signs in and sees enough information about their own P
 
 **Acceptance Scenarios**:
 
-1. **Given** a Chief Leader has a Pending appointment, **when** that person opens their own appointment, **then** the Event title, schedule, location, Pending status, and Accept and Decline choices are available.
+1. **Given** a Chief Leader has a Pending appointment, **when** that person opens their own appointment list and selects it, **then** the Event title, schedule, location, Pending status, and Accept and Decline choices are available.
 2. **Given** another Chief Leader, an ordinary Leader, or an unauthenticated actor, **when** they attempt to view or respond to the appointment, **then** access is denied without revealing protected appointment details or changing state.
 3. **Given** an Event is still Draft, **when** its appointed candidate reviews the appointment, **then** the candidate can see this assigned context while ordinary Leaders still cannot see the Event as published or available.
 
@@ -85,8 +85,8 @@ The candidate receives a safe, clear outcome when the appointment is missing, no
 
 ### Functional Requirements
 
-- **FR-001**: The system MUST let an authenticated, active Chief Leader view their own Pending appointment and the Event title, scheduled time, and location needed to respond while the Event remains Draft.
-- **FR-002**: The system MUST restrict appointment review and direct response to the appointed candidate; Chief Leader role membership alone MUST NOT grant access to another person's appointment.
+- **FR-001**: The system MUST let an authenticated, active Chief Leader find their own Pending appointments and view the Event title, scheduled time, and location needed to respond while the Event remains Draft.
+- **FR-002**: The system MUST restrict appointment listing, review, and direct response to the appointed candidate; Chief Leader role membership alone MUST NOT grant access to another person's appointment.
 - **FR-003**: An appointed Chief Leader's Draft Event context MUST NOT make that Event available as a published Event to ordinary Leaders.
 - **FR-004**: The system MUST present explicit Accept and Decline actions for a Pending appointment and MUST NOT infer acceptance from viewing, opening a notification, or navigation.
 - **FR-005**: Only a Pending assignment for a Draft Event MAY be directly accepted or declined; unknown, Active, Declined, or otherwise ineligible targets MUST NOT transition.

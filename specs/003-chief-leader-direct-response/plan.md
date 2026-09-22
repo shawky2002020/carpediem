@@ -4,7 +4,7 @@
 
 ## Summary
 
-Give the appointed, active Chief Leader a focused view of their Pending appointment and explicit Accept and Decline actions. Reuse the SLICE-03 assignment, audit, notification, authentication, and SQL transaction foundation. Accept activates the existing record; decline preserves it as Declined and stages an alert for each active Admin. Neither action changes the Draft Event.
+Give the appointed, active Chief Leader a candidate-only Pending appointment list, a focused appointment view, and explicit Accept and Decline actions. Reuse the SLICE-03 assignment, audit, notification, authentication, and SQL transaction foundation. Accept activates the existing record; decline preserves it as Declined and stages an alert for each active Admin. Neither action changes the Draft Event.
 
 ## Technical Context
 
@@ -60,7 +60,7 @@ Chief Leader response route
 
 ## Response Flow
 
-1. Candidate opens a Pending assignment link. Server checks active Chief Leader membership and matching candidate ID, then returns Event title, Cairo-local schedule, location, status, and opaque version.
+1. Candidate opens a list of their own Pending appointments and selects one. Server checks active Chief Leader membership and exact candidate ID, then returns Event title, Cairo-local schedule, location, status, and opaque version.
 2. Candidate chooses Accept or Decline explicitly; the client permits one in-flight submission.
 3. Server rechecks role, assignment, Event Draft state, expected version, and Pending state. Accept applies CHANGE-001 same-Event exclusivity.
 4. Accept sets Active, `AcceptedAt`, `AcceptedByUserId`, `AcceptanceSource=Direct`; decline sets Declined and `DeclinedAt`. Event stays Draft.
@@ -73,6 +73,7 @@ See [contracts/chief-leader-direct-response.openapi.yaml](contracts/chief-leader
 
 | Operation | Success | Failures |
 |---|---|---|
+| `GET /api/chief-leader/appointments` | 200 own Pending summaries | 401, 403, 5xx |
 | `GET /api/chief-leader/appointments/{assignmentId}` | 200 own context | 400, 401, 403, 404, 5xx |
 | `POST /api/chief-leader/appointments/{assignmentId}/accept` | 200 Active, including same-action replay | 400/CSRF, 401, 403, 404, 409, 5xx |
 | `POST /api/chief-leader/appointments/{assignmentId}/decline` | 200 Declined, including same-action replay | 400/CSRF, 401, 403, 404, 409, 5xx |
@@ -94,7 +95,7 @@ See [data-model.md](data-model.md). Reuse the existing schema. `AcceptanceSource
 
 | Spec scope | Evidence |
 |---|---|
-| FR-001–005; US1 | Candidate-only read, Draft eligibility, explicit action, non-public visibility |
+| FR-001–005; US1 | Candidate-only list/detail, Draft eligibility, explicit action, non-public visibility |
 | FR-006–008; US2 | Domain accept/team guard, SQL Active/direct attribution, Draft unchanged |
 | FR-009–013; US3 | Domain decline, SQL historical row, one audit/Admin alerts, rollback |
 | FR-014–018; US4 | Replay, opposite response, rowversion race, errors, uncertain reload |

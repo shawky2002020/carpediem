@@ -26,7 +26,7 @@
 
 ## API and UX
 
-- **Decision**: Candidate-only GET and explicit Accept/Decline POST with antiforgery, `If-Match`, typed results, RFC 7807 errors, and a focused Angular route.
+- **Decision**: Candidate-only Pending list/detail GET and explicit Accept/Decline POST with antiforgery, `If-Match`, typed results, RFC 7807 errors, and focused Angular routes.
 - **Rationale**: Matches host conventions and makes stale/uncertain outcomes observable.
 - **Alternatives considered**: Automatic acceptance and full inbox violate scope.
 
