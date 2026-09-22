@@ -4,6 +4,7 @@ using Carpediem.Modules.Identity.Authorization;
 using Carpediem.Modules.Identity.Domain;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 
 namespace Carpediem.Api.IntegrationTests.Infrastructure;
 
@@ -87,6 +88,65 @@ public sealed class DraftApiTestHarness : IAsyncDisposable
         return await Client.SendAsync(request);
     }
 
+    public async Task<Guid> CreateDefaultDraftAsync()
+    {
+        var response = await CreateAsync(Guid.NewGuid(), new
+        {
+            title = "Beach cleanup",
+            start = new { localDateTime = "2026-10-10T14:30" },
+            end = new { localDateTime = "2026-10-10T16:30" },
+            location = "North shore",
+        });
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<CreatedDraftBody>())!.Id;
+    }
+
+    public async Task<Guid> SeedUserAsync(string userName, bool isActive, params string[] roles)
+    {
+        await using var scope = Factory.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<CarpediemDbContext>();
+        var user = new CarpediemUser
+        {
+            Id = Guid.NewGuid(),
+            UserName = userName,
+            NormalizedUserName = userName.ToUpperInvariant(),
+            Email = $"{userName}@localhost.invalid",
+            NormalizedEmail = $"{userName}@localhost.invalid".ToUpperInvariant(),
+            IsActive = isActive,
+        };
+        db.Users.Add(user);
+        foreach (var roleName in roles)
+        {
+            var role = await db.Roles.SingleOrDefaultAsync(item => item.Name == roleName);
+            if (role is null)
+            {
+                role = new IdentityRole<Guid>
+                {
+                    Id = Guid.NewGuid(),
+                    Name = roleName,
+                    NormalizedName = roleName.ToUpperInvariant(),
+                };
+                db.Roles.Add(role);
+            }
+            db.UserRoles.Add(new IdentityUserRole<Guid> { UserId = user.Id, RoleId = role.Id });
+        }
+        await db.SaveChangesAsync();
+        return user.Id;
+    }
+
+    public async Task<HttpResponseMessage> AppointAsync(Guid eventId, Guid candidateUserId,
+        Guid requestToken, bool includeAntiforgery = true)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post,
+            $"/api/events/drafts/{eventId}/chief-leader-appointment")
+        {
+            Content = JsonContent.Create(new { candidateUserId }),
+        };
+        request.Headers.Add("Idempotency-Key", requestToken.ToString());
+        if (includeAntiforgery) request.Headers.Add("X-XSRF-TOKEN", AntiforgeryToken);
+        return await Client.SendAsync(request);
+    }
+
     public async ValueTask DisposeAsync()
     {
         Client.Dispose();
@@ -94,4 +154,5 @@ public sealed class DraftApiTestHarness : IAsyncDisposable
     }
 
     private sealed record AntiforgeryBody(string RequestToken);
+    private sealed record CreatedDraftBody(Guid Id);
 }

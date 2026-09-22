@@ -18,11 +18,19 @@ export interface DraftApiOptions {
   updateFailure?: 'stale' | 'network' | 'unauthenticated';
   createUncertainOnce?: boolean;
   createValidationOnce?: { field: string; message: string };
+  appointmentUncertainOnce?: boolean;
+  appointmentIneligibleOnce?: boolean;
 }
 
 export async function mockDraftApi(page: Page, options: DraftApiOptions = {}) {
   let draft: MockDraft | null = null;
   let createCount = 0;
+  let appointmentCount = 0;
+  let appointment: { id: string; eventId: string; candidate: { userId: string; userName: string }; status: 'Pending'; appointedAt: string; appointedByUserId: string; version: string } | null = null;
+  const candidates = [
+    { userId: '30000000-0000-0000-0000-000000000001', userName: 'chief.one' },
+    { userId: '30000000-0000-0000-0000-000000000002', userName: 'chief.two' },
+  ];
 
   await page.route('**/api/**', async route => {
     const request = route.request();
@@ -63,6 +71,30 @@ export async function mockDraftApi(page: Page, options: DraftApiOptions = {}) {
       return json(route, createCount > 1 ? 200 : 201, draft,
         createCount > 1 ? { 'Idempotent-Replay': 'true' } : { Location: `/api/events/drafts/${draft.id}` });
     }
+    if (path.endsWith('/chief-leader-appointment') && request.method() === 'GET') {
+      if (!draft) return problem(route, 404, 'event_not_found', 'Draft Event was not found.');
+      return json(route, 200, {
+        eventId: draft.id, eventTitle: draft.title, eventStatus: 'Draft', currentAppointment: appointment,
+        candidates: appointment ? [] : candidates,
+      });
+    }
+    if (path.endsWith('/chief-leader-appointment') && request.method() === 'POST') {
+      appointmentCount += 1;
+      if (!draft) return problem(route, 404, 'event_not_found', 'Draft Event was not found.');
+      if (options.appointmentIneligibleOnce && appointmentCount === 1) {
+        return problem(route, 422, 'candidate_ineligible', 'Review the selected candidate.');
+      }
+      const body = request.postDataJSON();
+      const candidate = candidates.find(item => item.userId === body.candidateUserId)!;
+      appointment ??= {
+        id: '40000000-0000-0000-0000-000000000001', eventId: draft.id, candidate, status: 'Pending',
+        appointedAt: '2026-09-22T09:00:00Z', appointedByUserId: '10000000-0000-0000-0000-000000000001',
+        version: 'AAAAAAAAB9M=',
+      };
+      if (options.appointmentUncertainOnce && appointmentCount === 1) return route.abort('connectionfailed');
+      return json(route, appointmentCount > 1 ? 200 : 201, appointment,
+        appointmentCount > 1 ? { 'Idempotent-Replay': 'true' } : undefined);
+    }
     if (path.startsWith('/api/events/drafts/') && request.method() === 'GET') {
       return draft
         ? json(route, 200, draft)
@@ -91,6 +123,8 @@ export async function mockDraftApi(page: Page, options: DraftApiOptions = {}) {
   return {
     get draft() { return draft; },
     get createCount() { return createCount; },
+    get appointmentCount() { return appointmentCount; },
+    get appointment() { return appointment; },
     seed(value: MockDraft) { draft = value; },
   };
 }

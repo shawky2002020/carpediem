@@ -42,6 +42,37 @@ builder.Services.AddOpenApi(options =>
                 [new OpenApiSecuritySchemeReference("cookieAuth", context.Document, null)] = [],
             });
         }
+        if (string.Equals(operation.OperationId, "AppointChiefLeader", StringComparison.Ordinal))
+        {
+            operation.Parameters ??= [];
+            operation.Parameters.Add(new OpenApiParameter
+            {
+                Name = "Idempotency-Key",
+                In = ParameterLocation.Header,
+                Required = true,
+                Description = "Stable request token reused only when retrying the same appointment intent.",
+                Schema = new OpenApiSchema { Type = JsonSchemaType.String, Format = "uuid" },
+            });
+            operation.Parameters.Add(new OpenApiParameter
+            {
+                Name = "X-XSRF-TOKEN",
+                In = ParameterLocation.Header,
+                Required = true,
+                Description = "Antiforgery request token paired with the session cookie.",
+                Schema = new OpenApiSchema { Type = JsonSchemaType.String },
+            });
+            if (operation.Responses?.TryGetValue("200", out var replayResponse) == true &&
+                replayResponse is OpenApiResponse concreteReplayResponse)
+            {
+                concreteReplayResponse.Headers ??= new Dictionary<string, IOpenApiHeader>();
+                concreteReplayResponse.Headers["Idempotent-Replay"] = new OpenApiHeader
+                {
+                    Description = "True when the response replays the original committed appointment.",
+                    Required = true,
+                    Schema = new OpenApiSchema { Type = JsonSchemaType.Boolean },
+                };
+            }
+        }
         return Task.CompletedTask;
     });
     options.AddSchemaTransformer((schema, context, _) =>
@@ -90,6 +121,7 @@ if (app.Environment.IsDevelopment())
 app.MapHealthChecks("/healthz");
 app.MapSessionEndpoints();
 app.MapDraftEventsEndpoints();
+app.MapChiefLeaderAppointmentEndpoints();
 
 await app.Services.SeedDevelopmentIdentityAsync(app.Environment.IsDevelopment(), app.Configuration);
 await app.RunAsync();

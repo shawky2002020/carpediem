@@ -82,6 +82,67 @@ namespace Carpediem.Infrastructure.Persistence.Migrations
                     b.ToTable("AuditLogs", "audit");
                 });
 
+            modelBuilder.Entity("Carpediem.Modules.Events.Domain.ChiefLeaderAssignments.ChiefLeaderAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AcceptanceSource")
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<DateTimeOffset?>("AcceptedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("AcceptedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("AppointedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("AppointedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ChiefLeaderUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("DeclinedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("varchar(20)");
+
+                    b.HasKey("Id")
+                        .HasName("PK_events_ChiefLeaderAssignments");
+
+                    b.HasIndex("AcceptedByUserId");
+
+                    b.HasIndex("AppointedByUserId");
+
+                    b.HasIndex("ChiefLeaderUserId");
+
+                    b.HasIndex("EventId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_ChiefLeaderAssignments_ActivePerEvent")
+                        .HasFilter("[Status] = 'Active'");
+
+                    b.ToTable("ChiefLeaderAssignments", "events", t =>
+                        {
+                            t.HasCheckConstraint("CK_ChiefLeaderAssignments_Source", "[AcceptanceSource] IS NULL OR [AcceptanceSource] IN ('Direct','AdminExternal')");
+
+                            t.HasCheckConstraint("CK_ChiefLeaderAssignments_Status", "[Status] IN ('Pending','Active','Declined')");
+                        });
+                });
+
             modelBuilder.Entity("Carpediem.Modules.Events.Domain.Events.Event", b =>
                 {
                     b.Property<Guid>("Id")
@@ -180,6 +241,35 @@ namespace Carpediem.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Carpediem.Modules.Events.Infrastructure.Persistence.ChiefLeaderAppointmentRequest", b =>
+                {
+                    b.Property<Guid>("ActorUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RequestToken")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AssignmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<byte[]>("PayloadFingerprint")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("binary(32)")
+                        .IsFixedLength();
+
+                    b.HasKey("ActorUserId", "RequestToken")
+                        .HasName("PK_events_ChiefLeaderAppointmentRequests");
+
+                    b.HasIndex("AssignmentId")
+                        .HasDatabaseName("IX_ChiefLeaderAppointmentRequests_AssignmentId");
+
+                    b.ToTable("ChiefLeaderAppointmentRequests", "events");
+                });
+
             modelBuilder.Entity("Carpediem.Modules.Events.Infrastructure.Persistence.DraftCreateRequest", b =>
                 {
                     b.Property<Guid>("ActorUserId")
@@ -274,6 +364,46 @@ namespace Carpediem.Infrastructure.Persistence.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("Users", "identity");
+                });
+
+            modelBuilder.Entity("Carpediem.Modules.Notifications.Domain.InPlatformNotification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContextPayload")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("EventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("NotificationType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<DateTimeOffset?>("ReadAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("RecipientUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id")
+                        .HasName("PK_notifications_InPlatformNotifications");
+
+                    b.HasIndex("EventId");
+
+                    b.HasIndex("RecipientUserId", "CreatedAt")
+                        .HasDatabaseName("IX_Notifications_Recipient_CreatedAt");
+
+                    b.ToTable("InPlatformNotifications", "notifications", t =>
+                        {
+                            t.HasCheckConstraint("CK_Notifications_ReadAt", "[ReadAt] IS NULL OR [ReadAt] >= [CreatedAt]");
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
@@ -416,6 +546,36 @@ namespace Carpediem.Infrastructure.Persistence.Migrations
                         .HasConstraintName("FK_AuditLogs_Users");
                 });
 
+            modelBuilder.Entity("Carpediem.Modules.Events.Domain.ChiefLeaderAssignments.ChiefLeaderAssignment", b =>
+                {
+                    b.HasOne("Carpediem.Modules.Identity.Domain.CarpediemUser", null)
+                        .WithMany()
+                        .HasForeignKey("AcceptedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_ChiefLeaderAssignments_AcceptedBy");
+
+                    b.HasOne("Carpediem.Modules.Identity.Domain.CarpediemUser", null)
+                        .WithMany()
+                        .HasForeignKey("AppointedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_ChiefLeaderAssignments_AppointedBy");
+
+                    b.HasOne("Carpediem.Modules.Identity.Domain.CarpediemUser", null)
+                        .WithMany()
+                        .HasForeignKey("ChiefLeaderUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_ChiefLeaderAssignments_Users");
+
+                    b.HasOne("Carpediem.Modules.Events.Domain.Events.Event", null)
+                        .WithMany("ChiefLeaderAssignments")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_ChiefLeaderAssignments_Events");
+                });
+
             modelBuilder.Entity("Carpediem.Modules.Events.Domain.Events.Event", b =>
                 {
                     b.HasOne("Carpediem.Modules.Identity.Domain.CarpediemUser", null)
@@ -436,6 +596,23 @@ namespace Carpediem.Infrastructure.Persistence.Migrations
                         .HasConstraintName("FK_StaffingCycles_Events");
                 });
 
+            modelBuilder.Entity("Carpediem.Modules.Events.Infrastructure.Persistence.ChiefLeaderAppointmentRequest", b =>
+                {
+                    b.HasOne("Carpediem.Modules.Identity.Domain.CarpediemUser", null)
+                        .WithMany()
+                        .HasForeignKey("ActorUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_ChiefLeaderAppointmentRequests_Users");
+
+                    b.HasOne("Carpediem.Modules.Events.Domain.ChiefLeaderAssignments.ChiefLeaderAssignment", null)
+                        .WithMany()
+                        .HasForeignKey("AssignmentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_ChiefLeaderAppointmentRequests_Assignments");
+                });
+
             modelBuilder.Entity("Carpediem.Modules.Events.Infrastructure.Persistence.DraftCreateRequest", b =>
                 {
                     b.HasOne("Carpediem.Modules.Identity.Domain.CarpediemUser", null)
@@ -451,6 +628,22 @@ namespace Carpediem.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_DraftCreateRequests_Events");
+                });
+
+            modelBuilder.Entity("Carpediem.Modules.Notifications.Domain.InPlatformNotification", b =>
+                {
+                    b.HasOne("Carpediem.Modules.Events.Domain.Events.Event", null)
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_Notifications_Events");
+
+                    b.HasOne("Carpediem.Modules.Identity.Domain.CarpediemUser", null)
+                        .WithMany()
+                        .HasForeignKey("RecipientUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_Notifications_Users");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -506,6 +699,8 @@ namespace Carpediem.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Carpediem.Modules.Events.Domain.Events.Event", b =>
                 {
+                    b.Navigation("ChiefLeaderAssignments");
+
                     b.Navigation("StaffingCycles");
                 });
 #pragma warning restore 612, 618

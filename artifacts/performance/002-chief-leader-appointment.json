@@ -1,0 +1,208 @@
+{
+    "root_group": {
+        "checks": {
+            "antiforgery returns 200": {
+                "name": "antiforgery returns 200",
+                "path": "::antiforgery returns 200",
+                "id": "6ce01a1887aed217b6f46b96145948e3",
+                "passes": 200,
+                "fails": 0
+            },
+            "login returns 200": {
+                "id": "4fbe4713e0d93ed24ebf8e5829249ccf",
+                "passes": 100,
+                "fails": 0,
+                "name": "login returns 200",
+                "path": "::login returns 200"
+            },
+            "create_draft returns 201": {
+                "id": "01b0806effe5ae05e8a6c86153d7f0ae",
+                "passes": 100,
+                "fails": 0,
+                "name": "create_draft returns 201",
+                "path": "::create_draft returns 201"
+            },
+            "read_candidates returns 200": {
+                "name": "read_candidates returns 200",
+                "path": "::read_candidates returns 200",
+                "id": "7127cb9118f07cff45c86adc5d2027f0",
+                "passes": 100,
+                "fails": 0
+            },
+            "candidate exists": {
+                "name": "candidate exists",
+                "path": "::candidate exists",
+                "id": "86b6bb1cef796857f220a24dbb591995",
+                "passes": 100,
+                "fails": 0
+            },
+            "appoint returns 201": {
+                "passes": 100,
+                "fails": 0,
+                "name": "appoint returns 201",
+                "path": "::appoint returns 201",
+                "id": "3f872b538b3016c6bc237a0d6546241e"
+            },
+            "appointment is Pending": {
+                "id": "65cfbd912e678bc36570f0a8cf599aaf",
+                "passes": 100,
+                "fails": 0,
+                "name": "appointment is Pending",
+                "path": "::appointment is Pending"
+            },
+            "appointment Event is unchanged": {
+                "fails": 0,
+                "name": "appointment Event is unchanged",
+                "path": "::appointment Event is unchanged",
+                "id": "369ed86ccbae81b5379f2e9bbfaaa228",
+                "passes": 100
+            },
+            "replay returns 200": {
+                "name": "replay returns 200",
+                "path": "::replay returns 200",
+                "id": "65aa9977e43bb80b2e54cf99aa6f6a85",
+                "passes": 100,
+                "fails": 0
+            },
+            "replay returns same assignment": {
+                "name": "replay returns same assignment",
+                "path": "::replay returns same assignment",
+                "id": "63495fb0f0a85345e3a2e62e4d652204",
+                "passes": 100,
+                "fails": 0
+            }
+        },
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {}
+    },
+    "metrics": {
+        "http_reqs": {
+            "count": 700,
+            "rate": 325.0386111044427
+        },
+        "appointment_operation_errors": {
+            "count": 0,
+            "rate": 0,
+            "thresholds": {
+                "count==0": false
+            }
+        },
+        "data_sent": {
+            "count": 395863,
+            "rate": 183815.37101091142
+        },
+        "http_req_duration{expected_response:true}": {
+            "avg": 251.77814085714306,
+            "min": 1.07,
+            "med": 38.020399999999995,
+            "max": 2012.1044,
+            "p(90)": 1154.24611,
+            "p(95)": 1483.37662
+        },
+        "vus": {
+            "value": 30,
+            "min": 30,
+            "max": 100
+        },
+        "iteration_duration": {
+            "max": 2149.3681,
+            "p(90)": 2094.39309,
+            "p(95)": 2105.2123949999996,
+            "avg": 1807.2907899999998,
+            "min": 1233.8828,
+            "med": 1895.90315
+        },
+        "http_req_duration": {
+            "p(90)": 1154.24611,
+            "p(95)": 1483.37662,
+            "avg": 251.77814085714306,
+            "min": 1.07,
+            "med": 38.020399999999995,
+            "max": 2012.1044
+        },
+        "http_req_receiving": {
+            "avg": 2.234924571428571,
+            "min": 0,
+            "med": 0.5205500000000001,
+            "max": 136.1385,
+            "p(90)": 1.7527500000000005,
+            "p(95)": 3.036984999999997
+        },
+        "http_req_blocked": {
+            "p(90)": 28.89024000000003,
+            "p(95)": 56.5573,
+            "avg": 6.163524285714282,
+            "min": 0,
+            "med": 0,
+            "max": 67.2262
+        },
+        "iterations": {
+            "count": 100,
+            "rate": 46.43408730063467
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 700,
+            "thresholds": {
+                "rate==0": false
+            },
+            "value": 0
+        },
+        "http_req_tls_handshaking": {
+            "avg": 5.751926428571429,
+            "min": 0,
+            "med": 0,
+            "max": 66.1667,
+            "p(90)": 23.63005000000002,
+            "p(95)": 56.030355
+        },
+        "http_req_waiting": {
+            "avg": 249.4488392857142,
+            "min": 0.5281,
+            "med": 36.11095,
+            "max": 2009.8371,
+            "p(90)": 1152.8842300000001,
+            "p(95)": 1482.271545
+        },
+        "chief_leader_appointment_journey": {
+            "avg": 1807.25,
+            "min": 1234,
+            "med": 1896,
+            "max": 2149,
+            "p(90)": 2095,
+            "p(95)": 2106.0499999999997
+        },
+        "data_received": {
+            "count": 569923,
+            "rate": 264638.5433663961
+        },
+        "checks": {
+            "fails": 0,
+            "passes": 1100,
+            "value": 1
+        },
+        "http_req_connecting": {
+            "avg": 0.39074971428571426,
+            "min": 0,
+            "med": 0,
+            "max": 8.2282,
+            "p(90)": 0.5684,
+            "p(95)": 4.1441
+        },
+        "vus_max": {
+            "value": 100,
+            "min": 100,
+            "max": 100
+        },
+        "http_req_sending": {
+            "med": 0,
+            "max": 1.5625,
+            "p(90)": 0.52321,
+            "p(95)": 0.599115,
+            "avg": 0.094377,
+            "min": 0
+        }
+    }
+}

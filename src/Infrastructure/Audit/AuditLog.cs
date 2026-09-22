@@ -23,13 +23,14 @@ public sealed class AuditLog
         Guid correlationId,
         DateTimeOffset occurredAt,
         string? previousValue,
-        string? newValue) => new()
+        string? newValue,
+        string resourceType = "Event") => new()
         {
             Id = Guid.NewGuid(),
             OccurredAt = occurredAt,
             ActorUserId = actorUserId,
             Action = action,
-            ResourceType = "Event",
+            ResourceType = resourceType,
             ResourceId = resourceId,
             CorrelationId = correlationId,
             Source = "Direct",

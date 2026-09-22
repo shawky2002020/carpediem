@@ -33,5 +33,11 @@ public sealed class EventConfiguration : IEntityTypeConfiguration<Event>
             .OnDelete(DeleteBehavior.NoAction)
             .HasConstraintName("FK_StaffingCycles_Events");
         builder.Navigation(eventItem => eventItem.StaffingCycles).UsePropertyAccessMode(PropertyAccessMode.Field);
+        builder.HasMany(eventItem => eventItem.ChiefLeaderAssignments)
+            .WithOne()
+            .HasForeignKey(assignment => assignment.EventId)
+            .OnDelete(DeleteBehavior.NoAction)
+            .HasConstraintName("FK_ChiefLeaderAssignments_Events");
+        builder.Navigation(eventItem => eventItem.ChiefLeaderAssignments).UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

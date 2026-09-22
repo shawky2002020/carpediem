@@ -1,4 +1,5 @@
 using Carpediem.Modules.Events.Application.Drafts;
+using Carpediem.Modules.Events.Application.ChiefLeaderAppointments;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Carpediem.Modules.Events;
@@ -9,6 +10,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<CreateDraftEventHandler>();
         services.AddScoped<UpdateDraftEventHandler>();
+        services.AddScoped<AppointChiefLeaderHandler>();
         return services;
     }
 }

@@ -12,6 +12,9 @@
   <Folder Name="/src/Modules/Identity/">
     <Project Path="src/Modules/Identity/Carpediem.Modules.Identity.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/Notifications/">
+    <Project Path="src/Modules/Notifications/Carpediem.Modules.Notifications.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Carpediem.Api.IntegrationTests/Carpediem.Api.IntegrationTests.csproj" />
     <Project Path="tests/Carpediem.Domain.Tests/Carpediem.Domain.Tests.csproj" />

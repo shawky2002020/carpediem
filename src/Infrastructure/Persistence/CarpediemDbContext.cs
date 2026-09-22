@@ -2,6 +2,8 @@ using Carpediem.Modules.Identity.Domain;
 using Carpediem.Modules.Events.Domain.Events;
 using Carpediem.Modules.Events.Domain.StaffingCycles;
 using Carpediem.Modules.Events.Infrastructure.Persistence;
+using Carpediem.Modules.Events.Domain.ChiefLeaderAssignments;
+using Carpediem.Modules.Notifications.Domain;
 using Carpediem.Infrastructure.Audit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -16,6 +18,9 @@ public sealed class CarpediemDbContext(DbContextOptions<CarpediemDbContext> opti
     public DbSet<StaffingCycle> StaffingCycles => Set<StaffingCycle>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
     public DbSet<DraftCreateRequest> DraftCreateRequests => Set<DraftCreateRequest>();
+    public DbSet<ChiefLeaderAssignment> ChiefLeaderAssignments => Set<ChiefLeaderAssignment>();
+    public DbSet<ChiefLeaderAppointmentRequest> ChiefLeaderAppointmentRequests => Set<ChiefLeaderAppointmentRequest>();
+    public DbSet<InPlatformNotification> InPlatformNotifications => Set<InPlatformNotification>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -32,6 +37,7 @@ public sealed class CarpediemDbContext(DbContextOptions<CarpediemDbContext> opti
 
         builder.ApplyConfigurationsFromAssembly(typeof(CarpediemDbContext).Assembly);
         builder.ApplyConfigurationsFromAssembly(typeof(Carpediem.Modules.Events.ServiceCollectionExtensions).Assembly);
+        builder.ApplyConfigurationsFromAssembly(typeof(InPlatformNotification).Assembly);
 
         builder.Entity<Event>()
             .HasOne<CarpediemUser>()
@@ -57,5 +63,47 @@ public sealed class CarpediemDbContext(DbContextOptions<CarpediemDbContext> opti
             .HasForeignKey(intent => intent.EventId)
             .OnDelete(DeleteBehavior.NoAction)
             .HasConstraintName("FK_DraftCreateRequests_Events");
+        builder.Entity<ChiefLeaderAssignment>()
+            .HasOne<CarpediemUser>()
+            .WithMany()
+            .HasForeignKey(item => item.ChiefLeaderUserId)
+            .OnDelete(DeleteBehavior.NoAction)
+            .HasConstraintName("FK_ChiefLeaderAssignments_Users");
+        builder.Entity<ChiefLeaderAssignment>()
+            .HasOne<CarpediemUser>()
+            .WithMany()
+            .HasForeignKey(item => item.AppointedByUserId)
+            .OnDelete(DeleteBehavior.NoAction)
+            .HasConstraintName("FK_ChiefLeaderAssignments_AppointedBy");
+        builder.Entity<ChiefLeaderAssignment>()
+            .HasOne<CarpediemUser>()
+            .WithMany()
+            .HasForeignKey(item => item.AcceptedByUserId)
+            .OnDelete(DeleteBehavior.NoAction)
+            .HasConstraintName("FK_ChiefLeaderAssignments_AcceptedBy");
+        builder.Entity<ChiefLeaderAppointmentRequest>()
+            .HasOne<CarpediemUser>()
+            .WithMany()
+            .HasForeignKey(item => item.ActorUserId)
+            .OnDelete(DeleteBehavior.NoAction)
+            .HasConstraintName("FK_ChiefLeaderAppointmentRequests_Users");
+        builder.Entity<ChiefLeaderAppointmentRequest>()
+            .HasOne<ChiefLeaderAssignment>()
+            .WithMany()
+            .HasForeignKey(item => item.AssignmentId)
+            .OnDelete(DeleteBehavior.NoAction)
+            .HasConstraintName("FK_ChiefLeaderAppointmentRequests_Assignments");
+        builder.Entity<InPlatformNotification>()
+            .HasOne<CarpediemUser>()
+            .WithMany()
+            .HasForeignKey(item => item.RecipientUserId)
+            .OnDelete(DeleteBehavior.NoAction)
+            .HasConstraintName("FK_Notifications_Users");
+        builder.Entity<InPlatformNotification>()
+            .HasOne<Event>()
+            .WithMany()
+            .HasForeignKey(item => item.EventId)
+            .OnDelete(DeleteBehavior.NoAction)
+            .HasConstraintName("FK_Notifications_Events");
     }
 }

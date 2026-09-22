@@ -4,6 +4,7 @@ import { of, Subject, throwError } from 'rxjs';
 import { DraftEventFormComponent } from '../../components/draft-event-form.component';
 import { DraftEvent, DraftEventsService, DraftWrite } from '../../data/draft-events.service';
 import { DraftEditComponent } from './draft-edit.component';
+import { ChiefLeaderAppointmentService } from '../../../chief-leader-appointment/data/chief-leader-appointment.service';
 
 describe('DraftEditComponent', () => {
   const draft: DraftEvent = {
@@ -76,6 +77,9 @@ describe('DraftEditComponent', () => {
       providers: [
         provideRouter([]),
         { provide: DraftEventsService, useValue: service },
+        { provide: ChiefLeaderAppointmentService, useValue: {
+          getContext: vi.fn(() => of({ eventId: 'event-1', eventTitle: 'Beach cleanup', eventStatus: 'Draft', currentAppointment: null, candidates: [] })),
+        } },
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => 'event-1' } } } },
         { provide: Router, useValue: { navigate: vi.fn() } },
       ],

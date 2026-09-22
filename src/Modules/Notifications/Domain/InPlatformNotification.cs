@@ -1,0 +1,38 @@
+namespace Carpediem.Modules.Notifications.Domain;
+
+public sealed class InPlatformNotification
+{
+    public const string ChiefLeaderAppointmentType = "ChiefLeaderAppointment";
+
+    private InPlatformNotification() { }
+
+    public Guid Id { get; private set; }
+    public Guid RecipientUserId { get; private set; }
+    public Guid? EventId { get; private set; }
+    public string NotificationType { get; private set; } = string.Empty;
+    public DateTimeOffset CreatedAt { get; private set; }
+    public DateTimeOffset? ReadAt { get; private set; }
+    public string? ContextPayload { get; private set; }
+
+    public static InPlatformNotification ChiefLeaderAppointment(
+        Guid recipientUserId,
+        Guid eventId,
+        DateTimeOffset createdAt,
+        string contextPayload)
+    {
+        if (recipientUserId == Guid.Empty) throw new ArgumentException("A recipient is required.", nameof(recipientUserId));
+        if (eventId == Guid.Empty) throw new ArgumentException("An Event is required.", nameof(eventId));
+        if (createdAt.Offset != TimeSpan.Zero) throw new ArgumentException("Creation time must be UTC.", nameof(createdAt));
+        if (contextPayload.Length > 500) throw new ArgumentException("Notification context is too long.", nameof(contextPayload));
+
+        return new InPlatformNotification
+        {
+            Id = Guid.NewGuid(),
+            RecipientUserId = recipientUserId,
+            EventId = eventId,
+            NotificationType = ChiefLeaderAppointmentType,
+            CreatedAt = createdAt,
+            ContextPayload = contextPayload,
+        };
+    }
+}

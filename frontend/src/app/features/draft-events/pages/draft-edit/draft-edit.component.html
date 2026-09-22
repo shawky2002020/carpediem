@@ -18,6 +18,24 @@
     @else { <p>Try again. @if (problem()?.traceId) { Reference: {{ problem()?.traceId }} }</p><button type="button" (click)="load()">Retry</button> }
   </section>
 } @else if (draft(); as loadedDraft) {
+  <section class="appointment-panel" aria-labelledby="chief-leader-title">
+    <div>
+      <p class="eyebrow">Chief Leader</p>
+      <h2 id="chief-leader-title">
+        @if (appointmentLoading()) { Loading appointment… }
+        @else if (chiefLeaderAppointment(); as appointment) { {{ appointment.candidate.userName }} }
+        @else { No appointment yet }
+      </h2>
+      @if (chiefLeaderAppointment(); as appointment) {
+        <p><span class="appointment-status">{{ appointment.status }}</span> Awaiting the candidate's response.</p>
+      } @else if (!appointmentLoading()) {
+        <p>Choose a candidate from the predefined Chief Leader group.</p>
+      }
+    </div>
+    <a class="appointment-action" [routerLink]="['/draft-events', loadedDraft.id, 'chief-leader']">
+      {{ chiefLeaderAppointment() ? 'Review appointment' : 'Appoint Chief Leader' }}
+    </a>
+  </section>
   @if (problem()?.code === 'unauthenticated') {
     <section class="error-panel" role="alert">
       <h2>Your session has expired</h2>

@@ -27,12 +27,14 @@ public static class ObservabilityConfiguration
     private static void AddTelemetry(WebApplicationBuilder builder)
     {
         builder.Services.AddOpenTelemetry()
-            .WithTracing(tracing => tracing.AddAspNetCoreInstrumentation(options =>
+            .WithTracing(tracing => tracing.AddSource(ChiefLeaderAppointmentTelemetry.SourceName)
+                .AddAspNetCoreInstrumentation(options =>
             {
                 options.RecordException = true;
                 options.Filter = httpContext => !httpContext.Request.Path.StartsWithSegments("/healthz");
             }))
-            .WithMetrics(metrics => metrics.AddAspNetCoreInstrumentation());
+            .WithMetrics(metrics => metrics.AddMeter(ChiefLeaderAppointmentTelemetry.SourceName)
+                .AddAspNetCoreInstrumentation());
 
     }
 }

@@ -1,4 +1,5 @@
 using Carpediem.Modules.Events.Domain.StaffingCycles;
+using Carpediem.Modules.Events.Domain.ChiefLeaderAssignments;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Carpediem.Modules.Events.Domain.Events;
@@ -19,6 +20,7 @@ public sealed record DraftEditChanges(
 public sealed class Event
 {
     private readonly List<StaffingCycle> staffingCycles = [];
+    private readonly List<ChiefLeaderAssignment> chiefLeaderAssignments = [];
 
     private Event() { }
 
@@ -33,6 +35,25 @@ public sealed class Event
     public DateTimeOffset CreatedAt { get; private set; }
     public byte[] RowVersion { get; private set; } = [];
     public IReadOnlyCollection<StaffingCycle> StaffingCycles => staffingCycles.AsReadOnly();
+    public IReadOnlyCollection<ChiefLeaderAssignment> ChiefLeaderAssignments => chiefLeaderAssignments.AsReadOnly();
+
+    public ChiefLeaderAssignment AppointChiefLeader(
+        Guid chiefLeaderUserId,
+        Guid appointedByUserId,
+        DateTimeOffset appointedAt)
+    {
+        if (Status != EventStatus.Draft) throw new NotDraftException();
+        if (chiefLeaderAssignments.Any(item => item.Status is
+            ChiefLeaderAssignmentStatus.Pending or ChiefLeaderAssignmentStatus.Active))
+        {
+            throw new ChiefLeaderAlreadyAssignedException();
+        }
+
+        var assignment = ChiefLeaderAssignment.CreatePending(Id, chiefLeaderUserId,
+            appointedByUserId, appointedAt);
+        chiefLeaderAssignments.Add(assignment);
+        return assignment;
+    }
 
     public static Event CreateDraft(
         string? title,

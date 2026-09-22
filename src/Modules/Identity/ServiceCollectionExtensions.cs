@@ -1,4 +1,6 @@
 using Carpediem.Modules.Identity.Authorization;
+using Carpediem.Modules.Identity.Application;
+using Carpediem.Modules.Identity.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,6 +16,7 @@ public static class ServiceCollectionExtensions
                     .RequireRole(CarpediemRoles.Admin)
                     .AddRequirements(new CurrentAdminRequirement()));
         services.AddScoped<IAuthorizationHandler, CurrentAdminAuthorizationHandler>();
+        services.AddScoped<IChiefLeaderCandidateDirectory, EfChiefLeaderCandidateDirectory>();
 
         return services;
     }

@@ -1,0 +1,79 @@
+<a class="back-link" [routerLink]="['/draft-events', eventId]">← Back to Draft Event</a>
+
+<header class="page-heading">
+  <p class="eyebrow">Event leadership</p>
+  <h1>Appoint Chief Leader</h1>
+  @if (context(); as appointmentContext) {
+    <p>{{ appointmentContext.eventTitle }}</p>
+  } @else {
+    <p>Select one person from the predefined Chief Leader group.</p>
+  }
+</header>
+
+<div class="status-space" aria-live="polite" role="status">
+  @if (loading()) { Loading eligible Chief Leaders… }
+  @else if (saving()) { Saving appointment… }
+  @else if (success()) { {{ success() }} }
+</div>
+
+@if (problem() && !context()) {
+  <section class="message error" role="alert">
+    <h2>{{ problem()?.title }}</h2>
+    @if (problem()?.code === 'event_not_found') { <p>This Draft Event could not be found.</p> }
+    @else if (problem()?.code === 'not_draft') { <p>This Event is no longer in Draft.</p> }
+    @else if (problem()?.code === 'forbidden') { <p>You do not have access to Chief Leader appointment.</p> }
+    @else { <p>Try loading the appointment again.</p><button type="button" (click)="load()">Retry</button> }
+  </section>
+} @else if (context(); as appointmentContext) {
+  @if (appointmentContext.currentAppointment; as appointment) {
+    <section class="current-appointment" aria-labelledby="current-appointment-title">
+      <p class="status-label">Pending</p>
+      <h2 id="current-appointment-title">{{ appointment.candidate.userName }}</h2>
+      <p>This Chief Leader has been appointed and is awaiting a response.</p>
+    </section>
+  } @else {
+    @if (problem()) {
+      <section class="message error" role="alert">
+        <h2>{{ problem()?.title }}</h2>
+        @if (problem()?.code === 'candidate_ineligible') {
+          <p>The candidate list may have changed. Reload and choose an eligible Chief Leader.</p>
+          <button type="button" (click)="load()">Reload candidates</button>
+        } @else if (uncertain()) {
+          <p>The outcome is uncertain. Retry the same appointment to resolve it without creating a duplicate.</p>
+          <button type="button" data-testid="retry-appointment" (click)="retry()" [disabled]="saving()">Retry appointment</button>
+        } @else {
+          <p>Your selection remains available. Try again when ready.</p>
+        }
+      </section>
+    }
+
+    @if (appointmentContext.candidates.length === 0) {
+      <section class="message empty">
+        <h2>No eligible Chief Leaders</h2>
+        <p>No active members of the Chief Leader group are available to select.</p>
+      </section>
+    } @else {
+      <fieldset [disabled]="saving() || uncertain()" aria-describedby="candidate-help">
+        <legend>Choose a Chief Leader</legend>
+        <p id="candidate-help">The appointment remains Pending until the candidate responds.</p>
+        <div class="candidate-list">
+          @for (candidate of appointmentContext.candidates; track candidate.userId) {
+            <label class="candidate-option" [class.selected]="selectedCandidateId() === candidate.userId">
+              <input type="radio" name="chiefLeaderCandidate" [value]="candidate.userId"
+                [checked]="selectedCandidateId() === candidate.userId"
+                (change)="selectCandidate(candidate.userId)" />
+              <span>{{ candidate.userName }}</span>
+            </label>
+          }
+        </div>
+      </fieldset>
+      <div class="actions">
+        <button class="primary" type="button" (click)="appoint()"
+          [disabled]="!selectedCandidateId() || saving() || uncertain()">
+          {{ saving() ? 'Appointing…' : 'Appoint Chief Leader' }}
+        </button>
+        <button class="secondary" type="button" (click)="cancel()" [disabled]="saving()">Cancel</button>
+      </div>
+    }
+  }
+}

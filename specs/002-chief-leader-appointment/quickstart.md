@@ -10,13 +10,14 @@
 ## Automated validation
 
 ```powershell
-dotnet test tests/Carpediem.Domain.Tests/Carpediem.Domain.Tests.csproj
-.\tests\run-sql-integration.ps1
+dotnet test tests/Carpediem.Domain.Tests/Carpediem.Domain.Tests.csproj --configuration Release
+.\tests\run-sql-integration.ps1 -ContainerTestHost
 npm --prefix frontend test -- --watch=false
 npm --prefix tests/e2e test
+.\tests\performance\run-chief-leader-appointment.ps1
 ```
 
-Generate and inspect the migration SQL and OpenAPI artifact using the repository commands recorded in implementation tasks. Run the focused k6 appointment workload against the local host.
+The container test host runs the real SQL Server suite in Linux when Windows Application Control blocks freshly built test DLLs. Generate and inspect the migration SQL and host OpenAPI artifact using the repository commands recorded in implementation tasks. The performance script starts an isolated migrated SQL Server and HTTPS host, then runs the 100-user k6 appointment workload.
 
 ## Critical end-to-end proof
 
