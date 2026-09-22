@@ -1,0 +1,162 @@
+openapi: 3.1.0
+info:
+  title: Carpediem Chief Leader Appointment
+  version: 0.1.0
+  description: SLICE-03 Admin-only candidate review and Pending appointment.
+servers:
+  - url: /
+security:
+  - cookieAuth: []
+paths:
+  /api/events/drafts/{eventId}/chief-leader-appointment:
+    parameters:
+      - name: eventId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    get:
+      operationId: getChiefLeaderAppointment
+      summary: Review the current appointment and eligible Chief Leader candidates
+      responses:
+        '200':
+          description: Draft Event appointment context
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AppointmentContext' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '500': { $ref: '#/components/responses/ServerError' }
+    post:
+      operationId: appointChiefLeader
+      summary: Create one Pending Chief Leader assignment
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+        - $ref: '#/components/parameters/AntiforgeryToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AppointRequest' }
+      responses:
+        '201':
+          description: Pending appointment created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Appointment' }
+        '200':
+          description: Identical appointment intent replayed
+          headers:
+            Idempotent-Replay:
+              schema: { type: boolean, const: true }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Appointment' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/Validation' }
+        '500': { $ref: '#/components/responses/ServerError' }
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: Carpediem.Session
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string, format: uuid }
+    AntiforgeryToken:
+      name: X-XSRF-TOKEN
+      in: header
+      required: true
+      schema: { type: string }
+  schemas:
+    AppointRequest:
+      type: object
+      required: [candidateUserId]
+      properties:
+        candidateUserId: { type: string, format: uuid }
+    Candidate:
+      type: object
+      required: [userId, userName]
+      properties:
+        userId: { type: string, format: uuid }
+        userName: { type: string }
+    Appointment:
+      type: object
+      required: [id, eventId, candidate, status, appointedAt, appointedByUserId, version]
+      properties:
+        id: { type: string, format: uuid }
+        eventId: { type: string, format: uuid }
+        candidate: { $ref: '#/components/schemas/Candidate' }
+        status: { type: string, enum: [Pending, Active] }
+        appointedAt: { type: string, format: date-time }
+        appointedByUserId: { type: string, format: uuid }
+        version: { type: string, description: Opaque assignment version. }
+    AppointmentContext:
+      type: object
+      required: [eventId, eventTitle, eventStatus, candidates]
+      properties:
+        eventId: { type: string, format: uuid }
+        eventTitle: { type: string }
+        eventStatus: { type: string, const: Draft }
+        currentAppointment:
+          oneOf:
+            - { $ref: '#/components/schemas/Appointment' }
+            - { type: 'null' }
+        candidates:
+          type: array
+          items: { $ref: '#/components/schemas/Candidate' }
+    Problem:
+      type: object
+      required: [type, title, status, code, traceId]
+      properties:
+        type: { type: string }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        code:
+          type: string
+          enum: [malformed_request, antiforgery_failed, unauthenticated, forbidden, event_not_found, not_draft, chief_leader_already_assigned, appointment_conflict, idempotency_key_reused, candidate_ineligible, unexpected_error]
+        traceId: { type: string }
+    ValidationProblem:
+      allOf:
+        - $ref: '#/components/schemas/Problem'
+        - type: object
+          required: [errors]
+          properties:
+            errors:
+              type: object
+              additionalProperties:
+                type: array
+                items: { type: string }
+  responses:
+    BadRequest:
+      description: Malformed identifier, request, control header, or antiforgery token
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    Unauthenticated:
+      description: Session missing or expired
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    Forbidden:
+      description: Actor lacks active Admin authority
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    NotFound:
+      description: Event does not exist
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    Conflict:
+      description: Event is not Draft, already has unresolved assignment, concurrent state won, or request token changed payload
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    Validation:
+      description: Candidate is no longer eligible
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/ValidationProblem' } } }
+    ServerError:
+      description: Safe unexpected failure with correlation identifier
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
