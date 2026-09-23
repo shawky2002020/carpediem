@@ -1,0 +1,130 @@
+openapi: 3.1.0
+info:
+  title: Carpediem Chief Leader Admin-Recorded External Acceptance
+  version: 0.1.0
+  description: SLICE-05 Admin recording of a Chief Leader's already confirmed external acceptance.
+servers:
+  - url: /
+security:
+  - cookieAuth: []
+paths:
+  /api/events/drafts/{eventId}/chief-leader-appointment/{assignmentId}/external-acceptance:
+    parameters:
+      - name: eventId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+      - name: assignmentId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    post:
+      operationId: recordExternalChiefLeaderAcceptance
+      summary: Record acceptance already confirmed outside Carpediem
+      parameters:
+        - $ref: '#/components/parameters/IfMatch'
+        - $ref: '#/components/parameters/Antiforgery'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ExternalAcceptanceRequest' }
+      responses:
+        '200':
+          description: Active AdminExternal assignment or same-intent replay
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Appointment' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthenticated' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+        '422': { $ref: '#/components/responses/ValidationFailed' }
+        '500': { $ref: '#/components/responses/ServerError' }
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: Carpediem.Session
+  parameters:
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      schema: { type: string, description: Opaque assignment version from the Admin context GET }
+    Antiforgery:
+      name: X-XSRF-TOKEN
+      in: header
+      required: true
+      schema: { type: string }
+  schemas:
+    ExternalAcceptanceRequest:
+      type: object
+      required: [justification]
+      properties:
+        justification:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Meaningful audit justification; whitespace-only values are invalid.
+    Candidate:
+      type: object
+      required: [userId, userName]
+      properties:
+        userId: { type: string, format: uuid }
+        userName: { type: string }
+    Appointment:
+      type: object
+      required: [id, eventId, candidate, status, appointedAt, appointedByUserId, acceptedAt, acceptanceSource, acceptedByUserId, version]
+      properties:
+        id: { type: string, format: uuid }
+        eventId: { type: string, format: uuid }
+        candidate: { $ref: '#/components/schemas/Candidate' }
+        status: { type: string, const: Active }
+        appointedAt: { type: string, format: date-time }
+        appointedByUserId: { type: string, format: uuid }
+        acceptedAt: { type: string, format: date-time }
+        acceptanceSource: { type: string, const: AdminExternal }
+        acceptedByUserId: { type: string, format: uuid }
+        version: { type: string, description: Opaque assignment version }
+    Problem:
+      type: object
+      required: [type, title, status, code, traceId]
+      properties:
+        type: { type: string }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        code:
+          type: string
+          enum: [malformed_request, antiforgery_failed, unauthenticated, forbidden, event_not_found, appointment_not_found, validation_failed, not_draft, appointment_not_pending, appointment_conflict, team_assignment_conflict, unexpected_error]
+        traceId: { type: string }
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items: { type: string }
+  responses:
+    BadRequest:
+      description: Malformed identifier, version, body, or antiforgery token
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    Unauthenticated:
+      description: Session missing or expired
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    Forbidden:
+      description: Actor lacks active Admin authority
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    NotFound:
+      description: Draft Event or assignment does not exist
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    Conflict:
+      description: Appointment state, version, direct response, or same-Event participation conflicts
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    ValidationFailed:
+      description: Justification is blank, whitespace-only, or exceeds 1,000 characters
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    ServerError:
+      description: Safe unexpected failure with correlation identifier
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
