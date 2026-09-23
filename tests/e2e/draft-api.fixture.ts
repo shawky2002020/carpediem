@@ -75,6 +75,7 @@ export async function mockDraftApi(page: Page, options: DraftApiOptions = {}) {
       if (!draft) return problem(route, 404, 'event_not_found', 'Draft Event was not found.');
       return json(route, 200, {
         eventId: draft.id, eventTitle: draft.title, eventStatus: 'Draft', currentAppointment: appointment,
+        declinedHistory: [],
         candidates: appointment ? [] : candidates,
       });
     }

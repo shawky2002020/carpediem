@@ -11,7 +11,7 @@ export interface ChiefLeaderAppointment {
   id: string;
   eventId: string;
   candidate: ChiefLeaderCandidate;
-  status: 'Pending' | 'Active';
+  status: 'Pending' | 'Active' | 'Declined';
   appointedAt: string;
   appointedByUserId: string;
   version: string;
@@ -22,6 +22,7 @@ export interface ChiefLeaderAppointmentContext {
   eventTitle: string;
   eventStatus: 'Draft';
   currentAppointment: ChiefLeaderAppointment | null;
+  declinedHistory: ChiefLeaderAppointment[];
   candidates: ChiefLeaderCandidate[];
 }
 

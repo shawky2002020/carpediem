@@ -11,6 +11,7 @@ import { AppointmentComponent } from './appointment.component';
 describe('AppointmentComponent', () => {
   const context: ChiefLeaderAppointmentContext = {
     eventId: 'event-1', eventTitle: 'Beach cleanup', eventStatus: 'Draft', currentAppointment: null,
+    declinedHistory: [],
     candidates: [
       { userId: 'chief-1', userName: 'chief.one' },
       { userId: 'chief-2', userName: 'chief.two' },
@@ -84,6 +85,19 @@ describe('AppointmentComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('chief.one');
     expect(fixture.nativeElement.querySelector('input[type="radio"]')).toBeNull();
     expect(fixture.nativeElement.querySelector('.primary')).toBeNull();
+  });
+
+  it('shows declined history while keeping replacement candidates available', async () => {
+    const declined = { ...appointment, status: 'Declined' as const };
+    const fixture = await createFixture({
+      getContext: vi.fn(() => of({ ...context, declinedHistory: [declined] })),
+      appoint: vi.fn(),
+    });
+
+    expect(fixture.nativeElement.textContent).toContain('Previous responses');
+    expect(fixture.nativeElement.textContent).toContain('chief.one');
+    expect(fixture.nativeElement.textContent).toContain('Declined');
+    expect(fixture.nativeElement.querySelectorAll('input[type="radio"]')).toHaveLength(2);
   });
 
   it('offers candidate reload after save-time ineligibility and clears stale selection on reload', async () => {

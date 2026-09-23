@@ -12,4 +12,5 @@ public static class CarpediemRoles
 public static class AuthorizationPolicies
 {
     public const string RequireAdmin = nameof(RequireAdmin);
+    public const string RequireChiefLeader = nameof(RequireChiefLeader);
 }

@@ -4,6 +4,7 @@
     <a class="brand" routerLink="/" aria-label="Carpediem home">Carpediem</a>
     <nav aria-label="Primary navigation">
       @if (session.isAdmin()) { <a routerLink="/draft-events">Draft Events</a> }
+      @if (session.isChiefLeader()) { <a routerLink="/my-appointments">My appointments</a> }
       @if (!session.isAuthenticated()) { <a routerLink="/sign-in">Sign in</a> }
       @if (session.isAuthenticated()) { <span class="identity">{{ session.session()?.userName }}</span> }
     </nav>

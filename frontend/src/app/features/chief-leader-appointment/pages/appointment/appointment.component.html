@@ -76,4 +76,18 @@
       </div>
     }
   }
+
+  @if (appointmentContext.declinedHistory.length > 0) {
+    <section class="declined-history" aria-labelledby="declined-history-title">
+      <h2 id="declined-history-title">Previous responses</h2>
+      <ul>
+        @for (appointment of appointmentContext.declinedHistory; track appointment.id) {
+          <li>
+            <strong>{{ appointment.candidate.userName }}</strong>
+            <span class="declined-label">Declined</span>
+          </li>
+        }
+      </ul>
+    </section>
+  }
 }

@@ -3,6 +3,7 @@ namespace Carpediem.Modules.Notifications.Domain;
 public sealed class InPlatformNotification
 {
     public const string ChiefLeaderAppointmentType = "ChiefLeaderAppointment";
+    public const string ChiefLeaderDeclinedType = "ChiefLeaderDeclined";
 
     private InPlatformNotification() { }
 
@@ -34,5 +35,13 @@ public sealed class InPlatformNotification
             CreatedAt = createdAt,
             ContextPayload = contextPayload,
         };
+    }
+
+    public static InPlatformNotification ChiefLeaderDeclined(
+        Guid recipientUserId, Guid eventId, DateTimeOffset createdAt, string contextPayload)
+    {
+        var notification = ChiefLeaderAppointment(recipientUserId, eventId, createdAt, contextPayload);
+        notification.NotificationType = ChiefLeaderDeclinedType;
+        return notification;
     }
 }

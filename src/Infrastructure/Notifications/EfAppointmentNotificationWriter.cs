@@ -15,6 +15,7 @@ public sealed class EfAppointmentNotificationWriter(CarpediemDbContext db)
         DateTimeOffset createdAt)
     {
         var context = JsonSerializer.Serialize(new { eventTitle });
+        if (context.Length > 500) context = JsonSerializer.Serialize(new { eventId });
         var notification = InPlatformNotification.ChiefLeaderAppointment(
             recipientUserId, eventId, createdAt, context);
         db.InPlatformNotifications.Add(notification);

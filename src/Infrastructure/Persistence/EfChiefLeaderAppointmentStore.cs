@@ -35,12 +35,23 @@ public sealed class EfChiefLeaderAppointmentStore(
             .OrderByDescending(item => item.AppointedAt)
             .FirstOrDefaultAsync(cancellationToken);
         var currentView = current is null ? null : await ToViewAsync(current, cancellationToken);
+        var declinedAssignments = await db.ChiefLeaderAssignments.AsNoTracking()
+            .Where(item => item.EventId == eventId &&
+                item.Status == ChiefLeaderAssignmentStatus.Declined)
+            .OrderByDescending(item => item.DeclinedAt)
+            .ThenByDescending(item => item.AppointedAt)
+            .ToArrayAsync(cancellationToken);
+        var declinedHistory = new List<ChiefLeaderAppointmentView>(declinedAssignments.Length);
+        foreach (var assignment in declinedAssignments)
+        {
+            declinedHistory.Add(await ToViewAsync(assignment, cancellationToken));
+        }
         var eligible = current is null
             ? (await candidates.ListEligibleAsync(cancellationToken))
                 .Select(item => new AppointmentCandidate(item.UserId, item.UserName)).ToArray()
             : Array.Empty<AppointmentCandidate>();
         return new ChiefLeaderAppointmentContext(eventItem.Id, eventItem.Title,
-            eventItem.Status.ToString(), currentView, eligible);
+            eventItem.Status.ToString(), currentView, declinedHistory, eligible);
     }
 
     public async Task<ChiefLeaderAppointmentStoreResult> AppointAsync(

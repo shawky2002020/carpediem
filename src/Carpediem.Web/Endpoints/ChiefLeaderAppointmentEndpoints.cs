@@ -64,6 +64,7 @@ public static class ChiefLeaderAppointmentEndpoints
             return Results.Ok(new AppointmentContextResponse(result.EventId, result.EventTitle,
                 result.EventStatus,
                 result.CurrentAppointment is null ? null : ToResponse(result.CurrentAppointment),
+                result.DeclinedHistory.Select(ToResponse).ToArray(),
                 result.Candidates.Select(item => new CandidateResponse(item.UserId, item.UserName)).ToArray()));
         }
         catch (ChiefLeaderAppointmentNotFoundException)
@@ -212,5 +213,6 @@ public static class ChiefLeaderAppointmentEndpoints
     private sealed record AppointmentResponse(Guid Id, Guid EventId, CandidateResponse Candidate,
         string Status, DateTimeOffset AppointedAt, Guid AppointedByUserId, string Version);
     private sealed record AppointmentContextResponse(Guid EventId, string EventTitle, string EventStatus,
-        AppointmentResponse? CurrentAppointment, CandidateResponse[] Candidates);
+        AppointmentResponse? CurrentAppointment, AppointmentResponse[] DeclinedHistory,
+        CandidateResponse[] Candidates);
 }

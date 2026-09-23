@@ -1,0 +1,80 @@
+<a class="back-link" routerLink="/my-appointments">← My appointments</a>
+
+<header class="page-heading">
+  <p class="eyebrow">Event leadership</p>
+  <h1 id="response-heading" tabindex="-1">{{ id ? 'Review appointment' : 'My pending appointments' }}</h1>
+  @if (!id) { <p>Choose an appointment to review before responding.</p> }
+</header>
+
+<div class="status-space" role="status" aria-live="polite" aria-atomic="true">
+  @if (loading()) { Loading appointments… }
+  @else if (saving()) { Saving your response… }
+  @else if (success()) { {{ success() }} }
+</div>
+
+@if (problem(); as error) {
+  <section class="message error" role="alert">
+    <h2>{{ error.title }}</h2>
+    @if (error.code === 'appointment_not_found') {
+      <p>This appointment could not be found.</p>
+    } @else if (error.code === 'forbidden') {
+      <p>You do not have access to this appointment.</p>
+    } @else if (error.status === 409) {
+      <p>The appointment changed. Review its current state before choosing again.</p>
+    } @else {
+      <p>The outcome may be uncertain. Check the current state before responding again.</p>
+    }
+    @if (error.code !== 'appointment_not_found' && error.code !== 'forbidden') {
+      <button type="button" (click)="load()">Check current state</button>
+    }
+  </section>
+}
+
+@if (!loading() && !id && !problem()) {
+  @if (pending().length === 0) {
+    <section class="message empty">
+      <h2>No pending appointments</h2>
+      <p>You have no Chief Leader appointment awaiting a response.</p>
+    </section>
+  } @else {
+    <ul class="appointment-list">
+      @for (appointment of pending(); track appointment.id) {
+        <li>
+          <a class="appointment-card" [routerLink]="['/my-appointments', appointment.id]">
+            <span class="status-label">Pending</span>
+            <strong>{{ appointment.eventTitle }}</strong>
+            <span>{{ displayDate(appointment.startDateTime) }}</span>
+            <span>{{ appointment.location }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+  }
+}
+
+@if (!loading() && detail(); as appointment) {
+  <section class="appointment-detail" aria-labelledby="event-title">
+    <p class="status-label">{{ appointment.status }}</p>
+    <h2 id="event-title">{{ appointment.eventTitle }}</h2>
+    <dl>
+      <div><dt>Starts</dt><dd><time [attr.datetime]="appointment.startDateTime">{{ displayDate(appointment.startDateTime) }}</time></dd></div>
+      <div><dt>Ends</dt><dd><time [attr.datetime]="appointment.endDateTime">{{ displayDate(appointment.endDateTime) }}</time></dd></div>
+      <div><dt>Location</dt><dd>{{ appointment.location }}</dd></div>
+    </dl>
+    @if (appointment.status === 'Pending') {
+      <p>Choose one response. Accepting will make you the Active Chief Leader while the Event remains a Draft.</p>
+      <div class="actions">
+        <button class="primary" type="button" (click)="decide('accept')" [disabled]="saving() || uncertain()">
+          {{ saving() ? 'Saving…' : 'Accept appointment' }}
+        </button>
+        <button class="secondary" type="button" (click)="decide('decline')" [disabled]="saving() || uncertain()">
+          Decline appointment
+        </button>
+      </div>
+    } @else if (appointment.status === 'Active') {
+      <p>You accepted this appointment. The Event remains a Draft until an Administrator publishes it.</p>
+    } @else {
+      <p>You declined this appointment. Administrators can appoint another Chief Leader.</p>
+    }
+  </section>
+}

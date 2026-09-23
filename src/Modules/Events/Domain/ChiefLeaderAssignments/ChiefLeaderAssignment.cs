@@ -16,6 +16,34 @@ public sealed class ChiefLeaderAssignment
     public DateTimeOffset? DeclinedAt { get; private set; }
     public byte[] RowVersion { get; private set; } = [];
 
+    public void AcceptDirect(Guid actorUserId, DateTimeOffset acceptedAt,
+        bool hasActiveTeamAssignmentOnCurrentCycle)
+    {
+        ValidateDirectResponse(actorUserId, acceptedAt);
+        if (hasActiveTeamAssignmentOnCurrentCycle) throw new ActiveTeamAssignmentConflictException();
+        Status = ChiefLeaderAssignmentStatus.Active;
+        AcceptedAt = acceptedAt;
+        AcceptedByUserId = actorUserId;
+        AcceptanceSource = "Direct";
+    }
+
+    public void DeclineDirect(Guid actorUserId, DateTimeOffset declinedAt)
+    {
+        ValidateDirectResponse(actorUserId, declinedAt);
+        Status = ChiefLeaderAssignmentStatus.Declined;
+        DeclinedAt = declinedAt;
+    }
+
+    private void ValidateDirectResponse(Guid actorUserId, DateTimeOffset respondedAt)
+    {
+        if (actorUserId != ChiefLeaderUserId)
+            throw new UnauthorizedAccessException("Only the appointed candidate may respond.");
+        if (Status != ChiefLeaderAssignmentStatus.Pending)
+            throw new ChiefLeaderResponseStateException();
+        if (respondedAt.Offset != TimeSpan.Zero)
+            throw new ArgumentException("Response time must be UTC.", nameof(respondedAt));
+    }
+
     internal static ChiefLeaderAssignment CreatePending(
         Guid eventId,
         Guid chiefLeaderUserId,

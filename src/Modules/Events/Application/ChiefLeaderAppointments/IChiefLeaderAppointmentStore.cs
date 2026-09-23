@@ -18,6 +18,7 @@ public sealed record ChiefLeaderAppointmentContext(
     string EventTitle,
     string EventStatus,
     ChiefLeaderAppointmentView? CurrentAppointment,
+    IReadOnlyList<ChiefLeaderAppointmentView> DeclinedHistory,
     IReadOnlyList<AppointmentCandidate> Candidates);
 
 public sealed record ChiefLeaderAppointmentStoreResult(

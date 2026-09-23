@@ -78,7 +78,7 @@ describe('DraftEditComponent', () => {
         provideRouter([]),
         { provide: DraftEventsService, useValue: service },
         { provide: ChiefLeaderAppointmentService, useValue: {
-          getContext: vi.fn(() => of({ eventId: 'event-1', eventTitle: 'Beach cleanup', eventStatus: 'Draft', currentAppointment: null, candidates: [] })),
+          getContext: vi.fn(() => of({ eventId: 'event-1', eventTitle: 'Beach cleanup', eventStatus: 'Draft', currentAppointment: null, declinedHistory: [], candidates: [] })),
         } },
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => 'event-1' } } } },
         { provide: Router, useValue: { navigate: vi.fn() } },

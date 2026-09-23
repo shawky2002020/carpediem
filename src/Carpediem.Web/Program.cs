@@ -73,6 +73,26 @@ builder.Services.AddOpenApi(options =>
                 };
             }
         }
+        if (operation.OperationId is "AcceptMyChiefLeaderAppointment" or "DeclineMyChiefLeaderAppointment")
+        {
+            operation.Parameters ??= [];
+            operation.Parameters.Add(new OpenApiParameter
+            {
+                Name = "If-Match",
+                In = ParameterLocation.Header,
+                Required = true,
+                Description = "Opaque assignment version returned by the appointment read.",
+                Schema = new OpenApiSchema { Type = JsonSchemaType.String },
+            });
+            operation.Parameters.Add(new OpenApiParameter
+            {
+                Name = "X-XSRF-TOKEN",
+                In = ParameterLocation.Header,
+                Required = true,
+                Description = "Antiforgery request token paired with the session cookie.",
+                Schema = new OpenApiSchema { Type = JsonSchemaType.String },
+            });
+        }
         return Task.CompletedTask;
     });
     options.AddSchemaTransformer((schema, context, _) =>
@@ -122,6 +142,7 @@ app.MapHealthChecks("/healthz");
 app.MapSessionEndpoints();
 app.MapDraftEventsEndpoints();
 app.MapChiefLeaderAppointmentEndpoints();
+app.MapChiefLeaderResponseEndpoints();
 
 await app.Services.SeedDevelopmentIdentityAsync(app.Environment.IsDevelopment(), app.Configuration);
 await app.RunAsync();

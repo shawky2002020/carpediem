@@ -1,0 +1,250 @@
+{
+    "root_group": {
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {},
+        "checks": {
+                "antiforgery returns 200": {
+                    "path": "::antiforgery returns 200",
+                    "id": "6ce01a1887aed217b6f46b96145948e3",
+                    "passes": 400,
+                    "fails": 0,
+                    "name": "antiforgery returns 200"
+                },
+                "login_admin returns 200": {
+                    "name": "login_admin returns 200",
+                    "path": "::login_admin returns 200",
+                    "id": "225c0ae8d5df55caecaf5b5138c64502",
+                    "passes": 100,
+                    "fails": 0
+                },
+                "create_draft returns 201": {
+                    "name": "create_draft returns 201",
+                    "path": "::create_draft returns 201",
+                    "id": "01b0806effe5ae05e8a6c86153d7f0ae",
+                    "passes": 100,
+                    "fails": 0
+                },
+                "read_candidates returns 200": {
+                    "name": "read_candidates returns 200",
+                    "path": "::read_candidates returns 200",
+                    "id": "7127cb9118f07cff45c86adc5d2027f0",
+                    "passes": 100,
+                    "fails": 0
+                },
+                "candidate exists": {
+                    "id": "86b6bb1cef796857f220a24dbb591995",
+                    "passes": 100,
+                    "fails": 0,
+                    "name": "candidate exists",
+                    "path": "::candidate exists"
+                },
+                "appoint returns 201": {
+                    "path": "::appoint returns 201",
+                    "id": "3f872b538b3016c6bc237a0d6546241e",
+                    "passes": 100,
+                    "fails": 0,
+                    "name": "appoint returns 201"
+                },
+                "logout returns 204": {
+                    "passes": 100,
+                    "fails": 0,
+                    "name": "logout returns 204",
+                    "path": "::logout returns 204",
+                    "id": "c714f1768aa26aeca8999dc0e6239c3c"
+                },
+                "login_chief.one returns 200": {
+                    "fails": 0,
+                    "name": "login_chief.one returns 200",
+                    "path": "::login_chief.one returns 200",
+                    "id": "b077cb9e0b6fea7be0bfe754ced9e642",
+                    "passes": 100
+                },
+                "list_pending returns 200": {
+                    "id": "fe6cfdad34941f24f65745b202e2fc47",
+                    "passes": 100,
+                    "fails": 0,
+                    "name": "list_pending returns 200",
+                    "path": "::list_pending returns 200"
+                },
+                "own Pending appointment listed": {
+                    "name": "own Pending appointment listed",
+                    "path": "::own Pending appointment listed",
+                    "id": "6bcb60bab187e1899e92c97d1273a704",
+                    "passes": 100,
+                    "fails": 0
+                },
+                "read_appointment returns 200": {
+                    "name": "read_appointment returns 200",
+                    "path": "::read_appointment returns 200",
+                    "id": "d214feb14cd318b80be596347414fd4d",
+                    "passes": 100,
+                    "fails": 0
+                },
+                "accept returns 200": {
+                    "path": "::accept returns 200",
+                    "id": "29a8ae62ec4c7cb9d7f6912e792750e7",
+                    "passes": 50,
+                    "fails": 0,
+                    "name": "accept returns 200"
+                },
+                "direct response has expected state": {
+                    "fails": 0,
+                    "name": "direct response has expected state",
+                    "path": "::direct response has expected state",
+                    "id": "e4a8b51048d389eea8ec6d7b72b8e56b",
+                    "passes": 100
+                },
+                "decline returns 200": {
+                    "passes": 50,
+                    "fails": 0,
+                    "name": "decline returns 200",
+                    "path": "::decline returns 200",
+                    "id": "74bd8e3758de580337c54e9b6457f72d"
+                },
+                "same_action_replay returns 200": {
+                    "name": "same_action_replay returns 200",
+                    "path": "::same_action_replay returns 200",
+                    "id": "db24231ca93e0e0a311371cd3c121f43",
+                    "passes": 100,
+                    "fails": 0
+                },
+                "replay returns same assignment": {
+                    "name": "replay returns same assignment",
+                    "path": "::replay returns same assignment",
+                    "id": "63495fb0f0a85345e3a2e62e4d652204",
+                    "passes": 100,
+                    "fails": 0
+                }
+            }
+    },
+    "metrics": {
+        "checks": {
+            "passes": 1800,
+            "fails": 0,
+            "value": 1
+        },
+        "http_req_duration": {
+            "p(95)": 1273.8059749999995,
+            "avg": 148.87829999999988,
+            "min": 0.5025,
+            "med": 22.35935,
+            "max": 2346.4207,
+            "p(90)": 267.8675000000044
+        },
+        "http_req_waiting": {
+            "min": 0,
+            "med": 21.14685,
+            "max": 2343.5094,
+            "p(90)": 267.3294300000044,
+            "p(95)": 1272.5474599999995,
+            "avg": 147.84704921428562
+        },
+        "http_req_failed": {
+            "fails": 1400,
+            "passes": 0,
+            "thresholds": {
+                "rate==0": false
+            },
+            "value": 0
+        },
+        "http_reqs": {
+            "count": 1400,
+            "rate": 528.3262296726955
+        },
+        "vus": {
+            "value": 71,
+            "min": 71,
+            "max": 100
+        },
+        "http_req_sending": {
+            "p(90)": 0.5251300000000001,
+            "p(95)": 0.571235,
+            "avg": 0.09831249999999993,
+            "min": 0,
+            "med": 0,
+            "max": 2.0078
+        },
+        "http_req_receiving": {
+            "max": 76.9619,
+            "p(90)": 1.2271,
+            "p(95)": 1.8032999999999957,
+            "avg": 0.9329382857142859,
+            "min": 0,
+            "med": 0.5059
+        },
+        "data_received": {
+            "count": 1613402,
+            "rate": 608858.9968617045
+        },
+        "chief_leader_response_journey": {
+            "avg": 2109.95,
+            "min": 1004,
+            "med": 2280.5,
+            "max": 2645,
+            "p(90)": 2563.1,
+            "p(95)": 2569.1
+        },
+        "http_req_tls_handshaking": {
+            "med": 0,
+            "max": 33.4624,
+            "p(90)": 0,
+            "p(95)": 16.9936,
+            "avg": 1.4127137857142857,
+            "min": 0
+        },
+        "iterations": {
+            "count": 100,
+            "rate": 37.73758783376397
+        },
+        "data_sent": {
+            "count": 573112,
+            "rate": 216278.64438584133
+        },
+        "http_req_connecting": {
+            "p(90)": 0,
+            "p(95)": 0.5582,
+            "avg": 0.12409764285714293,
+            "min": 0,
+            "med": 0,
+            "max": 8.4545
+        },
+        "iteration_duration": {
+            "max": 2645.1118,
+            "p(90)": 2564.02255,
+            "p(95)": 2569.70403,
+            "avg": 2110.232961,
+            "min": 1004.713,
+            "med": 2280.71995
+        },
+        "http_req_blocked": {
+            "min": 0,
+            "med": 0,
+            "max": 38.3351,
+            "p(90)": 0,
+            "p(95)": 19.662349999999986,
+            "avg": 1.594619285714286
+        },
+        "vus_max": {
+            "value": 100,
+            "min": 100,
+            "max": 100
+        },
+        "response_operation_errors": {
+            "count": 0,
+            "rate": 0,
+            "thresholds": {
+                "count==0": false
+            }
+        },
+        "http_req_duration{expected_response:true}": {
+            "max": 2346.4207,
+            "p(90)": 267.8675000000044,
+            "p(95)": 1273.8059749999995,
+            "avg": 148.87829999999988,
+            "min": 0.5025,
+            "med": 22.35935
+        }
+    }
+}
