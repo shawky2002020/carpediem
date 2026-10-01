@@ -1,0 +1,120 @@
+<div class="team-selection-container">
+  <header class="team-selection-header">
+    <p class="eyebrow">Event Operations</p>
+    <h1 id="team-selection-title">Team Selection</h1>
+    @if (context(); as ctx) {
+      <div class="event-summary-card">
+        <h2 class="event-title">{{ ctx.eventTitle }}</h2>
+        <div class="event-meta">
+          <p class="meta-item">
+            <strong>Schedule:</strong>
+            <time [attr.datetime]="ctx.startDateTime">{{ formatDate(ctx.startDateTime) }}</time>
+            –
+            <time [attr.datetime]="ctx.endDateTime">{{ formatDate(ctx.endDateTime) }}</time>
+          </p>
+          <p class="meta-item">
+            <strong>Location:</strong> {{ ctx.location }}
+          </p>
+        </div>
+      </div>
+    }
+  </header>
+
+  <div class="live-region" role="status" aria-live="polite" aria-atomic="true">
+    @if (loading()) { Loading team selection context… }
+    @else if (submittingId()) { Adding volunteer to active team… }
+    @else if (statusMessage()) { {{ statusMessage() }} }
+  </div>
+
+  @if (problem(); as error) {
+    <section class="alert-box error" role="alert">
+      <h2>{{ error.title }}</h2>
+      @if (error.code === 'chief_leader_conflict') {
+        <p>The Chief Leader cannot be selected as a volunteer team member on this event.</p>
+      } @else if (error.code === 'candidate_not_available') {
+        <p>This volunteer is no longer available in the current staffing cycle.</p>
+      } @else if (error.code === 'window_closed') {
+        <p>Team selection is closed because the event has already started.</p>
+      } @else if (error.code === 'invalid_event_status') {
+        <p>Team selection is only permitted for published events.</p>
+      } @else if (error.code === 'unauthorized_chief_leader') {
+        <p>You are not authorized to select volunteers for this event.</p>
+      } @else {
+        <p>{{ error.detail || 'An unexpected error occurred while processing team selection.' }}</p>
+      }
+      <button type="button" class="btn-retry" (click)="load()">Refresh roster</button>
+    </section>
+  }
+
+  @if (!loading() && context(); as ctx) {
+    @if (!ctx.isWindowOpen) {
+      <section class="alert-box warning" role="note" aria-labelledby="window-closed-heading">
+        <h2 id="window-closed-heading">Selection Window Closed</h2>
+        <p>This event has already started. Team selection is closed and the roster cannot be modified.</p>
+      </section>
+    }
+
+    <!-- Active Team Roster Section -->
+    <section class="roster-section" aria-labelledby="active-roster-heading">
+      <div class="section-header">
+        <h2 id="active-roster-heading">Active Team Roster</h2>
+        <span class="count-badge" [attr.aria-label]="activeTeamCount() + ' active team members'">
+          {{ activeTeamCount() }}
+        </span>
+      </div>
+
+      @if (activeTeam().length === 0) {
+        <p class="empty-state">No team members selected yet. Select available volunteers below.</p>
+      } @else {
+        <ul class="team-list" role="list">
+          @for (member of activeTeam(); track member.assignmentId) {
+            <li class="team-item">
+              <div class="member-info">
+                <span class="member-name">{{ member.userName }}</span>
+                <span class="member-timestamp">Selected: {{ formatDate(member.assignedAt) }}</span>
+              </div>
+              <span class="status-badge status-badge-active" role="status">Active</span>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <!-- Available Volunteers Section -->
+    <section class="candidates-section" aria-labelledby="available-candidates-heading">
+      <div class="section-header">
+        <h2 id="available-candidates-heading">Available Volunteers</h2>
+        <span class="count-badge count-badge-candidates" [attr.aria-label]="availableCandidatesCount() + ' available volunteers'">
+          {{ availableCandidatesCount() }}
+        </span>
+      </div>
+
+      @if (availableCandidates().length === 0) {
+        <p class="empty-state">No available volunteers found in the pool for this cycle.</p>
+      } @else {
+        <ul class="candidates-list" role="list">
+          @for (candidate of availableCandidates(); track candidate.userId) {
+            <li class="candidate-item">
+              <div class="candidate-info">
+                <span class="candidate-name">{{ candidate.userName }}</span>
+                <span class="candidate-timestamp">Available since: {{ formatDate(candidate.declaredAt) }}</span>
+              </div>
+              <button
+                type="button"
+                class="btn-select"
+                [disabled]="!ctx.isWindowOpen || submittingId() !== null"
+                [attr.aria-label]="'Select ' + candidate.userName + ' for team'"
+                (click)="selectVolunteer(candidate)">
+                @if (submittingId() === candidate.userId) {
+                  Selecting…
+                } @else {
+                  Select for Team
+                }
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+</div>

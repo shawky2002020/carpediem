@@ -5,6 +5,7 @@ using Carpediem.Modules.Events.Infrastructure.Persistence;
 using Carpediem.Modules.Events.Domain.ChiefLeaderAssignments;
 using Carpediem.Modules.Notifications.Domain;
 using Carpediem.Modules.Staffing.Domain.Availability;
+using Carpediem.Modules.Staffing.Domain.TeamSelection;
 using Carpediem.Infrastructure.Audit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -23,6 +24,7 @@ public sealed class CarpediemDbContext(DbContextOptions<CarpediemDbContext> opti
     public DbSet<ChiefLeaderAppointmentRequest> ChiefLeaderAppointmentRequests => Set<ChiefLeaderAppointmentRequest>();
     public DbSet<InPlatformNotification> InPlatformNotifications => Set<InPlatformNotification>();
     public DbSet<AvailabilityResponse> AvailabilityResponses => Set<AvailabilityResponse>();
+    public DbSet<TeamAssignment> TeamAssignments => Set<TeamAssignment>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -126,5 +128,29 @@ public sealed class CarpediemDbContext(DbContextOptions<CarpediemDbContext> opti
             .HasForeignKey(item => item.StaffingCycleId)
             .OnDelete(DeleteBehavior.NoAction)
             .HasConstraintName("FK_AvailabilityResponses_StaffingCycles");
+        builder.Entity<TeamAssignment>()
+            .HasOne<CarpediemUser>()
+            .WithMany()
+            .HasForeignKey(item => item.UserId)
+            .OnDelete(DeleteBehavior.NoAction)
+            .HasConstraintName("FK_TeamAssignments_Users");
+        builder.Entity<TeamAssignment>()
+            .HasOne<CarpediemUser>()
+            .WithMany()
+            .HasForeignKey(item => item.AssignedByUserId)
+            .OnDelete(DeleteBehavior.NoAction)
+            .HasConstraintName("FK_TeamAssignments_AssignedByUsers");
+        builder.Entity<TeamAssignment>()
+            .HasOne<Event>()
+            .WithMany()
+            .HasForeignKey(item => item.EventId)
+            .OnDelete(DeleteBehavior.NoAction)
+            .HasConstraintName("FK_TeamAssignments_Events");
+        builder.Entity<TeamAssignment>()
+            .HasOne<StaffingCycle>()
+            .WithMany()
+            .HasForeignKey(item => item.StaffingCycleId)
+            .OnDelete(DeleteBehavior.NoAction)
+            .HasConstraintName("FK_TeamAssignments_StaffingCycles");
     }
 }

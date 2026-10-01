@@ -14,4 +14,5 @@ public static class AuthorizationPolicies
     public const string RequireAdmin = nameof(RequireAdmin);
     public const string RequireChiefLeader = nameof(RequireChiefLeader);
     public const string RequireLeader = nameof(RequireLeader);
+    public const string RequireChiefLeaderOrAdmin = nameof(RequireChiefLeaderOrAdmin);
 }

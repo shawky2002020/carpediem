@@ -7,7 +7,7 @@ export const chiefLeaderGuard: CanActivateFn = () => {
   const session = inject(SessionService);
   const router = inject(Router);
   return session.ensureLoaded().pipe(
-    map(() => session.isChiefLeader()
+    map(() => (session.isChiefLeader() || session.isAdmin())
       ? true
       : router.createUrlTree([session.isAuthenticated() ? '/access-denied' : '/sign-in'])),
   );

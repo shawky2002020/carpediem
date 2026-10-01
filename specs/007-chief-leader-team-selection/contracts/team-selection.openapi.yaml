@@ -1,0 +1,262 @@
+openapi: 3.0.3
+info:
+  title: Carpediem Team Selection API
+  version: 1.0.0
+  description: API endpoints for Chief Leader volunteer team selection from the available pool.
+paths:
+  /api/events/{eventId}/team-selection:
+    get:
+      tags:
+        - Team Selection
+      summary: Get team selection context including available candidates and active team roster
+      operationId: GetTeamSelectionContext
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Team selection context retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamSelectionContextResponse'
+        '400':
+          description: Malformed event ID
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Unauthenticated
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Forbidden - Not the active Chief Leader or Admin on this event
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Event not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Invalid event status (e.g. not Published)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+    post:
+      tags:
+        - Team Selection
+      summary: Select an available volunteer leader onto the active team roster
+      operationId: SelectVolunteer
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-XSRF-TOKEN
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Antiforgery request token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SelectVolunteerRequest'
+      responses:
+        '201':
+          description: Volunteer selected and placed into Active team status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamAssignmentResponse'
+        '200':
+          description: Idempotent replay of existing active team placement
+          headers:
+            Idempotent-Replay:
+              schema:
+                type: string
+                example: 'true'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamAssignmentResponse'
+        '400':
+          description: Malformed request or invalid candidate ID
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Unauthenticated
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Forbidden - Not the active Chief Leader or Admin on this event
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Event or Candidate not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Conflict (chief_leader_conflict, candidate_not_available, window_closed, invalid_event_status)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+components:
+  schemas:
+    TeamSelectionContextResponse:
+      type: object
+      required:
+        - eventId
+        - staffingCycleId
+        - eventTitle
+        - startDateTime
+        - endDateTime
+        - location
+        - isWindowOpen
+        - availableCandidates
+        - activeTeam
+      properties:
+        eventId:
+          type: string
+          format: uuid
+        staffingCycleId:
+          type: string
+          format: uuid
+        eventTitle:
+          type: string
+        startDateTime:
+          type: string
+          format: date-time
+        endDateTime:
+          type: string
+          format: date-time
+        location:
+          type: string
+        isWindowOpen:
+          type: boolean
+        availableCandidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailableCandidateDto'
+        activeTeam:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActiveTeamMemberDto'
+    AvailableCandidateDto:
+      type: object
+      required:
+        - userId
+        - userName
+        - declaredAt
+      properties:
+        userId:
+          type: string
+          format: uuid
+        userName:
+          type: string
+        declaredAt:
+          type: string
+          format: date-time
+    ActiveTeamMemberDto:
+      type: object
+      required:
+        - assignmentId
+        - userId
+        - userName
+        - assignedAt
+        - version
+      properties:
+        assignmentId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        userName:
+          type: string
+        assignedAt:
+          type: string
+          format: date-time
+        version:
+          type: string
+    SelectVolunteerRequest:
+      type: object
+      required:
+        - candidateUserId
+      properties:
+        candidateUserId:
+          type: string
+          format: uuid
+    TeamAssignmentResponse:
+      type: object
+      required:
+        - id
+        - eventId
+        - staffingCycleId
+        - userId
+        - status
+        - assignedAt
+        - assignedByUserId
+        - version
+      properties:
+        id:
+          type: string
+          format: uuid
+        eventId:
+          type: string
+          format: uuid
+        staffingCycleId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          example: Active
+        assignedAt:
+          type: string
+          format: date-time
+        assignedByUserId:
+          type: string
+          format: uuid
+        version:
+          type: string
+    ProblemDetails:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string

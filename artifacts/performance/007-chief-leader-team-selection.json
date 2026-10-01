@@ -1,0 +1,764 @@
+{
+    "metrics": {
+        "iterations": {
+            "count": 100,
+            "rate": 11.217072815560881
+        },
+        "vus": {
+            "value": 82,
+            "min": 0,
+            "max": 82
+        },
+        "team_selection_operation_errors": {
+            "count": 0,
+            "rate": 0,
+            "thresholds": {
+                "count==0": false
+            }
+        },
+        "checks": {
+            "passes": 2012,
+            "fails": 0,
+            "value": 1
+        },
+        "iteration_duration": {
+            "avg": 1090.0865559999997,
+            "min": 293.5301,
+            "med": 1160.13695,
+            "max": 1552.1071,
+            "p(90)": 1518.18178,
+            "p(95)": 1528.0957899999999
+        },
+        "vus_max": {
+            "value": 100,
+            "min": 100,
+            "max": 100
+        },
+        "http_req_receiving": {
+            "p(90)": 0.5265799999999999,
+            "p(95)": 0.5635399999999997,
+            "avg": 0.10906791707798612,
+            "min": 0,
+            "med": 0,
+            "max": 5.2485
+        },
+        "data_received": {
+            "count": 2371249,
+            "rate": 265984.7269682592
+        },
+        "http_req_duration{expected_response:true}": {
+            "max": 1453.4084,
+            "p(90)": 388.8116600000031,
+            "p(95)": 955.84276,
+            "avg": 112.3485349457058,
+            "min": 1.0348,
+            "med": 11.0403
+        },
+        "http_req_connecting": {
+            "avg": 0.276691806515301,
+            "min": 0,
+            "med": 0,
+            "max": 13.5107,
+            "p(90)": 0,
+            "p(95)": 1.2181599999999972
+        },
+        "http_req_waiting": {
+            "p(95)": 955.84276,
+            "avg": 112.1164101678184,
+            "min": 0.907,
+            "med": 10.8392,
+            "max": 1452.7642,
+            "p(90)": 388.58230000000316
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 1013,
+            "thresholds": {
+                "rate==0": false
+            },
+            "value": 0
+        },
+        "http_req_duration": {
+            "avg": 112.3485349457058,
+            "min": 1.0348,
+            "med": 11.0403,
+            "max": 1453.4084,
+            "p(90)": 388.8116600000031,
+            "p(95)": 955.84276
+        },
+        "http_req_blocked": {
+            "avg": 2.3083898321816383,
+            "min": 0,
+            "med": 0,
+            "max": 45.7843,
+            "p(90)": 0,
+            "p(95)": 23.360199999999995
+        },
+        "http_req_sending": {
+            "min": 0,
+            "med": 0,
+            "max": 4.1736,
+            "p(90)": 0.52886,
+            "p(95)": 0.56994,
+            "avg": 0.12305686080947678
+        },
+        "http_req_tls_handshaking": {
+            "min": 0,
+            "med": 0,
+            "max": 32.7049,
+            "p(90)": 0,
+            "p(95)": 19.49495999999999,
+            "avg": 1.9413702862783815
+        },
+        "data_sent": {
+            "count": 504898,
+            "rate": 56634.77630431057
+        },
+        "http_reqs": {
+            "count": 1013,
+            "rate": 113.62894762163172
+        },
+        "team_selection_journey": {
+            "p(90)": 1518,
+            "p(95)": 1528.15,
+            "avg": 1090.22,
+            "min": 294,
+            "med": 1160,
+            "max": 1552
+        }
+    },
+    "setup_data": {
+        "candidates": [
+            {
+                "userId": "3acc92d2-3259-445a-a62c-b4c7bc24f5b4",
+                "userName": "leader.1",
+                "declaredAt": "2026-10-01T20:14:29.5625689+00:00"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:29.6938537+00:00",
+                "userId": "3471771c-3240-488e-8d77-01ba1c8fea7b",
+                "userName": "leader.2"
+            },
+            {
+                "userName": "leader.3",
+                "declaredAt": "2026-10-01T20:14:29.7570268+00:00",
+                "userId": "8b5a3ffc-ed46-43f3-9bc8-a44d7ba07757"
+            },
+            {
+                "userId": "df1326cc-2224-4dba-809d-9f70c21d96ef",
+                "userName": "leader.4",
+                "declaredAt": "2026-10-01T20:14:29.8199809+00:00"
+            },
+            {
+                "userName": "leader.5",
+                "declaredAt": "2026-10-01T20:14:29.8861151+00:00",
+                "userId": "f525f636-72dc-4c03-852c-579bb2dc6916"
+            },
+            {
+                "userName": "leader.6",
+                "declaredAt": "2026-10-01T20:14:29.9501668+00:00",
+                "userId": "5c876eb6-b0b9-498d-a5d0-c73020c2b577"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:30.0131343+00:00",
+                "userId": "81019207-8f38-4687-a0b5-58011aba0bc0",
+                "userName": "leader.7"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:30.0748773+00:00",
+                "userId": "5058464a-51de-49f7-bfff-aa49d3a6522a",
+                "userName": "leader.8"
+            },
+            {
+                "userName": "leader.9",
+                "declaredAt": "2026-10-01T20:14:30.1360599+00:00",
+                "userId": "3da7a0b2-40a7-4bfa-9488-fca9a983d8e4"
+            },
+            {
+                "userId": "f85f0d2d-d860-4700-8309-72665b4aa0a5",
+                "userName": "leader.10",
+                "declaredAt": "2026-10-01T20:14:30.1941137+00:00"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:30.2619862+00:00",
+                "userId": "0ad748d2-5b29-4264-b2f3-75971f25111a",
+                "userName": "leader.11"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:30.3215547+00:00",
+                "userId": "49e25d08-6e1c-45f1-9932-0a2e399935f6",
+                "userName": "leader.12"
+            },
+            {
+                "userName": "leader.13",
+                "declaredAt": "2026-10-01T20:14:30.3809204+00:00",
+                "userId": "eea490c7-b777-44dc-9cc7-a211ccf2f53e"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:30.4422337+00:00",
+                "userId": "0e72b2bd-93b6-4ebb-b1b1-e4621cf601ff",
+                "userName": "leader.14"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:30.5036503+00:00",
+                "userId": "01fca973-ab1c-48cc-8ea8-c23a3a6935d4",
+                "userName": "leader.15"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:30.565552+00:00",
+                "userId": "70dc2349-3b3f-4359-9706-cbbf959cfcd8",
+                "userName": "leader.16"
+            },
+            {
+                "userId": "ebe24bfd-0322-4131-92b3-22c270ca2ca2",
+                "userName": "leader.17",
+                "declaredAt": "2026-10-01T20:14:30.6271301+00:00"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:30.6893516+00:00",
+                "userId": "5e7f00cb-b285-4a6f-afbe-a46eaa9c8960",
+                "userName": "leader.18"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:30.7539922+00:00",
+                "userId": "415f1c3e-fcd1-4230-87d0-90fa027bfd22",
+                "userName": "leader.19"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:30.8249844+00:00",
+                "userId": "0f38a743-c0ef-4913-8824-a81ac0e0da80",
+                "userName": "leader.20"
+            },
+            {
+                "userName": "leader.21",
+                "declaredAt": "2026-10-01T20:14:30.8932981+00:00",
+                "userId": "f3eb4b4f-6158-407c-a1ec-0a565d06f48c"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:30.9598968+00:00",
+                "userId": "6c85bac3-aefb-4267-a2ba-6952d844a477",
+                "userName": "leader.22"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:31.0241988+00:00",
+                "userId": "86b24c1b-31ff-4020-9034-413fd31e1ba2",
+                "userName": "leader.23"
+            },
+            {
+                "userId": "6eb550c3-6a56-4852-bd4a-1103c7a8bba8",
+                "userName": "leader.24",
+                "declaredAt": "2026-10-01T20:14:31.0894083+00:00"
+            },
+            {
+                "userId": "227cc9dc-3aa2-4a2a-8050-dfde5bbb1a15",
+                "userName": "leader.25",
+                "declaredAt": "2026-10-01T20:14:31.1570966+00:00"
+            },
+            {
+                "userName": "leader.26",
+                "declaredAt": "2026-10-01T20:14:31.2232297+00:00",
+                "userId": "829d1f66-f0f0-42cd-a502-a7b21eee3871"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:31.2872964+00:00",
+                "userId": "106266c7-e35b-4515-8526-3e90927e2ea5",
+                "userName": "leader.27"
+            },
+            {
+                "userId": "555e89bd-9a45-4022-89d7-8a3bb83be6e5",
+                "userName": "leader.28",
+                "declaredAt": "2026-10-01T20:14:31.3553155+00:00"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:31.4217379+00:00",
+                "userId": "7f4bfc6f-ce4a-4f82-b81a-51d138b5a7cb",
+                "userName": "leader.29"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:31.4820075+00:00",
+                "userId": "2a35e65e-8953-482c-84c3-e7ffddcc6a5e",
+                "userName": "leader.30"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:31.5419431+00:00",
+                "userId": "879ac4ec-6803-4b5a-b26a-7a08488380d9",
+                "userName": "leader.31"
+            },
+            {
+                "userId": "94f72b77-dbd8-40b7-9c36-cf79fb5b0d15",
+                "userName": "leader.32",
+                "declaredAt": "2026-10-01T20:14:31.607441+00:00"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:31.6701837+00:00",
+                "userId": "71760ec4-013d-41c5-82b3-b9abf8896a8b",
+                "userName": "leader.33"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:31.7320597+00:00",
+                "userId": "957f33db-b056-41d6-b07b-b4340caed729",
+                "userName": "leader.34"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:31.7974019+00:00",
+                "userId": "d24d7b38-2b80-44b8-936c-9af9a008c4c1",
+                "userName": "leader.35"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:31.8676962+00:00",
+                "userId": "1fe44f7a-9ff7-4553-a959-a04cd0857942",
+                "userName": "leader.36"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:31.9274478+00:00",
+                "userId": "cd964b36-e80c-4451-860e-44cc5cd618e2",
+                "userName": "leader.37"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:31.9853212+00:00",
+                "userId": "87b46cdd-7d77-4c36-8662-6268fa9fabf3",
+                "userName": "leader.38"
+            },
+            {
+                "userName": "leader.39",
+                "declaredAt": "2026-10-01T20:14:32.0492852+00:00",
+                "userId": "93a46105-5dbb-4312-a1bf-69f5c46903b5"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:32.115904+00:00",
+                "userId": "cbd16daf-1875-4973-9b28-ef4bf2dd25d7",
+                "userName": "leader.40"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:32.184757+00:00",
+                "userId": "4fafc993-7a0e-43d1-bbb3-91d0f35fd6c8",
+                "userName": "leader.41"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:32.247259+00:00",
+                "userId": "11e18430-6cb4-4afb-aff6-8af19fcde6c8",
+                "userName": "leader.42"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:32.3117859+00:00",
+                "userId": "ac542653-d07c-424f-b023-84baa48f1a58",
+                "userName": "leader.43"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:32.3812548+00:00",
+                "userId": "c968e65b-fd4b-4b76-984f-1357e6a20c21",
+                "userName": "leader.44"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:32.4519906+00:00",
+                "userId": "bdddf04e-d65e-4d5a-a343-553b4460f9ec",
+                "userName": "leader.45"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:32.5138715+00:00",
+                "userId": "07283e33-9a3a-4c3c-9855-9aae9de4a458",
+                "userName": "leader.46"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:32.5755528+00:00",
+                "userId": "b5150156-f771-4fa9-a554-f994bfbca295",
+                "userName": "leader.47"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:32.6374884+00:00",
+                "userId": "994b550e-4f32-47c5-852c-231f18154563",
+                "userName": "leader.48"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:32.698114+00:00",
+                "userId": "ca5fe063-3790-405a-b76b-675191995209",
+                "userName": "leader.49"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:32.7574519+00:00",
+                "userId": "9c522204-daa9-4e21-b55f-95d33a2b73b1",
+                "userName": "leader.50"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:32.8176362+00:00",
+                "userId": "29cdc1ca-4a63-42c2-845a-aacec1c85ef5",
+                "userName": "leader.51"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:32.8787253+00:00",
+                "userId": "ef4ac4e1-7816-48ef-9a81-e91eefc1c400",
+                "userName": "leader.52"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:32.938226+00:00",
+                "userId": "a866e43b-bf4e-415c-a7bd-38478046ea84",
+                "userName": "leader.53"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:33.0013223+00:00",
+                "userId": "7a270e07-d2d9-45b7-aec5-d63e249bb736",
+                "userName": "leader.54"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:33.0657708+00:00",
+                "userId": "3a577a68-13be-48a5-bf3b-020f5c36fc8d",
+                "userName": "leader.55"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:33.1292516+00:00",
+                "userId": "f990c39b-7028-4152-9a60-b493b76de807",
+                "userName": "leader.56"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:33.1906049+00:00",
+                "userId": "89364ef7-2e76-41a7-a83b-8360a4cbecf1",
+                "userName": "leader.57"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:33.2507124+00:00",
+                "userId": "69461dab-05ce-44ec-b244-505a134a3d7b",
+                "userName": "leader.58"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:33.312145+00:00",
+                "userId": "f3e96753-9b63-44c8-971a-afdbca7f7c56",
+                "userName": "leader.59"
+            },
+            {
+                "userId": "b4a68fa5-522f-44ec-a734-d701584fd56d",
+                "userName": "leader.60",
+                "declaredAt": "2026-10-01T20:14:33.3704133+00:00"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:33.4309803+00:00",
+                "userId": "7a667325-c075-49df-bb97-0e006167d962",
+                "userName": "leader.61"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:33.4895879+00:00",
+                "userId": "8fecb59b-d621-410f-86e4-dc44923f3766",
+                "userName": "leader.62"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:33.5472384+00:00",
+                "userId": "fe2b9428-10ea-4318-aadf-ef5e11f490ec",
+                "userName": "leader.63"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:33.6063586+00:00",
+                "userId": "14fac195-5a2b-467e-90dd-78457af2ab65",
+                "userName": "leader.64"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:33.6722169+00:00",
+                "userId": "35493d1a-0342-4aff-8c86-2a2b932585c7",
+                "userName": "leader.65"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:33.7331686+00:00",
+                "userId": "4c8bcb37-d730-431e-bbfc-9928e14609ee",
+                "userName": "leader.66"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:33.8076668+00:00",
+                "userId": "a5f77548-12be-42b3-a0f2-fda9fe141824",
+                "userName": "leader.67"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:33.8764276+00:00",
+                "userId": "5dbaff52-b86c-441d-a3c9-3a8e8f42e03d",
+                "userName": "leader.68"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:33.9375541+00:00",
+                "userId": "636ffa43-64f1-4063-84de-be2f6f08ee7f",
+                "userName": "leader.69"
+            },
+            {
+                "userId": "c53f9ea2-ec40-4749-a38d-c39223ed2c06",
+                "userName": "leader.70",
+                "declaredAt": "2026-10-01T20:14:33.997197+00:00"
+            },
+            {
+                "userName": "leader.71",
+                "declaredAt": "2026-10-01T20:14:34.059388+00:00",
+                "userId": "a92a3a92-632e-4cf6-bcf3-dab2b2c43c82"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:34.1209409+00:00",
+                "userId": "f8b78b66-e9a6-4d23-a5e4-b0b74a6e951c",
+                "userName": "leader.72"
+            },
+            {
+                "userName": "leader.73",
+                "declaredAt": "2026-10-01T20:14:34.1804369+00:00",
+                "userId": "34491f02-8f54-4691-87b2-1429c36ca862"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:34.2424667+00:00",
+                "userId": "13001f30-7144-4071-a8b4-ecf610ffd969",
+                "userName": "leader.74"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:34.2991409+00:00",
+                "userId": "2002b75e-708c-49bf-b390-519738ee2b05",
+                "userName": "leader.75"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:34.3559068+00:00",
+                "userId": "d6b8f957-5fb9-4677-9c94-dbba030b08e9",
+                "userName": "leader.76"
+            },
+            {
+                "userId": "83271847-beed-450e-ae72-1a0997576e94",
+                "userName": "leader.77",
+                "declaredAt": "2026-10-01T20:14:34.4152136+00:00"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:34.4734125+00:00",
+                "userId": "2604f6a3-112a-447b-b941-bb9fa0bca8f2",
+                "userName": "leader.78"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:34.5305002+00:00",
+                "userId": "084e6ab4-8f63-4736-9455-c2cf4ee948f0",
+                "userName": "leader.79"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:34.5900313+00:00",
+                "userId": "4aec1082-7654-43d2-bd24-ba603193a309",
+                "userName": "leader.80"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:34.6502391+00:00",
+                "userId": "ecdb1ad8-c6a1-46b8-ad66-557089f2166c",
+                "userName": "leader.81"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:34.7099238+00:00",
+                "userId": "39cea016-5af2-428a-bfd1-56c5b7c4c4b1",
+                "userName": "leader.82"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:34.774637+00:00",
+                "userId": "c233ecdd-851d-427b-9cec-c5beaa59efd5",
+                "userName": "leader.83"
+            },
+            {
+                "userName": "leader.84",
+                "declaredAt": "2026-10-01T20:14:34.8486295+00:00",
+                "userId": "48eed788-ebbc-4f2c-894b-05fee4580c68"
+            },
+            {
+                "userName": "leader.85",
+                "declaredAt": "2026-10-01T20:14:34.9261742+00:00",
+                "userId": "a6dec05d-289d-4e68-8cfd-c015372323c0"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:34.9952809+00:00",
+                "userId": "a5304c44-b9a7-470e-9ac3-3aba4c10f643",
+                "userName": "leader.86"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:35.0713058+00:00",
+                "userId": "81089f60-0aa7-424a-b4c5-5d0b44143145",
+                "userName": "leader.87"
+            },
+            {
+                "userId": "ad372565-28b1-45ba-ba4b-79ff19f8c233",
+                "userName": "leader.88",
+                "declaredAt": "2026-10-01T20:14:35.1577737+00:00"
+            },
+            {
+                "userName": "leader.89",
+                "declaredAt": "2026-10-01T20:14:35.2281956+00:00",
+                "userId": "38b21f0d-15c5-47bf-b374-bef55fc89a0b"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:35.2895211+00:00",
+                "userId": "376fa3df-db3a-4bb0-959b-f82bd8f10ae1",
+                "userName": "leader.90"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:35.3532234+00:00",
+                "userId": "7812c69f-4ed4-46b9-bc0e-d3fb5f6f2df6",
+                "userName": "leader.91"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:35.4110825+00:00",
+                "userId": "72b23730-d0b7-4cc1-9d38-7d0eede233ce",
+                "userName": "leader.92"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:35.4673351+00:00",
+                "userId": "d3dd6e48-bd24-4f87-849f-bfcecdc14a76",
+                "userName": "leader.93"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:35.535726+00:00",
+                "userId": "e185e991-b48e-467b-8c75-1bd7980a90ba",
+                "userName": "leader.94"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:35.5968422+00:00",
+                "userId": "89395bb7-bcd1-4fa8-a92a-a63b582d7852",
+                "userName": "leader.95"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:35.6567395+00:00",
+                "userId": "a06f55b8-9372-437c-bbca-0e119a8446e5",
+                "userName": "leader.96"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:35.7196768+00:00",
+                "userId": "38e7231c-ded7-47e3-b9fd-fc5a6a1df15b",
+                "userName": "leader.97"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:35.7891402+00:00",
+                "userId": "36d16b4d-a271-47bd-a657-6f6c759d192e",
+                "userName": "leader.98"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:35.8505036+00:00",
+                "userId": "26373ba4-b38b-4054-9c4e-47efb4a03439",
+                "userName": "leader.99"
+            },
+            {
+                "declaredAt": "2026-10-01T20:14:35.9109336+00:00",
+                "userId": "a8c2a253-8af0-4994-a095-927902ec7bb3",
+                "userName": "leader.100"
+            }
+        ],
+        "eventId": "41900763-06cf-482b-88f0-50fd3815dfe1"
+    },
+    "root_group": {
+        "checks": {
+            "antiforgery status is 200": {
+                "name": "antiforgery status is 200",
+                "path": "::antiforgery status is 200",
+                "id": "c20185627100c78e75d752b55a33f1e0",
+                "passes": 200,
+                "fails": 0
+            },
+            "antiforgery token present": {
+                "path": "::antiforgery token present",
+                "id": "43a3e483ea2e1315a65bee4aec00c58d",
+                "passes": 200,
+                "fails": 0,
+                "name": "antiforgery token present"
+            },
+            "login status is 200": {
+                "passes": 100,
+                "fails": 0,
+                "name": "login status is 200",
+                "path": "::login status is 200",
+                "id": "baba87e761865dc93085ee0c1fe25f4c"
+            },
+            "session active": {
+                "name": "session active",
+                "path": "::session active",
+                "id": "174933ba01228c1ddcddf0a1ffeee613",
+                "passes": 100,
+                "fails": 0
+            },
+            "get_team_selection_context status is 200": {
+                "id": "8613f12310b8498ce44caa7316e7acc4",
+                "passes": 100,
+                "fails": 0,
+                "name": "get_team_selection_context status is 200",
+                "path": "::get_team_selection_context status is 200"
+            },
+            "select_volunteer status is 201": {
+                "fails": 0,
+                "name": "select_volunteer status is 201",
+                "path": "::select_volunteer status is 201",
+                "id": "60c284ad08e8396952af5e3fbd681ade",
+                "passes": 100
+            },
+            "assignment active": {
+                "fails": 0,
+                "name": "assignment active",
+                "path": "::assignment active",
+                "id": "19829f62f4da13c7f7b50044f1a7cad6",
+                "passes": 100
+            },
+            "assignment candidate match": {
+                "name": "assignment candidate match",
+                "path": "::assignment candidate match",
+                "id": "089ac41676db37b91e02517f4b5ba7fa",
+                "passes": 100,
+                "fails": 0
+            },
+            "assignment event match": {
+                "name": "assignment event match",
+                "path": "::assignment event match",
+                "id": "760b895d39389ccd1efa6ae6d458f590",
+                "passes": 100,
+                "fails": 0
+            },
+            "replay_select_volunteer status is 200": {
+                "path": "::replay_select_volunteer status is 200",
+                "id": "d2ec8aec3f41e9adecd209f5bf67951d",
+                "passes": 100,
+                "fails": 0,
+                "name": "replay_select_volunteer status is 200"
+            },
+            "replay has idempotent header": {
+                "path": "::replay has idempotent header",
+                "id": "3212a9365866cd56ac7e68d0522bd7bb",
+                "passes": 100,
+                "fails": 0,
+                "name": "replay has idempotent header"
+            },
+            "replay status active": {
+                "id": "a231fbbddb92c1312479d8612e61fe26",
+                "passes": 100,
+                "fails": 0,
+                "name": "replay status active",
+                "path": "::replay status active"
+            }
+        },
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {
+            "setup": {
+                "name": "setup",
+                "path": "::setup",
+                "id": "5c0f8025f7e0b6654089e5b00e950f1a",
+                "groups": {},
+                "checks": {
+                        "antiforgery status is 200": {
+                            "id": "e31047222094314774f0d1b0530bd1c0",
+                            "passes": 204,
+                            "fails": 0,
+                            "name": "antiforgery status is 200",
+                            "path": "::setup::antiforgery status is 200"
+                        },
+                        "antiforgery token present": {
+                            "path": "::setup::antiforgery token present",
+                            "id": "526ed8e4098b71b521ed190d67227743",
+                            "passes": 204,
+                            "fails": 0,
+                            "name": "antiforgery token present"
+                        },
+                        "login status is 200": {
+                            "id": "bb27b460b057923f4a083e3603c038b9",
+                            "passes": 102,
+                            "fails": 0,
+                            "name": "login status is 200",
+                            "path": "::setup::login status is 200"
+                        },
+                        "session active": {
+                            "path": "::setup::session active",
+                            "id": "fdb2d7de4fe6219c621cbace87134b55",
+                            "passes": 102,
+                            "fails": 0,
+                            "name": "session active"
+                        }
+                    }
+            }
+        }
+    }
+}

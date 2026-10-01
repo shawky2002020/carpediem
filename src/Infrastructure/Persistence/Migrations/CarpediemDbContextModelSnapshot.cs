@@ -449,6 +449,65 @@ namespace Carpediem.Infrastructure.Persistence.Migrations
                     b.ToTable("AvailabilityResponses", "staffing");
                 });
 
+            modelBuilder.Entity("Carpediem.Modules.Staffing.Domain.TeamSelection.TeamAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("AssignedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("AssignedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CancellationReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTimeOffset?>("CancelledAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<Guid>("StaffingCycleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id")
+                        .HasName("PK_staffing_TeamAssignments");
+
+                    b.HasIndex("AssignedByUserId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("EventId", "Status")
+                        .HasDatabaseName("IX_TeamAssignments_Event_Status");
+
+                    b.HasIndex("StaffingCycleId", "UserId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_TeamAssignments_ActiveLeaderPerCycle")
+                        .HasFilter("[Status] = 'Active'");
+
+                    b.ToTable("TeamAssignments", "staffing", t =>
+                        {
+                            t.HasCheckConstraint("CK_TeamAssignments_Status", "[Status] IN ('Active','Cancelled')");
+                        });
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
                 {
                     b.Property<Guid>("Id")
@@ -711,6 +770,37 @@ namespace Carpediem.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_AvailabilityResponses_Users");
+                });
+
+            modelBuilder.Entity("Carpediem.Modules.Staffing.Domain.TeamSelection.TeamAssignment", b =>
+                {
+                    b.HasOne("Carpediem.Modules.Identity.Domain.CarpediemUser", null)
+                        .WithMany()
+                        .HasForeignKey("AssignedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_TeamAssignments_AssignedByUsers");
+
+                    b.HasOne("Carpediem.Modules.Events.Domain.Events.Event", null)
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_TeamAssignments_Events");
+
+                    b.HasOne("Carpediem.Modules.Events.Domain.StaffingCycles.StaffingCycle", null)
+                        .WithMany()
+                        .HasForeignKey("StaffingCycleId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_TeamAssignments_StaffingCycles");
+
+                    b.HasOne("Carpediem.Modules.Identity.Domain.CarpediemUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_TeamAssignments_Users");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>

@@ -1,0 +1,196 @@
+:host {
+  display: block;
+  max-inline-size: 48rem;
+  margin-inline: auto;
+  padding: var(--cd-space-4);
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--cd-text-secondary);
+  font-size: var(--cd-font-size-sm);
+  font-weight: var(--cd-weight-bold);
+  letter-spacing: var(--cd-letter-spacing-caps);
+  text-transform: uppercase;
+}
+
+h1 {
+  margin-block: var(--cd-space-2);
+  font: var(--cd-weight-bold) clamp(1.75rem, 5vw, 2.4rem)/var(--cd-line-tight) var(--cd-font-display);
+  color: var(--cd-text-primary);
+}
+
+.event-summary-card,
+.alert-box,
+.roster-section,
+.candidates-section {
+  margin-block: var(--cd-space-4);
+  padding: var(--cd-space-4);
+  border: 1px solid var(--cd-border-default);
+  border-radius: var(--cd-radius-panel);
+  background: var(--cd-bg-surface);
+}
+
+.event-title,
+.section-header h2 {
+  margin: 0;
+  font-size: var(--cd-font-size-lg);
+  font-weight: var(--cd-weight-bold);
+}
+
+.event-meta {
+  margin-block-start: var(--cd-space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--cd-space-1);
+}
+
+.meta-item,
+.member-timestamp,
+.candidate-timestamp,
+.empty-state {
+  margin: 0;
+  color: var(--cd-text-secondary);
+  font-size: var(--cd-font-size-sm);
+}
+
+.live-region {
+  min-block-size: 1.5rem;
+  margin-block: var(--cd-space-2);
+  color: var(--cd-status-success-fg);
+  font-weight: var(--cd-weight-medium);
+  font-size: var(--cd-font-size-sm);
+}
+
+.alert-box {
+  &.error {
+    border-inline-start: 4px solid var(--cd-status-danger-fg);
+    background: var(--cd-status-danger-bg);
+    color: var(--cd-status-danger-fg);
+  }
+  &.warning {
+    border-inline-start: 4px solid var(--cd-status-warning-fg);
+    background: var(--cd-status-warning-bg);
+    color: var(--cd-text-primary);
+  }
+}
+
+.btn-retry {
+  min-block-size: var(--cd-touch-target-min, 44px);
+  margin-block-start: var(--cd-space-3);
+  padding-inline: var(--cd-space-4);
+  border: 1px solid var(--cd-border-strong);
+  border-radius: var(--cd-radius-control);
+  background: var(--cd-bg-surface);
+  font-weight: var(--cd-weight-semibold);
+  cursor: pointer;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-block-end: var(--cd-space-3);
+  padding-block-end: var(--cd-space-2);
+  border-block-end: 1px solid var(--cd-border-subtle, #e5e7eb);
+}
+
+.count-badge {
+  display: inline-flex;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--cd-radius-pill);
+  font-size: var(--cd-font-size-xs);
+  font-weight: var(--cd-weight-bold);
+  background: var(--cd-status-success-bg);
+  color: var(--cd-status-success-fg);
+
+  &-candidates {
+    background: var(--cd-bg-muted, #f3f4f6);
+    color: var(--cd-text-secondary);
+  }
+}
+
+.team-list,
+.candidates-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--cd-space-3);
+}
+
+.team-item,
+.candidate-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--cd-space-3);
+  padding: var(--cd-space-3);
+  border: 1px solid var(--cd-border-subtle, #e5e7eb);
+  border-radius: var(--cd-radius-control);
+  background: var(--cd-bg-surface-elevated, #fafafa);
+}
+
+.member-info,
+.candidate-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.member-name,
+.candidate-name {
+  font-weight: var(--cd-weight-semibold);
+  font-size: var(--cd-font-size-base);
+  word-break: break-word;
+}
+
+.status-badge-active {
+  display: inline-flex;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--cd-radius-pill);
+  font-size: var(--cd-font-size-xs);
+  font-weight: var(--cd-weight-bold);
+  background: var(--cd-status-success-bg);
+  color: var(--cd-status-success-fg);
+}
+
+.btn-select {
+  min-block-size: var(--cd-touch-target-min, 44px);
+  min-inline-size: 8rem;
+  padding: var(--cd-space-2) var(--cd-space-4);
+  border: 2px solid var(--cd-action-primary);
+  border-radius: var(--cd-radius-control);
+  background: var(--cd-action-primary);
+  color: var(--cd-text-inverse);
+  font-weight: var(--cd-weight-semibold);
+  font-size: var(--cd-font-size-sm);
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--cd-action-primary-hover, #065f46);
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+@media (max-width: 30rem) {
+  .team-item,
+  .candidate-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .btn-select {
+    inline-size: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+  }
+}

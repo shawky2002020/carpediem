@@ -74,4 +74,21 @@ public sealed class AuditLog
             newValue: newValue,
             resourceType: "AvailabilityResponse",
             source: "Direct");
+
+    public static AuditLog VolunteerSelected(
+        Guid teamAssignmentId,
+        Guid actorUserId,
+        Guid correlationId,
+        DateTimeOffset occurredAt,
+        bool isAdminActor) =>
+        Create(
+            actorUserId,
+            action: "VolunteerSelected",
+            resourceId: teamAssignmentId,
+            correlationId: correlationId,
+            occurredAt: occurredAt,
+            previousValue: null,
+            newValue: "Active",
+            resourceType: "TeamAssignment",
+            source: isAdminActor ? "AdminSelection" : "Direct");
 }
