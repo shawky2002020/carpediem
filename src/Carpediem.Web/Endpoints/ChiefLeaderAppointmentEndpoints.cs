@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Carpediem.Modules.Events.Application.ChiefLeaderAppointments;
+using Carpediem.Modules.Events.Application.ChiefLeaderExternalAcceptances;
 using Carpediem.Modules.Events.Domain.ChiefLeaderAssignments;
 using Carpediem.Modules.Events.Domain.Events;
 using Carpediem.Modules.Identity.Authorization;
@@ -38,7 +39,111 @@ public static class ChiefLeaderAppointmentEndpoints
             .Produces<ApiProblemResponse>(422, "application/problem+json")
             .Produces<ApiProblemResponse>(500, "application/problem+json")
             .WithMetadata(new RequireAntiforgeryTokenAttribute());
+        group.MapPost("/{assignmentId}/external-acceptance", RecordExternalAcceptanceAsync)
+            .WithName("RecordExternalChiefLeaderAcceptance")
+            .Accepts<ExternalAcceptanceRequest>("application/json")
+            .Produces<AppointmentResponse>()
+            .Produces<ApiProblemResponse>(400, "application/problem+json")
+            .Produces<ApiProblemResponse>(401, "application/problem+json")
+            .Produces<ApiProblemResponse>(403, "application/problem+json")
+            .Produces<ApiProblemResponse>(404, "application/problem+json")
+            .Produces<ApiProblemResponse>(409, "application/problem+json")
+            .Produces<ApiProblemResponse>(422, "application/problem+json")
+            .Produces<ApiProblemResponse>(500, "application/problem+json")
+            .WithMetadata(new RequireAntiforgeryTokenAttribute());
         return endpoints;
+    }
+
+    private static async Task<IResult> RecordExternalAcceptanceAsync(
+        string eventId,
+        string assignmentId,
+        ExternalAcceptanceRequest request,
+        HttpContext context,
+        IAntiforgery antiforgery,
+        RecordChiefLeaderExternalAcceptanceHandler handler,
+        CancellationToken cancellationToken)
+    {
+        using var activity = ChiefLeaderExternalAcceptanceTelemetry.Start();
+        if (!Guid.TryParse(eventId, out var selectedEventId) || selectedEventId == Guid.Empty ||
+            !Guid.TryParse(assignmentId, out var selectedAssignmentId) || selectedAssignmentId == Guid.Empty)
+            return ExternalProblem(context, activity, 400, "malformed_request",
+                "Valid Event and appointment identifiers are required.");
+        if (!await HasValidAntiforgeryAsync(context, antiforgery))
+            return ExternalProblem(context, activity, 400, "antiforgery_failed",
+                "The request could not be verified.");
+        if (!TryReadVersion(context, out var version))
+            return ExternalProblem(context, activity, 400, "malformed_request",
+                "A valid appointment version is required.");
+        if (!TryGetActor(context, out var actorUserId))
+            return ExternalProblem(context, activity, 401, "unauthenticated",
+                "The session is no longer active.");
+
+        try
+        {
+            var result = await handler.HandleAsync(selectedEventId, selectedAssignmentId,
+                actorUserId, version, request.Justification,
+                (Guid)context.Items["CorrelationId"]!, cancellationToken);
+            ChiefLeaderExternalAcceptanceTelemetry.Record(activity,
+                result.IsReplay ? "replayed" : "recorded");
+            if (result.IsReplay) context.Response.Headers["Idempotent-Replay"] = "true";
+            return Results.Ok(ToResponse(result.Appointment));
+        }
+        catch (ChiefLeaderExternalAcceptanceValidationException error)
+        {
+            ChiefLeaderExternalAcceptanceTelemetry.Record(activity, "validation_failed");
+            return ApiProblemDetailsService.Problem(context, 422, "validation_failed",
+                "Review the highlighted fields.", errors: new Dictionary<string, string[]>
+                {
+                    ["justification"] = [error.Message],
+                });
+        }
+        catch (ChiefLeaderExternalAcceptanceNotFoundException)
+        {
+            return ExternalProblem(context, activity, 404, "appointment_not_found",
+                "Pending Chief Leader appointment was not found.");
+        }
+        catch (Exception error) when (error is ChiefLeaderExternalAcceptanceConflictException or
+            ChiefLeaderResponseStateException)
+        {
+            return ExternalProblem(context, activity, 409, "appointment_conflict",
+                "The appointment changed. Review its current state before continuing.");
+        }
+        catch (ActiveTeamAssignmentConflictException)
+        {
+            return ExternalProblem(context, activity, 409, "team_assignment_conflict",
+                "Resolve the active team assignment on this Event before recording acceptance.");
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return ExternalProblem(context, activity, 403, "forbidden",
+                "Chief Leader external acceptance access is denied.");
+        }
+        catch
+        {
+            ChiefLeaderExternalAcceptanceTelemetry.Record(activity, "unexpected_error");
+            throw;
+        }
+    }
+
+    private static IResult ExternalProblem(HttpContext context, System.Diagnostics.Activity? activity,
+        int status, string code, string detail)
+    {
+        ChiefLeaderExternalAcceptanceTelemetry.Record(activity, code);
+        return ApiProblemDetailsService.Problem(context, status, code, detail);
+    }
+
+    private static bool TryReadVersion(HttpContext context, out byte[] version)
+    {
+        try
+        {
+            version = Convert.FromBase64String(context.Request.Headers.IfMatch.ToString().Trim('"'));
+            return version.Length == 8;
+        }
+        catch (FormatException)
+        {
+            version = [];
+            return false;
+        }
     }
 
     private static async Task<IResult> GetAsync(
@@ -206,12 +311,18 @@ public static class ChiefLeaderAppointmentEndpoints
         value.Status.ToString(),
         value.AppointedAt.ToUniversalTime(),
         value.AppointedByUserId,
+        value.AcceptedAt?.ToUniversalTime(),
+        value.AcceptanceSource,
+        value.AcceptedByUserId,
         Convert.ToBase64String(value.Version));
 
     private sealed record AppointRequest(string CandidateUserId);
+    private sealed record ExternalAcceptanceRequest(string? Justification);
     private sealed record CandidateResponse(Guid UserId, string UserName);
     private sealed record AppointmentResponse(Guid Id, Guid EventId, CandidateResponse Candidate,
-        string Status, DateTimeOffset AppointedAt, Guid AppointedByUserId, string Version);
+        string Status, DateTimeOffset AppointedAt, Guid AppointedByUserId,
+        DateTimeOffset? AcceptedAt, string? AcceptanceSource, Guid? AcceptedByUserId,
+        string Version);
     private sealed record AppointmentContextResponse(Guid EventId, string EventTitle, string EventStatus,
         AppointmentResponse? CurrentAppointment, AppointmentResponse[] DeclinedHistory,
         CandidateResponse[] Candidates);

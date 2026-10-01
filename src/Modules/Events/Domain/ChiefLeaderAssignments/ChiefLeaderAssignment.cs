@@ -34,10 +34,28 @@ public sealed class ChiefLeaderAssignment
         DeclinedAt = declinedAt;
     }
 
+    public void AcceptExternal(Guid adminUserId, DateTimeOffset acceptedAt,
+        bool hasActiveTeamAssignmentOnCurrentCycle)
+    {
+        if (adminUserId == Guid.Empty)
+            throw new ArgumentException("An acting Admin is required.", nameof(adminUserId));
+        ValidatePendingUtc(acceptedAt);
+        if (hasActiveTeamAssignmentOnCurrentCycle) throw new ActiveTeamAssignmentConflictException();
+        Status = ChiefLeaderAssignmentStatus.Active;
+        AcceptedAt = acceptedAt;
+        AcceptedByUserId = adminUserId;
+        AcceptanceSource = "AdminExternal";
+    }
+
     private void ValidateDirectResponse(Guid actorUserId, DateTimeOffset respondedAt)
     {
         if (actorUserId != ChiefLeaderUserId)
             throw new UnauthorizedAccessException("Only the appointed candidate may respond.");
+        ValidatePendingUtc(respondedAt);
+    }
+
+    private void ValidatePendingUtc(DateTimeOffset respondedAt)
+    {
         if (Status != ChiefLeaderAssignmentStatus.Pending)
             throw new ChiefLeaderResponseStateException();
         if (respondedAt.Offset != TimeSpan.Zero)

@@ -93,6 +93,37 @@ builder.Services.AddOpenApi(options =>
                 Schema = new OpenApiSchema { Type = JsonSchemaType.String },
             });
         }
+        if (operation.OperationId == "RecordExternalChiefLeaderAcceptance")
+        {
+            operation.Parameters ??= [];
+            operation.Parameters.Add(new OpenApiParameter
+            {
+                Name = "If-Match",
+                In = ParameterLocation.Header,
+                Required = true,
+                Description = "Opaque assignment version returned by the Admin appointment context.",
+                Schema = new OpenApiSchema { Type = JsonSchemaType.String },
+            });
+            operation.Parameters.Add(new OpenApiParameter
+            {
+                Name = "X-XSRF-TOKEN",
+                In = ParameterLocation.Header,
+                Required = true,
+                Description = "Antiforgery request token paired with the session cookie.",
+                Schema = new OpenApiSchema { Type = JsonSchemaType.String },
+            });
+            if (operation.Responses?.TryGetValue("200", out var replayResponse) == true &&
+                replayResponse is OpenApiResponse concreteReplayResponse)
+            {
+                concreteReplayResponse.Headers ??= new Dictionary<string, IOpenApiHeader>();
+                concreteReplayResponse.Headers["Idempotent-Replay"] = new OpenApiHeader
+                {
+                    Description = "True when the response replays the committed external acceptance.",
+                    Required = false,
+                    Schema = new OpenApiSchema { Type = JsonSchemaType.Boolean },
+                };
+            }
+        }
         return Task.CompletedTask;
     });
     options.AddSchemaTransformer((schema, context, _) =>

@@ -159,6 +159,9 @@ public sealed class EfChiefLeaderAppointmentStore(
             assignment.Status,
             assignment.AppointedAt,
             assignment.AppointedByUserId,
+            assignment.AcceptedAt,
+            assignment.AcceptanceSource,
+            assignment.AcceptedByUserId,
             assignment.RowVersion);
 
     private static bool IsDuplicateKey(DbUpdateException error) =>

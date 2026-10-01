@@ -14,6 +14,9 @@ export interface ChiefLeaderAppointment {
   status: 'Pending' | 'Active' | 'Declined';
   appointedAt: string;
   appointedByUserId: string;
+  acceptedAt: string | null;
+  acceptanceSource: 'Direct' | 'AdminExternal' | null;
+  acceptedByUserId: string | null;
   version: string;
 }
 
@@ -40,5 +43,13 @@ export class ChiefLeaderAppointmentService {
       `/api/events/drafts/${eventId}/chief-leader-appointment`,
       { candidateUserId },
       { headers: new HttpHeaders({ 'Idempotency-Key': requestToken }) });
+  }
+
+  recordExternalAcceptance(eventId: string, assignmentId: string, version: string,
+    justification: string): Observable<ChiefLeaderAppointment> {
+    return this.http.post<ChiefLeaderAppointment>(
+      `/api/events/drafts/${eventId}/chief-leader-appointment/${assignmentId}/external-acceptance`,
+      { justification },
+      { headers: new HttpHeaders({ 'If-Match': `"${version}"` }) });
   }
 }

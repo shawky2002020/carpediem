@@ -32,6 +32,11 @@ paths:
       responses:
         '200':
           description: Active AdminExternal assignment or same-intent replay
+          headers:
+            Idempotent-Replay:
+              description: Present with value true when the committed external acceptance is replayed.
+              required: false
+              schema: { type: boolean }
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Appointment' }

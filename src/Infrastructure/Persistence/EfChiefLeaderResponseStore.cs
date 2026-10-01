@@ -60,7 +60,7 @@ public sealed class EfChiefLeaderResponseStore(
                 var eventItem = await db.Events.AsNoTracking()
                     .SingleAsync(item => item.Id == assignment.EventId, cancellationToken);
 
-                if (IsFinalStateFor(decision, assignment.Status))
+                if (IsFinalStateFor(decision, assignment, actorUserId))
                     return ToView(assignment, eventItem);
                 if (assignment.Status != ChiefLeaderAssignmentStatus.Pending ||
                     eventItem.Status != EventStatus.Draft ||
@@ -93,8 +93,17 @@ public sealed class EfChiefLeaderResponseStore(
         catch (DbUpdateConcurrencyException)
         {
             db.ChangeTracker.Clear();
-            var current = await GetAsync(assignmentId, actorUserId, cancellationToken);
-            if (IsFinalStateFor(decision, current.Status)) return current;
+            await EnsureActiveChiefLeaderAsync(actorUserId, cancellationToken);
+            var current = await db.ChiefLeaderAssignments.AsNoTracking()
+                .SingleOrDefaultAsync(item => item.Id == assignmentId, cancellationToken);
+            if (current is null || current.ChiefLeaderUserId != actorUserId)
+                throw new ChiefLeaderResponseNotFoundException();
+            if (IsFinalStateFor(decision, current, actorUserId))
+            {
+                var eventItem = await db.Events.AsNoTracking()
+                    .SingleAsync(item => item.Id == current.EventId, cancellationToken);
+                return ToView(current, eventItem);
+            }
             throw new ChiefLeaderResponseConflictException();
         }
     }
@@ -106,9 +115,13 @@ public sealed class EfChiefLeaderResponseStore(
     }
 
     private static bool IsFinalStateFor(ChiefLeaderDecision decision,
-        ChiefLeaderAssignmentStatus status) =>
-        decision == ChiefLeaderDecision.Accept && status == ChiefLeaderAssignmentStatus.Active ||
-        decision == ChiefLeaderDecision.Decline && status == ChiefLeaderAssignmentStatus.Declined;
+        ChiefLeaderAssignment assignment, Guid actorUserId) =>
+        decision == ChiefLeaderDecision.Accept &&
+            assignment.Status == ChiefLeaderAssignmentStatus.Active &&
+            assignment.AcceptanceSource == "Direct" &&
+            assignment.AcceptedByUserId == actorUserId ||
+        decision == ChiefLeaderDecision.Decline &&
+            assignment.Status == ChiefLeaderAssignmentStatus.Declined;
 
     private static ChiefLeaderResponseView ToView(
         ChiefLeaderAssignment assignment, Event eventItem) => new(

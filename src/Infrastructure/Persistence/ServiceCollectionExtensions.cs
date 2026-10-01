@@ -2,6 +2,8 @@ using Carpediem.Modules.Identity.Domain;
 using Carpediem.Modules.Events.Application.Drafts;
 using Carpediem.Modules.Events.Application.ChiefLeaderAppointments;
 using Carpediem.Modules.Events.Application.ChiefLeaderResponses;
+using Carpediem.Modules.Events.Application.ChiefLeaderExternalAcceptances;
+using Carpediem.Infrastructure.Audit;
 using Carpediem.Modules.Notifications.Application;
 using Carpediem.Infrastructure.Notifications;
 using Microsoft.AspNetCore.Identity;
@@ -27,6 +29,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDraftEventStore, EfDraftEventStore>();
         services.AddScoped<IChiefLeaderAppointmentStore, EfChiefLeaderAppointmentStore>();
         services.AddScoped<IChiefLeaderResponseStore, EfChiefLeaderResponseStore>();
+        services.AddScoped<IChiefLeaderExternalAcceptanceStore, EfChiefLeaderExternalAcceptanceStore>();
+        services.AddScoped<IChiefLeaderExternalAcceptanceAuditWriter, ChiefLeaderExternalAcceptanceAuditWriter>();
         services.AddScoped<IActiveChiefLeaderLookup, EfActiveChiefLeaderLookup>();
         services.AddScoped<IAppointmentNotificationWriter, EfAppointmentNotificationWriter>();
         services.AddScoped<IChiefLeaderDeclineNotificationWriter, EfChiefLeaderDeclineNotificationWriter>();

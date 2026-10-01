@@ -20,6 +20,7 @@ describe('AppointmentComponent', () => {
   const appointment: ChiefLeaderAppointment = {
     id: 'assignment-1', eventId: 'event-1', candidate: context.candidates[0], status: 'Pending',
     appointedAt: '2026-09-22T09:00:00Z', appointedByUserId: 'admin-1', version: 'AQIDBA==',
+    acceptedAt: null, acceptanceSource: null, acceptedByUserId: null,
   };
 
   it('selects one candidate, suppresses duplicate submit, and renders Pending success', async () => {
@@ -85,6 +86,82 @@ describe('AppointmentComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('chief.one');
     expect(fixture.nativeElement.querySelector('input[type="radio"]')).toBeNull();
     expect(fixture.nativeElement.querySelector('.primary')).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Record external acceptance');
+  });
+
+  it('requires a meaningful bounded justification and records one external acceptance', async () => {
+    const pending = new Subject<ChiefLeaderAppointment>();
+    const recordExternalAcceptance = vi.fn(() => pending.asObservable());
+    const fixture = await createFixture({
+      getContext: vi.fn(() => of({ ...context, currentAppointment: appointment, candidates: [] })),
+      appoint: vi.fn(), recordExternalAcceptance,
+    });
+    const element = fixture.nativeElement as HTMLElement;
+    element.querySelector<HTMLButtonElement>('.external-open')!.click();
+    fixture.detectChanges();
+    element.querySelector<HTMLButtonElement>('button[type="submit"]')!.click();
+    fixture.detectChanges();
+    expect(recordExternalAcceptance).not.toHaveBeenCalled();
+    expect(element.textContent).toContain('Enter why this external confirmation is being recorded');
+
+    fixture.componentInstance.justification.setValue('  Confirmed by phone  ');
+    fixture.detectChanges();
+    element.querySelector<HTMLButtonElement>('button[type="submit"]')!.click();
+    fixture.detectChanges();
+    element.querySelector<HTMLButtonElement>('button[type="submit"]')!.click();
+    expect(recordExternalAcceptance).toHaveBeenCalledTimes(1);
+    expect(recordExternalAcceptance).toHaveBeenCalledWith('event-1', 'assignment-1',
+      'AQIDBA==', 'Confirmed by phone');
+
+    pending.next({ ...appointment, status: 'Active', acceptedAt: '2026-09-23T07:30:00Z',
+      acceptanceSource: 'AdminExternal', acceptedByUserId: 'admin-1' });
+    pending.complete();
+    fixture.detectChanges();
+    expect(element.textContent).toContain('External acceptance recorded for chief.one');
+    expect(element.textContent).toContain('This Event remains in Draft');
+  });
+
+  it('rejects more than 1,000 characters and cancel discards without saving', async () => {
+    const recordExternalAcceptance = vi.fn();
+    const fixture = await createFixture({
+      getContext: vi.fn(() => of({ ...context, currentAppointment: appointment, candidates: [] })),
+      appoint: vi.fn(), recordExternalAcceptance,
+    });
+    const element = fixture.nativeElement as HTMLElement;
+    element.querySelector<HTMLButtonElement>('.external-open')!.click();
+    fixture.componentInstance.justification.setValue('x'.repeat(1001));
+    fixture.detectChanges();
+    element.querySelector<HTMLButtonElement>('button[type="submit"]')!.click();
+    fixture.detectChanges();
+    expect(element.textContent).toContain('1,000 characters or fewer');
+    expect(recordExternalAcceptance).not.toHaveBeenCalled();
+
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    expect(fixture.componentInstance.canDeactivate()).toBe(false);
+    element.querySelectorAll<HTMLButtonElement>('.external-form .secondary')[0].click();
+    fixture.detectChanges();
+    expect(recordExternalAcceptance).not.toHaveBeenCalled();
+    expect(element.querySelector('.external-form')).toBeNull();
+    confirm.mockRestore();
+  });
+
+  it('preserves justification and retries the same external acceptance after uncertainty', async () => {
+    const recordExternalAcceptance = vi.fn(() => throwError(() => ({ status: 0 })));
+    const fixture = await createFixture({
+      getContext: vi.fn(() => of({ ...context, currentAppointment: appointment, candidates: [] })),
+      appoint: vi.fn(), recordExternalAcceptance,
+    });
+    const element = fixture.nativeElement as HTMLElement;
+    element.querySelector<HTMLButtonElement>('.external-open')!.click();
+    fixture.componentInstance.justification.setValue('Confirmed by phone');
+    fixture.detectChanges();
+    element.querySelector<HTMLButtonElement>('button[type="submit"]')!.click();
+    fixture.detectChanges();
+    expect(element.textContent).toContain('Check the current state');
+    expect(fixture.componentInstance.justification.value).toBe('Confirmed by phone');
+    element.querySelector<HTMLButtonElement>('[data-testid="retry-external"]')!.click();
+    expect(recordExternalAcceptance).toHaveBeenCalledTimes(2);
+    expect(recordExternalAcceptance.mock.calls[0]).toEqual(recordExternalAcceptance.mock.calls[1]);
   });
 
   it('shows declined history while keeping replacement candidates available', async () => {
@@ -137,13 +214,15 @@ describe('AppointmentComponent', () => {
     confirm.mockRestore();
   });
 
-  async function createFixture(service: Pick<ChiefLeaderAppointmentService, 'getContext' | 'appoint'>) {
+  async function createFixture(service: Pick<ChiefLeaderAppointmentService, 'getContext' | 'appoint'> &
+    Partial<Pick<ChiefLeaderAppointmentService, 'recordExternalAcceptance'>>) {
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
       imports: [AppointmentComponent],
       providers: [
         provideRouter([]),
-        { provide: ChiefLeaderAppointmentService, useValue: service },
+        { provide: ChiefLeaderAppointmentService,
+          useValue: { recordExternalAcceptance: vi.fn(), ...service } },
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => 'event-1' } } } },
         { provide: Router, useValue: { navigate: vi.fn() } },
       ],

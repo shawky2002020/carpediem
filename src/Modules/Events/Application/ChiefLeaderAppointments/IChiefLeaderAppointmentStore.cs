@@ -11,6 +11,9 @@ public sealed record ChiefLeaderAppointmentView(
     ChiefLeaderAssignmentStatus Status,
     DateTimeOffset AppointedAt,
     Guid AppointedByUserId,
+    DateTimeOffset? AcceptedAt,
+    string? AcceptanceSource,
+    Guid? AcceptedByUserId,
     byte[] Version);
 
 public sealed record ChiefLeaderAppointmentContext(

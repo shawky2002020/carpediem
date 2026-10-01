@@ -27,9 +27,52 @@
 } @else if (context(); as appointmentContext) {
   @if (appointmentContext.currentAppointment; as appointment) {
     <section class="current-appointment" aria-labelledby="current-appointment-title">
-      <p class="status-label">Pending</p>
+      <p class="status-label" [class.active]="appointment.status === 'Active'">{{ appointment.status }}</p>
       <h2 id="current-appointment-title">{{ appointment.candidate.userName }}</h2>
-      <p>This Chief Leader has been appointed and is awaiting a response.</p>
+      @if (appointment.status === 'Pending') {
+        <p>This Chief Leader has been appointed and is awaiting a response.</p>
+        @if (!recordingExternal()) {
+          <button class="secondary external-open" type="button" (click)="openExternalAcceptance()">
+            Record external acceptance
+          </button>
+        } @else {
+          <form class="external-form" (submit)="$event.preventDefault(); recordExternalAcceptance()">
+            <h3>Record external acceptance</h3>
+            <p>Use this only after {{ appointment.candidate.userName }} has accepted verbally or through an external channel.</p>
+            <label for="external-justification">Justification</label>
+            <textarea id="external-justification" [formControl]="justification" maxlength="1000"
+              rows="5" [attr.aria-invalid]="justificationError() ? 'true' : null"
+              [attr.aria-describedby]="justificationError() ? 'external-justification-error external-justification-count' : 'external-justification-count'"></textarea>
+            <div class="field-meta">
+              @if (justificationError(); as error) {
+                <p id="external-justification-error" class="field-error" role="alert">{{ error }}</p>
+              }
+              <p id="external-justification-count">{{ justification.value.length }} / 1,000 characters</p>
+            </div>
+            @if (problem() && externalUncertain()) {
+              <div class="message error" role="alert">
+                <h3>Check the current state</h3>
+                <p>The outcome is uncertain. Your justification is still here.</p>
+                <button type="button" (click)="load()">Check current state</button>
+                <button type="button" data-testid="retry-external" (click)="retryExternalAcceptance()">Retry same acceptance</button>
+              </div>
+            } @else if (problem() && problem()?.code !== 'validation_failed') {
+              <div class="message error" role="alert">
+                <h3>{{ problem()?.title }}</h3>
+                <p>Review the current appointment before trying again.</p>
+              </div>
+            }
+            <div class="actions">
+              <button class="primary" type="submit" [disabled]="saving()">
+                {{ saving() ? 'Recording…' : 'Record external acceptance' }}
+              </button>
+              <button class="secondary" type="button" (click)="cancelExternalAcceptance()" [disabled]="saving()">Cancel</button>
+            </div>
+          </form>
+        }
+      } @else {
+        <p>External acceptance has been recorded. This Event remains in Draft.</p>
+      }
     </section>
   } @else {
     @if (problem()) {

@@ -37,4 +37,16 @@ describe('ChiefLeaderAppointmentService', () => {
     expect(request.request.headers.get('X-XSRF-TOKEN')).toBe('test-token');
     request.flush({ id: 'assignment-1' });
   });
+
+  it('records external acceptance with justification, antiforgery, and opaque version', () => {
+    service.recordExternalAcceptance('event-1', 'assignment-1', 'AQIDBA==',
+      'Confirmed by phone').subscribe();
+    const request = http.expectOne(
+      '/api/events/drafts/event-1/chief-leader-appointment/assignment-1/external-acceptance');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({ justification: 'Confirmed by phone' });
+    expect(request.request.headers.get('If-Match')).toBe('"AQIDBA=="');
+    expect(request.request.headers.get('X-XSRF-TOKEN')).toBe('test-token');
+    request.flush({ id: 'assignment-1', status: 'Active' });
+  });
 });

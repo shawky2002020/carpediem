@@ -18,9 +18,9 @@
 
 **Purpose**: Confirm the frozen requirements gate and establish the feature's existing-surface seams.
 
-- [ ] T001 Record the 24/24 pre-task requirements quality gate and frozen spec/plan references in `specs/004-chief-leader-admin-acceptance/checklists/feature-quality.md` and `specs/004-chief-leader-admin-acceptance/plan.md`
-- [ ] T002 [P] Add external-acceptance operation metadata and required `If-Match`/`X-XSRF-TOKEN` headers to the generated OpenAPI configuration in `src/Carpediem.Web/Program.cs`
-- [ ] T003 [P] Create structured outcome telemetry for external acceptance without justification text in `src/Carpediem.Web/Observability/ChiefLeaderExternalAcceptanceTelemetry.cs`
+- [x] T001 Record the 24/24 pre-task requirements quality gate and frozen spec/plan references in `specs/004-chief-leader-admin-acceptance/checklists/feature-quality.md` and `specs/004-chief-leader-admin-acceptance/plan.md`
+- [x] T002 [P] Add external-acceptance operation metadata and required `If-Match`/`X-XSRF-TOKEN` headers to the generated OpenAPI configuration in `src/Carpediem.Web/Program.cs`
+- [x] T003 [P] Create structured outcome telemetry for external acceptance without justification text in `src/Carpediem.Web/Observability/ChiefLeaderExternalAcceptanceTelemetry.cs`
 
 ---
 
@@ -30,12 +30,12 @@
 
 **⚠️ CRITICAL**: User story implementation begins only after this phase is green.
 
-- [ ] T004 [P] Add failing domain tests for Pending-to-Active AdminExternal transition, UTC time, Admin attribution, non-Pending rejection, and active same-Event team conflict in `tests/Carpediem.Domain.Tests/Events/ChiefLeaderExternalAcceptanceTests.cs`
-- [ ] T005 Implement `AcceptExternal` and focused state/team-conflict guards on the existing assignment in `src/Modules/Events/Domain/ChiefLeaderAssignments/ChiefLeaderAssignment.cs`
-- [ ] T006 [P] Define external-acceptance command/result, validation, not-found, conflict, and store contracts in `src/Modules/Events/Application/ChiefLeaderExternalAcceptances/IChiefLeaderExternalAcceptanceStore.cs`
-- [ ] T007 Implement the external-acceptance handler with trimmed 1–1,000-character justification validation in `src/Modules/Events/Application/ChiefLeaderExternalAcceptances/RecordChiefLeaderExternalAcceptanceHandler.cs`
-- [ ] T008 [P] Extend typed assignment views with nullable accepted time, source, and actor needed for Active recovery in `src/Modules/Events/Application/ChiefLeaderAppointments/IChiefLeaderAppointmentStore.cs`
-- [ ] T009 [P] Add a typed immutable audit factory requiring a trimmed 1–1,000-character reason and `AdminExternal` source in `src/Infrastructure/Audit/ChiefLeaderExternalAcceptanceAuditWriter.cs` and `src/Infrastructure/Audit/AuditLog.cs`
+- [x] T004 [P] Add failing domain tests for Pending-to-Active AdminExternal transition, UTC time, Admin attribution, non-Pending rejection, and active same-Event team conflict in `tests/Carpediem.Domain.Tests/Events/ChiefLeaderExternalAcceptanceTests.cs`
+- [x] T005 Implement `AcceptExternal` and focused state/team-conflict guards on the existing assignment in `src/Modules/Events/Domain/ChiefLeaderAssignments/ChiefLeaderAssignment.cs`
+- [x] T006 [P] Define external-acceptance command/result, validation, not-found, conflict, and store contracts in `src/Modules/Events/Application/ChiefLeaderExternalAcceptances/IChiefLeaderExternalAcceptanceStore.cs`
+- [x] T007 Implement the external-acceptance handler with trimmed 1–1,000-character justification validation in `src/Modules/Events/Application/ChiefLeaderExternalAcceptances/RecordChiefLeaderExternalAcceptanceHandler.cs`
+- [x] T008 [P] Extend typed assignment views with nullable accepted time, source, and actor needed for Active recovery in `src/Modules/Events/Application/ChiefLeaderAppointments/IChiefLeaderAppointmentStore.cs`
+- [x] T009 [P] Add a typed immutable audit factory requiring a trimmed 1–1,000-character reason and `AdminExternal` source in `src/Infrastructure/Audit/ChiefLeaderExternalAcceptanceAuditWriter.cs` and `src/Infrastructure/Audit/AuditLog.cs`
 
 **Checkpoint**: Domain transition and server contracts are ready for story implementation.
 
@@ -49,14 +49,14 @@
 
 ### Tests for User Story 1
 
-- [ ] T010 [P] [US1] Add failing Angular component tests for Pending-only action visibility, candidate/Event context, attestation wording, and absent/terminal suppression in `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.spec.ts`
-- [ ] T011 [P] [US1] Add failing mobile Playwright coverage for Admin action visibility and ordinary-role denial in `tests/e2e/chief-leader-external-acceptance.spec.ts`
+- [x] T010 [P] [US1] Add failing Angular component tests for Pending-only action visibility, candidate/Event context, attestation wording, and absent/terminal suppression in `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.spec.ts`
+- [x] T011 [P] [US1] Add failing mobile Playwright coverage for Admin action visibility and ordinary-role denial in `tests/e2e/chief-leader-external-acceptance.spec.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T012 [P] [US1] Extend Admin appointment client types with accepted provenance while keeping the current context contract in `frontend/src/app/features/chief-leader-appointment/data/chief-leader-appointment.service.ts`
-- [ ] T013 [US1] Add the Pending-only explicit “Record external acceptance” disclosure and explanatory copy in `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.html`
-- [ ] T014 [US1] Add mobile-first disclosure/form shell styles, stable status space, 44px targets, focus visibility, and no horizontal overflow in `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.scss`
+- [x] T012 [P] [US1] Extend Admin appointment client types with accepted provenance while keeping the current context contract in `frontend/src/app/features/chief-leader-appointment/data/chief-leader-appointment.service.ts`
+- [x] T013 [US1] Add the Pending-only explicit “Record external acceptance” disclosure and explanatory copy in `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.html`
+- [x] T014 [US1] Add mobile-first disclosure/form shell styles, stable status space, 44px targets, focus visibility, and no horizontal overflow in `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.scss`
 
 **Checkpoint**: The Admin can identify the exact eligible appointment and understand the action without changing state.
 
@@ -70,20 +70,20 @@
 
 ### Tests for User Story 2
 
-- [ ] T015 [P] [US2] Add failing SQL/API tests for active Admin authorization, exact Event/assignment matching, valid 1- and 1,000-character reasons, blank/whitespace/1,001 rejection without truncation, AdminExternal fields, unchanged Draft, ownership, and one audit in `tests/Carpediem.Api.IntegrationTests/ChiefLeaderExternalAcceptances/ChiefLeaderExternalAcceptanceTests.cs`
-- [ ] T016 [P] [US2] Add failing Angular service tests for request body plus opaque version header in `frontend/src/app/features/chief-leader-appointment/data/chief-leader-appointment.service.spec.ts`
-- [ ] T017 [P] [US2] Add failing Angular component tests for justification association, whitespace/1,001 validation, 1/1,000 acceptance, single in-flight submission, and success state in `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.spec.ts`
+- [x] T015 [P] [US2] Add failing SQL/API tests for active Admin authorization, exact Event/assignment matching, valid 1- and 1,000-character reasons, blank/whitespace/1,001 rejection without truncation, AdminExternal fields, unchanged Draft, ownership, and one audit in `tests/Carpediem.Api.IntegrationTests/ChiefLeaderExternalAcceptances/ChiefLeaderExternalAcceptanceTests.cs`
+- [x] T016 [P] [US2] Add failing Angular service tests for request body plus opaque version header in `frontend/src/app/features/chief-leader-appointment/data/chief-leader-appointment.service.spec.ts`
+- [x] T017 [P] [US2] Add failing Angular component tests for justification association, whitespace/1,001 validation, 1/1,000 acceptance, single in-flight submission, and success state in `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.spec.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T018 [US2] Implement active-Admin, exact Draft/Event/assignment, rowversion, Pending, team-conflict, provenance, audit, and atomic save behavior in `src/Infrastructure/Persistence/EfChiefLeaderExternalAcceptanceStore.cs`
-- [ ] T019 [US2] Register the store and handler dependencies in `src/Infrastructure/Persistence/ServiceCollectionExtensions.cs` and `src/Modules/Events/ServiceCollectionExtensions.cs`
-- [ ] T020 [US2] Add the typed Admin POST with antiforgery, `If-Match`, validation, authorization, safe RFC 7807 mapping, and telemetry in `src/Carpediem.Web/Endpoints/ChiefLeaderAppointmentEndpoints.cs`
-- [ ] T021 [US2] Map accepted provenance consistently in Admin appointment GET/POST responses in `src/Infrastructure/Persistence/EfChiefLeaderAppointmentStore.cs` and `src/Carpediem.Web/Endpoints/ChiefLeaderAppointmentEndpoints.cs`
-- [ ] T022 [US2] Implement the external-acceptance HTTP method and typed result in `frontend/src/app/features/chief-leader-appointment/data/chief-leader-appointment.service.ts`
-- [ ] T023 [US2] Implement reactive justification state, server/client validation mapping, one in-flight submission, and Active success context in `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.ts`
-- [ ] T024 [US2] Complete the labeled justification, inline errors, length feedback, and explicit submit controls in `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.html`
-- [ ] T025 [US2] Add successful AdminExternal browser flow and boundary validation to `tests/e2e/chief-leader-external-acceptance.spec.ts`
+- [x] T018 [US2] Implement active-Admin, exact Draft/Event/assignment, rowversion, Pending, team-conflict, provenance, audit, and atomic save behavior in `src/Infrastructure/Persistence/EfChiefLeaderExternalAcceptanceStore.cs`
+- [x] T019 [US2] Register the store and handler dependencies in `src/Infrastructure/Persistence/ServiceCollectionExtensions.cs` and `src/Modules/Events/ServiceCollectionExtensions.cs`
+- [x] T020 [US2] Add the typed Admin POST with antiforgery, `If-Match`, validation, authorization, safe RFC 7807 mapping, and telemetry in `src/Carpediem.Web/Endpoints/ChiefLeaderAppointmentEndpoints.cs`
+- [x] T021 [US2] Map accepted provenance consistently in Admin appointment GET/POST responses in `src/Infrastructure/Persistence/EfChiefLeaderAppointmentStore.cs` and `src/Carpediem.Web/Endpoints/ChiefLeaderAppointmentEndpoints.cs`
+- [x] T022 [US2] Implement the external-acceptance HTTP method and typed result in `frontend/src/app/features/chief-leader-appointment/data/chief-leader-appointment.service.ts`
+- [x] T023 [US2] Implement reactive justification state, server/client validation mapping, one in-flight submission, and Active success context in `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.ts`
+- [x] T024 [US2] Complete the labeled justification, inline errors, length feedback, and explicit submit controls in `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.html`
+- [x] T025 [US2] Add successful AdminExternal browser flow and boundary validation to `tests/e2e/chief-leader-external-acceptance.spec.ts`
 
 **Checkpoint**: The primary audited external-acceptance business result is complete and independently testable.
 
@@ -97,13 +97,13 @@
 
 ### Tests for User Story 3
 
-- [ ] T026 [P] [US3] Add failing Angular tests for cancel, dirty-navigation confirmation, retained text after staying, and zero service call in `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.spec.ts`
-- [ ] T027 [P] [US3] Add failing Playwright cancellation and leave/stay coverage with zero mutation in `tests/e2e/chief-leader-external-acceptance.spec.ts`
+- [x] T026 [P] [US3] Add failing Angular tests for cancel, dirty-navigation confirmation, retained text after staying, and zero service call in `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.spec.ts`
+- [x] T027 [P] [US3] Add failing Playwright cancellation and leave/stay coverage with zero mutation in `tests/e2e/chief-leader-external-acceptance.spec.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T028 [US3] Extend the appointment component's route-deactivation contract to include unsaved external-acceptance justification in `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.ts`
-- [ ] T029 [US3] Wire explicit cancel/discard behavior without state mutation in `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.html`
+- [x] T028 [US3] Extend the appointment component's route-deactivation contract to include unsaved external-acceptance justification in `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.ts`
+- [x] T029 [US3] Wire explicit cancel/discard behavior without state mutation in `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.html`
 
 **Checkpoint**: Unfinished evidence can be safely retained or discarded without a business operation.
 
@@ -117,15 +117,15 @@
 
 ### Tests for User Story 4
 
-- [ ] T030 [P] [US4] Add failing SQL/API tests for same Admin/normalized-reason replay, different-reason conflict, stale version, direct accept/decline races, one-Active index conflict, audit rollback, inactive Admin, unknown targets, and safe errors in `tests/Carpediem.Api.IntegrationTests/ChiefLeaderExternalAcceptances/ChiefLeaderExternalAcceptanceTests.cs`
-- [ ] T031 [P] [US4] Add failing Angular tests for conflict/current-state reload, uncertain outcome, preserved reason, safe same-intent retry, and expired session in `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.spec.ts`
-- [ ] T032 [P] [US4] Add failing Playwright tests for uncertain submit recovery, direct-response winner display, and no duplicate acceptance in `tests/e2e/chief-leader-external-acceptance.spec.ts`
+- [x] T030 [P] [US4] Add failing SQL/API tests for same Admin/normalized-reason replay, different-reason conflict, stale version, direct accept/decline races, one-Active index conflict, audit rollback, inactive Admin, unknown targets, and safe errors in `tests/Carpediem.Api.IntegrationTests/ChiefLeaderExternalAcceptances/ChiefLeaderExternalAcceptanceTests.cs`
+- [x] T031 [P] [US4] Add failing Angular tests for conflict/current-state reload, uncertain outcome, preserved reason, safe same-intent retry, and expired session in `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.spec.ts`
+- [x] T032 [P] [US4] Add failing Playwright tests for uncertain submit recovery, direct-response winner display, and no duplicate acceptance in `tests/e2e/chief-leader-external-acceptance.spec.ts`
 
 ### Implementation for User Story 4
 
-- [ ] T033 [US4] Implement matching-audit same-intent replay and distinct stale/direct/opposite/team/index conflict outcomes in `src/Infrastructure/Persistence/EfChiefLeaderExternalAcceptanceStore.cs`
-- [ ] T034 [US4] Complete endpoint mapping for replay, validation, not-found, forbidden, stale, invalid-state, team-conflict, and unexpected outcomes in `src/Carpediem.Web/Endpoints/ChiefLeaderAppointmentEndpoints.cs`
-- [ ] T035 [US4] Implement preserved-input uncertain outcome, context reload, same-intent retry, and session-expiry handling in `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.ts` and `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.html`
+- [x] T033 [US4] Implement matching-audit same-intent replay and distinct stale/direct/opposite/team/index conflict outcomes in `src/Infrastructure/Persistence/EfChiefLeaderExternalAcceptanceStore.cs`
+- [x] T034 [US4] Complete endpoint mapping for replay, validation, not-found, forbidden, stale, invalid-state, team-conflict, and unexpected outcomes in `src/Carpediem.Web/Endpoints/ChiefLeaderAppointmentEndpoints.cs`
+- [x] T035 [US4] Implement preserved-input uncertain outcome, context reload, same-intent retry, and session-expiry handling in `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.ts` and `frontend/src/app/features/chief-leader-appointment/pages/appointment/appointment.component.html`
 
 **Checkpoint**: Every invalid, stale, failed, replayed, or concurrent attempt has one safe and testable outcome.
 
@@ -135,11 +135,11 @@
 
 **Purpose**: Close cross-cutting requirements and prove spec-to-implementation convergence.
 
-- [ ] T036 [P] Add axe, keyboard, visible-focus, 200% text, reduced-motion, 44px target, stable-layout, and 320/360/390/430 no-overflow checks in `tests/e2e/chief-leader-external-acceptance.spec.ts`
-- [ ] T037 [P] Add a SQL-backed 100-user external-acceptance/replay workload and generated OpenAPI assertions in `tests/performance/chief-leader-external-acceptance.k6.js` and `tests/performance/run-chief-leader-external-acceptance.ps1`
-- [ ] T038 Run Release build, domain tests, SQL Server 2025 integration, Angular tests/build, full Playwright, generated OpenAPI, k6, and `git diff --check`; record fresh evidence in `specs/004-chief-leader-admin-acceptance/implementation-review.md`
-- [ ] T039 Audit routes, OpenAPI, UI, migrations, notification types, and changed files to verify SLICE-05 adds no direct response, publication, replacement, staffing, inbox, delivery control, or external-channel integration; record the result in `specs/004-chief-leader-admin-acceptance/implementation-review.md`
-- [ ] T040 Perform requirement-to-evidence convergence for FR-001–FR-021 and all 15 acceptance scenarios, resolve any gaps, and mark completed tasks in `specs/004-chief-leader-admin-acceptance/tasks.md`
+- [x] T036 [P] Add axe, keyboard, visible-focus, 200% text, reduced-motion, 44px target, stable-layout, and 320/360/390/430 no-overflow checks in `tests/e2e/chief-leader-external-acceptance.spec.ts`
+- [x] T037 [P] Add a SQL-backed 100-user external-acceptance/replay workload and generated OpenAPI assertions in `tests/performance/chief-leader-external-acceptance.k6.js` and `tests/performance/run-chief-leader-external-acceptance.ps1`
+- [x] T038 Run Release build, domain tests, SQL Server 2025 integration, Angular tests/build, full Playwright, generated OpenAPI, k6, and `git diff --check`; record fresh evidence in `specs/004-chief-leader-admin-acceptance/implementation-review.md`
+- [x] T039 Audit routes, OpenAPI, UI, migrations, notification types, and changed files to verify SLICE-05 adds no direct response, publication, replacement, staffing, inbox, delivery control, or external-channel integration; record the result in `specs/004-chief-leader-admin-acceptance/implementation-review.md`
+- [x] T040 Perform requirement-to-evidence convergence for FR-001–FR-021 and all 15 acceptance scenarios, resolve any gaps, and mark completed tasks in `specs/004-chief-leader-admin-acceptance/tasks.md`
 
 ---
 

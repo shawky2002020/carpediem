@@ -24,7 +24,9 @@ public sealed class AuditLog
         DateTimeOffset occurredAt,
         string? previousValue,
         string? newValue,
-        string resourceType = "Event") => new()
+        string resourceType = "Event",
+        string source = "Direct",
+        string? mandatoryReason = null) => new()
         {
             Id = Guid.NewGuid(),
             OccurredAt = occurredAt,
@@ -33,7 +35,8 @@ public sealed class AuditLog
             ResourceType = resourceType,
             ResourceId = resourceId,
             CorrelationId = correlationId,
-            Source = "Direct",
+            Source = source,
+            MandatoryReason = mandatoryReason,
             PreviousValue = previousValue,
             NewValue = newValue,
         };
