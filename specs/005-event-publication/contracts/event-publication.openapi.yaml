@@ -1,0 +1,169 @@
+openapi: 3.0.3
+info:
+  title: Carpediem Event Publication API
+  description: Operations Admin endpoint to publish a Draft Event enforcing the publishing prerequisite invariant (exactly one Active Chief Leader assignment).
+  version: 1.0.0
+paths:
+  /api/events/drafts/{id}/publish:
+    post:
+      summary: Publish a Draft Event
+      description: Transitions an eligible Draft Event to Published status, verifying that exactly one accepted Active Chief Leader assignment exists, recording an audit log, and notifying eligible Leaders.
+      operationId: PublishDraftEvent
+      security:
+        - CookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the Draft Event.
+          schema:
+            type: string
+            format: uuid
+        - name: If-Match
+          in: header
+          required: true
+          description: Base64-encoded rowversion of the Event for optimistic concurrency control.
+          schema:
+            type: string
+        - name: X-XSRF-TOKEN
+          in: header
+          required: true
+          description: Antiforgery validation token.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Event successfully published, or idempotent replay of a previously published event.
+          headers:
+            Idempotent-Replay:
+              schema:
+                type: boolean
+              description: Present and true when an identical publish intent is safely replayed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublishedEventResponse'
+        '401':
+          description: Unauthenticated.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Forbidden (actor does not hold the Operations Admin role).
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Draft Event not found.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Concurrency conflict (stale rowversion) or invalid lifecycle state (already cancelled or completed).
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '422':
+          description: Publishing prerequisite invariant violated (e.g. missing active Chief Leader, invalid schedule window).
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '500':
+          description: Internal server error.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+components:
+  securitySchemes:
+    CookieAuth:
+      type: apiKey
+      in: cookie
+      name: .AspNetCore.Identity.Application
+
+  schemas:
+    PublishedEventResponse:
+      type: object
+      required:
+        - id
+        - title
+        - startDateTime
+        - endDateTime
+        - location
+        - status
+        - activeChiefLeader
+        - version
+        - publishedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        startDateTime:
+          type: string
+          format: date-time
+        endDateTime:
+          type: string
+          format: date-time
+        location:
+          type: string
+        notes:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [Published]
+        activeChiefLeader:
+          type: object
+          required:
+            - userId
+            - userName
+            - assignmentId
+          properties:
+            userId:
+              type: string
+              format: uuid
+            userName:
+              type: string
+            assignmentId:
+              type: string
+              format: uuid
+        version:
+          type: string
+          description: Opaque base64 rowversion string for concurrency control.
+        publishedAt:
+          type: string
+          format: date-time
+
+    ProblemDetails:
+      type: object
+      required:
+        - type
+        - title
+        - status
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        code:
+          type: string
+        traceId:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
