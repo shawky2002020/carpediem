@@ -1,0 +1,238 @@
+openapi: 3.0.3
+info:
+  title: Carpediem Leader Availability Declaration API
+  description: Volunteer Leader endpoints to view and declare schedule availability (Available / NotAvailable) for Published Events.
+  version: 1.0.0
+paths:
+  /api/events/{eventId}/availability/me:
+    get:
+      summary: Get My Availability Declaration
+      description: Returns the authenticated Leader's current availability declaration, rowversion token, and window status for the target event.
+      operationId: GetMyAvailability
+      security:
+        - CookieAuth: []
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          description: Unique identifier of the Event.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Availability state successfully retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyAvailabilityResponse'
+        '401':
+          description: Unauthenticated.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Forbidden (user does not hold Leader role).
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Event not found.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+  /api/events/{eventId}/availability:
+    post:
+      summary: Declare or Update Availability
+      description: Declares or updates the authenticated Leader's schedule availability (Available or NotAvailable) for the current active staffing cycle of a Published Event.
+      operationId: DeclareAvailability
+      security:
+        - CookieAuth: []
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          description: Unique identifier of the Event.
+          schema:
+            type: string
+            format: uuid
+        - name: If-Match
+          in: header
+          required: false
+          description: Base64-encoded rowversion of the existing availability record when updating.
+          schema:
+            type: string
+        - name: X-XSRF-TOKEN
+          in: header
+          required: true
+          description: Antiforgery validation token.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeclareAvailabilityRequest'
+      responses:
+        '200':
+          description: Availability updated, or idempotent replay of existing declaration.
+          headers:
+            Idempotent-Replay:
+              schema:
+                type: boolean
+              description: True when an identical declaration is safely replayed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvailabilityDeclarationResult'
+        '201':
+          description: Availability declaration created for the first time.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvailabilityDeclarationResult'
+        '400':
+          description: Invalid request payload or missing antiforgery token.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Unauthenticated.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Forbidden (user does not hold Leader role).
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Event not found.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Lifecycle or concurrency conflict (window_closed, invalid_event_status, chief_leader_conflict, stale_version).
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+components:
+  securitySchemes:
+    CookieAuth:
+      type: apiKey
+      in: cookie
+      name: .AspNetCore.Identity.Application
+
+  schemas:
+    DeclareAvailabilityRequest:
+      type: object
+      required:
+        - response
+      properties:
+        response:
+          type: string
+          enum: [Available, NotAvailable]
+          description: The declared availability state.
+
+    MyAvailabilityResponse:
+      type: object
+      required:
+        - eventId
+        - staffingCycleId
+        - isWindowOpen
+        - eventStatus
+        - isChiefLeaderOnEvent
+      properties:
+        eventId:
+          type: string
+          format: uuid
+        staffingCycleId:
+          type: string
+          format: uuid
+        response:
+          type: string
+          nullable: true
+          enum: [Available, NotAvailable]
+          description: Declared response, or null if no response has been made.
+        declaredAt:
+          type: string
+          format: date-time
+          nullable: true
+        version:
+          type: string
+          nullable: true
+          description: Base64-encoded rowversion token for optimistic concurrency.
+        isWindowOpen:
+          type: boolean
+          description: Whether the availability window is open (Event is Published and StartTime > UtcNow).
+        eventStatus:
+          type: string
+          description: Current Event status (Draft, Published, Completed, Cancelled).
+        isChiefLeaderOnEvent:
+          type: boolean
+          description: True if the current user is the Active Chief Leader on this Event.
+
+    AvailabilityDeclarationResult:
+      type: object
+      required:
+        - id
+        - eventId
+        - staffingCycleId
+        - userId
+        - response
+        - declaredAt
+        - version
+      properties:
+        id:
+          type: string
+          format: uuid
+        eventId:
+          type: string
+          format: uuid
+        staffingCycleId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        response:
+          type: string
+          enum: [Available, NotAvailable]
+        declaredAt:
+          type: string
+          format: date-time
+        version:
+          type: string
+          description: Base64-encoded rowversion of the saved record.
+
+    ProblemDetails:
+      type: object
+      required:
+        - type
+        - title
+        - status
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+        code:
+          type: string
+          description: Carpediem specific machine-readable error code.
