@@ -40,4 +40,20 @@ public sealed class AuditLog
             PreviousValue = previousValue,
             NewValue = newValue,
         };
+
+    public static AuditLog EventPublished(
+        Guid actorUserId,
+        Guid eventId,
+        Guid correlationId,
+        DateTimeOffset occurredAt) =>
+        Create(
+            actorUserId,
+            action: "EventPublished",
+            resourceId: eventId,
+            correlationId: correlationId,
+            occurredAt: occurredAt,
+            previousValue: "Draft",
+            newValue: "Published",
+            resourceType: "Event",
+            source: "Direct");
 }

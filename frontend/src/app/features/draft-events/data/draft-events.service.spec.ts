@@ -51,4 +51,14 @@ describe('DraftEventsService', () => {
     expect(request.request.body.version).toBe('AQIDBA==');
     request.flush({ id: 'event-1' });
   });
+
+  it('sends If-Match rowversion and antiforgery token when publishing', () => {
+    service.publishDraftEvent('event-1', 'AQIDBA==').subscribe();
+
+    const request = http.expectOne('/api/events/drafts/event-1/publish');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.headers.get('If-Match')).toBe('AQIDBA==');
+    expect(request.request.headers.get('X-XSRF-TOKEN')).toBe('test-token');
+    request.flush({ id: 'event-1', status: 'Published' });
+  });
 });

@@ -1,12 +1,14 @@
 <a class="back-link" routerLink="/draft-events">← Back to Draft Events</a>
 <div class="page-heading">
-  <p class="eyebrow">Private Draft</p>
+  <p class="eyebrow">{{ draft()?.status === 'Published' ? 'Published Event' : 'Private Draft' }}</p>
   <h1>{{ draft()?.title || 'Edit Draft Event' }}</h1>
-  <p>Changes keep this Event in Draft.</p>
+  <p>{{ draft()?.status === 'Published' ? 'This Event is published and open for volunteer Leader availability declarations.' : 'Changes keep this Event in Draft.' }}</p>
 </div>
 <div class="save-status" aria-live="polite" role="status">
   @if (loading()) { Loading Draft Event… }
   @else if (saving()) { Saving changes… }
+  @else if (publishing()) { Publishing Event… }
+  @else if (publishedNotice()) { {{ publishedNotice() }} }
   @else if (savedNotice()) { {{ savedNotice() }} }
 </div>
 
@@ -27,15 +29,59 @@
         @else { No appointment yet }
       </h2>
       @if (chiefLeaderAppointment(); as appointment) {
-        <p><span class="appointment-status">{{ appointment.status }}</span> Awaiting the candidate's response.</p>
+        <p><span class="appointment-status">{{ appointment.status }}</span> {{ appointment.status === 'Active' ? 'Chief Leader confirmed.' : 'Awaiting the candidate\'s response.' }}</p>
       } @else if (!appointmentLoading()) {
         <p>Choose a candidate from the predefined Chief Leader group.</p>
       }
     </div>
-    <a class="appointment-action" [routerLink]="['/draft-events', loadedDraft.id, 'chief-leader']">
-      {{ chiefLeaderAppointment() ? 'Review appointment' : 'Appoint Chief Leader' }}
-    </a>
+    @if (loadedDraft.status !== 'Published') {
+      <a class="appointment-action" [routerLink]="['/draft-events', loadedDraft.id, 'chief-leader']">
+        {{ chiefLeaderAppointment() ? 'Review appointment' : 'Appoint Chief Leader' }}
+      </a>
+    }
   </section>
+
+  <section class="publish-panel" aria-labelledby="publish-heading">
+    <div>
+      <p class="eyebrow">Publication</p>
+      <h2 id="publish-heading">
+        @if (loadedDraft.status === 'Published') { Published Event }
+        @else { Event Publication }
+      </h2>
+      @if (loadedDraft.status === 'Published') {
+        <p><span class="published-badge">Published</span> This Event is open to volunteer Leaders.</p>
+      } @else if (chiefLeaderAppointment()?.status === 'Active') {
+        <p>Chief Leader accepted. Ready to publish.</p>
+      } @else {
+        <p class="prerequisite-note">An accepted Chief Leader is required before publishing.</p>
+      }
+    </div>
+    @if (loadedDraft.status !== 'Published') {
+      @if (confirmPublish()) {
+        <div class="confirm-publish-card" role="dialog" aria-modal="true" aria-labelledby="confirm-publish-title">
+          <h3 id="confirm-publish-title">Confirm Event Publication</h3>
+          <p>Publishing will notify eligible volunteer Leaders and lock draft editing. Are you sure you want to publish now?</p>
+          <div class="confirm-actions">
+            <button type="button" class="btn-primary" [disabled]="publishing()" (click)="publish()">
+              {{ publishing() ? 'Publishing…' : 'Yes, Publish Event' }}
+            </button>
+            <button type="button" class="btn-secondary" [disabled]="publishing()" (click)="cancelPublish()">
+              Cancel
+            </button>
+          </div>
+        </div>
+      } @else {
+        <button
+          type="button"
+          class="btn-publish"
+          [disabled]="chiefLeaderAppointment()?.status !== 'Active' || publishing() || saving()"
+          (click)="openPublishDialog()">
+          Publish Event
+        </button>
+      }
+    }
+  </section>
+
   @if (problem()?.code === 'unauthenticated') {
     <section class="error-panel" role="alert">
       <h2>Your session has expired</h2>
@@ -55,12 +101,19 @@
       <a [routerLink]="['/draft-events', loadedDraft.id]" target="_blank" rel="noopener">Open latest Draft</a>
     </section>
   }
-  <app-draft-event-form
-    [initial]="loadedDraft"
-    [saving]="saving()"
-    submitLabel="Save Changes"
-    [serverProblem]="problem()?.code === 'unauthenticated' || problem()?.code === 'forbidden' ? null : problem()"
-    (saveDraft)="save($event)"
-    (formChanged)="savedNotice.set(null)"
-    (cancel)="cancel()" />
+
+  @if (loadedDraft.status === 'Published') {
+    <div class="published-lock-notice" role="status">
+      <p>This Event is published and cannot be modified via draft editing.</p>
+    </div>
+  } @else {
+    <app-draft-event-form
+      [initial]="loadedDraft"
+      [saving]="saving()"
+      submitLabel="Save Changes"
+      [serverProblem]="problem()?.code === 'unauthenticated' || problem()?.code === 'forbidden' ? null : problem()"
+      (saveDraft)="save($event)"
+      (formChanged)="savedNotice.set(null)"
+      (cancel)="cancel()" />
+  }
 }

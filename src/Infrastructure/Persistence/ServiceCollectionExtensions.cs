@@ -3,6 +3,7 @@ using Carpediem.Modules.Events.Application.Drafts;
 using Carpediem.Modules.Events.Application.ChiefLeaderAppointments;
 using Carpediem.Modules.Events.Application.ChiefLeaderResponses;
 using Carpediem.Modules.Events.Application.ChiefLeaderExternalAcceptances;
+using Carpediem.Modules.Events.Application.EventPublication;
 using Carpediem.Infrastructure.Audit;
 using Carpediem.Modules.Notifications.Application;
 using Carpediem.Infrastructure.Notifications;
@@ -34,6 +35,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IActiveChiefLeaderLookup, EfActiveChiefLeaderLookup>();
         services.AddScoped<IAppointmentNotificationWriter, EfAppointmentNotificationWriter>();
         services.AddScoped<IChiefLeaderDeclineNotificationWriter, EfChiefLeaderDeclineNotificationWriter>();
+        services.AddScoped<IEventPublicationStore, EfEventPublicationStore>();
+        services.AddScoped<IEventPublishedNotificationWriter, EfEventPublishedNotificationWriter>();
 
         services
             .AddIdentityCore<CarpediemUser>(options =>

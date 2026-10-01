@@ -24,7 +24,7 @@ export interface DraftEvent {
   endDateTimeUtc: string;
   location: string;
   notes: string | null;
-  status: 'Draft';
+  status: 'Draft' | 'Published';
   version: string;
 }
 
@@ -33,10 +33,29 @@ export interface DraftSummary {
   title: string;
   start: CairoResolvedTime;
   location: string;
-  status: 'Draft';
+  status: 'Draft' | 'Published';
 }
 
 export interface DraftList { items: DraftSummary[]; page: number; pageSize: number; }
+
+export interface ActiveChiefLeaderSummary {
+  userId: string;
+  userName: string;
+  assignmentId: string;
+}
+
+export interface PublishedEvent {
+  id: string;
+  title: string;
+  startDateTime: string;
+  endDateTime: string;
+  location: string;
+  notes: string | null;
+  status: 'Published';
+  activeChiefLeader: ActiveChiefLeaderSummary;
+  version: string;
+  publishedAt: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class DraftEventsService {
@@ -59,5 +78,11 @@ export class DraftEventsService {
 
   updateDraft(id: string, input: DraftUpdate): Observable<DraftEvent> {
     return this.http.put<DraftEvent>(`${this.baseUrl}/${id}`, input);
+  }
+
+  publishDraftEvent(id: string, version: string): Observable<PublishedEvent> {
+    return this.http.post<PublishedEvent>(`${this.baseUrl}/${id}/publish`, null, {
+      headers: new HttpHeaders({ 'If-Match': version }),
+    });
   }
 }

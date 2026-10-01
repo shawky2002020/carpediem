@@ -1,10 +1,12 @@
 using System.Globalization;
 using System.Security.Claims;
 using Carpediem.Modules.Events.Application.Drafts;
+using Carpediem.Modules.Events.Application.EventPublication;
 using Carpediem.Modules.Events.Application.Time;
 using Carpediem.Modules.Events.Domain.Events;
 using Carpediem.Modules.Identity.Authorization;
 using Carpediem.Web.Errors;
+using Carpediem.Web.Observability;
 using Microsoft.AspNetCore.Antiforgery;
 
 namespace Carpediem.Web.Endpoints;
@@ -48,6 +50,17 @@ public static class DraftEventsEndpoints
             .WithName("UpdateDraftEvent")
             .Accepts<DraftUpdateRequest>("application/json")
             .Produces<DraftEventResponse>()
+            .Produces<ApiProblemResponse>(400, "application/problem+json")
+            .Produces<ApiProblemResponse>(401, "application/problem+json")
+            .Produces<ApiProblemResponse>(403, "application/problem+json")
+            .Produces<ApiProblemResponse>(404, "application/problem+json")
+            .Produces<ApiProblemResponse>(409, "application/problem+json")
+            .Produces<ApiProblemResponse>(422, "application/problem+json")
+            .Produces<ApiProblemResponse>(500, "application/problem+json")
+            .WithMetadata(new RequireAntiforgeryTokenAttribute());
+        group.MapPost("/{id}/publish", PublishAsync)
+            .WithName("PublishDraftEvent")
+            .Produces<PublishedEventResponse>(200)
             .Produces<ApiProblemResponse>(400, "application/problem+json")
             .Produces<ApiProblemResponse>(401, "application/problem+json")
             .Produces<ApiProblemResponse>(403, "application/problem+json")
@@ -324,4 +337,136 @@ public static class DraftEventsEndpoints
         string? Notes,
         string Status,
         string Version);
+
+    private static async Task<IResult> PublishAsync(
+        string id,
+        HttpContext context,
+        IAntiforgery antiforgery,
+        IEventPublicationStore store,
+        CancellationToken cancellationToken)
+    {
+        using var activity = EventPublicationTelemetry.Start();
+
+        if (!Guid.TryParse(id, out var eventId))
+        {
+            EventPublicationTelemetry.Record(activity, "malformed_request");
+            return ApiProblemDetailsService.Problem(context, 400, "malformed_request", "A valid Event identifier is required.");
+        }
+
+        if (context.Features.Get<IAntiforgeryValidationFeature>() is { IsValid: false } ||
+            !await HasValidAntiforgeryAsync(context, antiforgery))
+        {
+            EventPublicationTelemetry.Record(activity, "antiforgery_failed");
+            return ApiProblemDetailsService.Problem(context, 400, "antiforgery_failed", "The request could not be verified.");
+        }
+
+        var ifMatch = context.Request.Headers.IfMatch.ToString();
+        if (string.IsNullOrWhiteSpace(ifMatch))
+        {
+            EventPublicationTelemetry.Record(activity, "missing_if_match");
+            return ApiProblemDetailsService.Problem(context, 400, "malformed_request", "If-Match header is required.");
+        }
+
+        var cleanVersion = ifMatch.Trim().Trim('"');
+        byte[] expectedVersion;
+        try
+        {
+            expectedVersion = Convert.FromBase64String(cleanVersion);
+            if (expectedVersion.Length != 8) throw new FormatException("Invalid version length.");
+        }
+        catch (FormatException)
+        {
+            EventPublicationTelemetry.Record(activity, "invalid_if_match");
+            return ApiProblemDetailsService.Problem(context, 400, "malformed_request", "A valid version is required in the If-Match header.");
+        }
+
+        if (!Guid.TryParse(context.User.FindFirstValue(ClaimTypes.NameIdentifier), out var actorUserId))
+        {
+            EventPublicationTelemetry.Record(activity, "unauthenticated");
+            return ApiProblemDetailsService.Problem(context, 401, "unauthenticated", "The session is no longer active.");
+        }
+
+        try
+        {
+            var correlationId = context.Items.TryGetValue("CorrelationId", out var item) && item is Guid guid
+                ? guid
+                : Guid.NewGuid();
+
+            var published = await store.PublishAsync(
+                eventId,
+                actorUserId,
+                expectedVersion,
+                correlationId,
+                DateTimeOffset.UtcNow,
+                cancellationToken);
+
+            if (published.IsReplay)
+            {
+                context.Response.Headers["Idempotent-Replay"] = "true";
+                EventPublicationTelemetry.Record(activity, "replayed");
+            }
+            else
+            {
+                EventPublicationTelemetry.Record(activity, "published");
+            }
+
+            return Results.Ok(new PublishedEventResponse(
+                published.Id,
+                published.Title,
+                FormatUtc(published.StartDateTime),
+                FormatUtc(published.EndDateTime),
+                published.Location,
+                published.Notes,
+                published.Status.ToString(),
+                new ActiveChiefLeaderResponse(
+                    published.ActiveChiefLeader.UserId,
+                    published.ActiveChiefLeader.UserName,
+                    published.ActiveChiefLeader.AssignmentId),
+                Convert.ToBase64String(published.Version),
+                FormatUtc(published.PublishedAt)));
+        }
+        catch (EventPublicationNotFoundException)
+        {
+            EventPublicationTelemetry.Record(activity, "not_found");
+            return ApiProblemDetailsService.Problem(context, 404, "event_not_found", "Draft Event was not found.");
+        }
+        catch (NotDraftException)
+        {
+            EventPublicationTelemetry.Record(activity, "not_draft");
+            return ApiProblemDetailsService.Problem(context, 409, "not_draft", "The Event is no longer a Draft.");
+        }
+        catch (EventPublicationConflictException error)
+        {
+            EventPublicationTelemetry.Record(activity, "conflict");
+            return ApiProblemDetailsService.Problem(context, 409, "conflict", error.Message);
+        }
+        catch (ActiveChiefLeaderRequiredException error)
+        {
+            EventPublicationTelemetry.Record(activity, "active_chief_leader_required");
+            return ApiProblemDetailsService.Problem(context, 422, "active_chief_leader_required", error.Message);
+        }
+        catch (EventPublicationValidationException error)
+        {
+            EventPublicationTelemetry.Record(activity, "validation_failed");
+            return ApiProblemDetailsService.Problem(context, 422, "validation_failed", error.Message);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            EventPublicationTelemetry.Record(activity, "forbidden");
+            return ApiProblemDetailsService.Problem(context, 403, "forbidden", "Draft Event access is denied.");
+        }
+    }
+
+    public sealed record ActiveChiefLeaderResponse(Guid UserId, string UserName, Guid AssignmentId);
+    public sealed record PublishedEventResponse(
+        Guid Id,
+        string Title,
+        string StartDateTime,
+        string EndDateTime,
+        string Location,
+        string? Notes,
+        string Status,
+        ActiveChiefLeaderResponse ActiveChiefLeader,
+        string Version,
+        string PublishedAt);
 }

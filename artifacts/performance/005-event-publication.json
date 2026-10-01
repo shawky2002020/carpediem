@@ -1,0 +1,222 @@
+{
+    "root_group": {
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {},
+        "checks": {
+                "antiforgery status is 200": {
+                    "name": "antiforgery status is 200",
+                    "path": "::antiforgery status is 200",
+                    "id": "c20185627100c78e75d752b55a33f1e0",
+                    "passes": 200,
+                    "fails": 0
+                },
+                "login status is 200": {
+                    "name": "login status is 200",
+                    "path": "::login status is 200",
+                    "id": "baba87e761865dc93085ee0c1fe25f4c",
+                    "passes": 100,
+                    "fails": 0
+                },
+                "create_draft status is 201": {
+                    "id": "53a8b425ddf6cbe39630d8cb9be1a240",
+                    "passes": 100,
+                    "fails": 0,
+                    "name": "create_draft status is 201",
+                    "path": "::create_draft status is 201"
+                },
+                "read_candidates status is 200": {
+                    "id": "daf3db300ec3b32fa5a699d1bbf86dd7",
+                    "passes": 100,
+                    "fails": 0,
+                    "name": "read_candidates status is 200",
+                    "path": "::read_candidates status is 200"
+                },
+                "candidate exists": {
+                    "passes": 100,
+                    "fails": 0,
+                    "name": "candidate exists",
+                    "path": "::candidate exists",
+                    "id": "86b6bb1cef796857f220a24dbb591995"
+                },
+                "appoint status is 201": {
+                    "name": "appoint status is 201",
+                    "path": "::appoint status is 201",
+                    "id": "b437d7106e260041f346a7f600da7f85",
+                    "passes": 100,
+                    "fails": 0
+                },
+                "record_external_acceptance status is 200": {
+                    "name": "record_external_acceptance status is 200",
+                    "path": "::record_external_acceptance status is 200",
+                    "id": "d0a54465ec3044780e6ab4a1ff47798b",
+                    "passes": 100,
+                    "fails": 0
+                },
+                "get_draft_detail status is 200": {
+                    "name": "get_draft_detail status is 200",
+                    "path": "::get_draft_detail status is 200",
+                    "id": "adcb2b4f4f2f224c8290dab470152e7e",
+                    "passes": 100,
+                    "fails": 0
+                },
+                "publish_event status is 200": {
+                    "name": "publish_event status is 200",
+                    "path": "::publish_event status is 200",
+                    "id": "a39299046f5cec2c9648e19e317e7c2f",
+                    "passes": 100,
+                    "fails": 0
+                },
+                "published event has authoritative state": {
+                    "name": "published event has authoritative state",
+                    "path": "::published event has authoritative state",
+                    "id": "d0d7eb492e3597bf7759e2b595b2f321",
+                    "passes": 100,
+                    "fails": 0
+                },
+                "publish_replay status is 200": {
+                    "id": "b57111ac97d736a8e6b986f5715ad46d",
+                    "passes": 100,
+                    "fails": 0,
+                    "name": "publish_replay status is 200",
+                    "path": "::publish_replay status is 200"
+                },
+                "replay has idempotent header and published status": {
+                    "name": "replay has idempotent header and published status",
+                    "path": "::replay has idempotent header and published status",
+                    "id": "54d4ba2e50ba639992ce887579144462",
+                    "passes": 100,
+                    "fails": 0
+                }
+            },
+        "name": ""
+    },
+    "metrics": {
+        "http_req_blocked": {
+            "max": 216.6088,
+            "p(90)": 1.7840300000002864,
+            "p(95)": 70.81319999999994,
+            "avg": 10.0836538,
+            "min": 0,
+            "med": 0
+        },
+        "http_req_sending": {
+            "avg": 0.22954889999999986,
+            "min": 0,
+            "med": 0,
+            "max": 11.0306,
+            "p(90)": 0.56652,
+            "p(95)": 0.8772899999999988
+        },
+        "http_req_waiting": {
+            "med": 46.2425,
+            "max": 3425.2448,
+            "p(90)": 1348.9800200000002,
+            "p(95)": 2088.453444999999,
+            "avg": 290.90983379999966,
+            "min": 2.1623
+        },
+        "iteration_duration": {
+            "med": 3271.19535,
+            "max": 3709.5072,
+            "p(90)": 3625.84003,
+            "p(95)": 3667.534465,
+            "avg": 3019.092263,
+            "min": 1569.5275
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 1000,
+            "thresholds": {
+                "rate==0": false
+            },
+            "value": 0
+        },
+        "http_req_receiving": {
+            "avg": 0.3282280999999998,
+            "min": 0,
+            "med": 0,
+            "max": 23.1699,
+            "p(90)": 0.6021400000000005,
+            "p(95)": 1.5210799999999998
+        },
+        "data_received": {
+            "count": 814140,
+            "rate": 219185.3194996079
+        },
+        "event_publication_operation_errors": {
+            "count": 0,
+            "rate": 0,
+            "thresholds": {
+                "count==0": false
+            }
+        },
+        "checks": {
+            "passes": 1300,
+            "fails": 0,
+            "value": 1
+        },
+        "http_req_duration": {
+            "p(95)": 2088.453444999999,
+            "avg": 291.4676108000001,
+            "min": 2.7093,
+            "med": 46.569100000000006,
+            "max": 3425.2448,
+            "p(90)": 1349.0425900000002
+        },
+        "http_req_duration{expected_response:true}": {
+            "avg": 291.4676108000001,
+            "min": 2.7093,
+            "med": 46.569100000000006,
+            "max": 3425.2448,
+            "p(90)": 1349.0425900000002,
+            "p(95)": 2088.453444999999
+        },
+        "http_req_connecting": {
+            "p(95)": 10.8766,
+            "avg": 1.0774482000000005,
+            "min": 0,
+            "med": 0,
+            "max": 17.9212,
+            "p(90)": 0.07023000000001597
+        },
+        "http_req_tls_handshaking": {
+            "med": 0,
+            "max": 204.2168,
+            "p(90)": 0.5838300000001327,
+            "p(95)": 66.76491999999995,
+            "avg": 8.8105537,
+            "min": 0
+        },
+        "data_sent": {
+            "count": 416933,
+            "rate": 112248.00748634143
+        },
+        "vus_max": {
+            "min": 100,
+            "max": 100,
+            "value": 100
+        },
+        "iterations": {
+            "count": 100,
+            "rate": 26.92231305421769
+        },
+        "http_reqs": {
+            "count": 1000,
+            "rate": 269.2231305421769
+        },
+        "event_publication_journey": {
+            "max": 3709,
+            "p(90)": 3625.3,
+            "p(95)": 3667.3,
+            "avg": 3018.87,
+            "min": 1569,
+            "med": 3271
+        },
+        "vus": {
+            "value": 66,
+            "min": 66,
+            "max": 100
+        }
+    }
+}

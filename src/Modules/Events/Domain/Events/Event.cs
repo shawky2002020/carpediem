@@ -55,6 +55,21 @@ public sealed class Event
         return assignment;
     }
 
+    public void Publish(Guid publishedByUserId, DateTimeOffset publishedAt)
+    {
+        if (Status != EventStatus.Draft) throw new NotDraftException();
+        if (publishedByUserId == Guid.Empty)
+            throw new ArgumentException("An acting Admin is required.", nameof(publishedByUserId));
+        if (publishedAt.Offset != TimeSpan.Zero)
+            throw new ArgumentException("Publication time must be UTC.", nameof(publishedAt));
+        if (StartDateTime >= EndDateTime)
+            throw new InvalidOperationException("End time must be after start time.");
+        if (chiefLeaderAssignments.Count(assignment => assignment.Status == ChiefLeaderAssignmentStatus.Active) != 1)
+            throw new ActiveChiefLeaderRequiredException();
+
+        Status = EventStatus.Published;
+    }
+
     public static Event CreateDraft(
         string? title,
         DateTimeOffset startDateTime,

@@ -27,6 +27,41 @@ export class DraftEditComponent implements OnInit {
   readonly problem = signal<ApiProblem | null>(null);
   readonly chiefLeaderAppointment = signal<ChiefLeaderAppointment | null>(null);
   readonly appointmentLoading = signal(true);
+  readonly publishing = signal(false);
+  readonly confirmPublish = signal(false);
+  readonly publishedNotice = signal<string | null>(null);
+
+  openPublishDialog(): void {
+    this.confirmPublish.set(true);
+  }
+
+  cancelPublish(): void {
+    this.confirmPublish.set(false);
+  }
+
+  publish(): void {
+    const current = this.draft();
+    if (!current || this.publishing() || this.saving()) return;
+    this.publishing.set(true);
+    this.problem.set(null);
+    this.drafts.publishDraftEvent(current.id, current.version)
+      .pipe(finalize(() => this.publishing.set(false)))
+      .subscribe({
+        next: published => {
+          this.confirmPublish.set(false);
+          this.draft.set({
+            ...current,
+            status: 'Published',
+            version: published.version,
+          });
+          this.publishedNotice.set('Event published successfully. Volunteers can now submit availability.');
+        },
+        error: error => {
+          this.confirmPublish.set(false);
+          this.problem.set(toApiProblem(error, 'The Event could not be published.'));
+        },
+      });
+  }
 
   ngOnInit(): void { this.load(); }
 
