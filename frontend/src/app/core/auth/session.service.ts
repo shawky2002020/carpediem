@@ -23,6 +23,7 @@ export class SessionService {
   readonly isAuthenticated = computed(() => this.sessionState() !== null);
   readonly isAdmin = computed(() => this.sessionState()?.roles.includes('Admin') === true);
   readonly isChiefLeader = computed(() => this.sessionState()?.roles.includes('ChiefLeader') === true);
+  readonly isLeader = computed(() => this.sessionState()?.roles.includes('Leader') === true);
   readonly antiforgeryToken = signal<string | null>(null);
 
   ensureLoaded(): Observable<Session | null> {

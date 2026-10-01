@@ -2,6 +2,7 @@ using Carpediem.Infrastructure.Persistence;
 using Carpediem.Modules.Events;
 using Carpediem.Modules.Identity;
 using Carpediem.Modules.Identity.Infrastructure;
+using Carpediem.Modules.Staffing;
 using Carpediem.Web.Endpoints;
 using Carpediem.Web.Errors;
 using Carpediem.Web.Observability;
@@ -155,6 +156,37 @@ builder.Services.AddOpenApi(options =>
                 };
             }
         }
+        if (operation.OperationId == "DeclareAvailability")
+        {
+            operation.Parameters ??= [];
+            operation.Parameters.Add(new OpenApiParameter
+            {
+                Name = "If-Match",
+                In = ParameterLocation.Header,
+                Required = false,
+                Description = "Base64-encoded rowversion of the existing availability record when updating.",
+                Schema = new OpenApiSchema { Type = JsonSchemaType.String },
+            });
+            operation.Parameters.Add(new OpenApiParameter
+            {
+                Name = "X-XSRF-TOKEN",
+                In = ParameterLocation.Header,
+                Required = true,
+                Description = "Antiforgery request token paired with the session cookie.",
+                Schema = new OpenApiSchema { Type = JsonSchemaType.String },
+            });
+            if (operation.Responses?.TryGetValue("200", out var replayResponse) == true &&
+                replayResponse is OpenApiResponse concreteReplayResponse)
+            {
+                concreteReplayResponse.Headers ??= new Dictionary<string, IOpenApiHeader>();
+                concreteReplayResponse.Headers["Idempotent-Replay"] = new OpenApiHeader
+                {
+                    Description = "True when the response replays the committed availability declaration.",
+                    Required = false,
+                    Schema = new OpenApiSchema { Type = JsonSchemaType.Boolean },
+                };
+            }
+        }
         return Task.CompletedTask;
     });
     options.AddSchemaTransformer((schema, context, _) =>
@@ -174,6 +206,7 @@ builder.Services.AddCarpediemAntiforgery();
 builder.Services.AddCarpediemPersistence(builder.Configuration);
 builder.Services.AddCarpediemAuthorization();
 builder.Services.AddEventsModule();
+builder.Services.AddStaffingModule();
 
 var app = builder.Build();
 
@@ -205,6 +238,7 @@ app.MapSessionEndpoints();
 app.MapDraftEventsEndpoints();
 app.MapChiefLeaderAppointmentEndpoints();
 app.MapChiefLeaderResponseEndpoints();
+app.MapEventAvailabilityEndpoints();
 
 await app.Services.SeedDevelopmentIdentityAsync(app.Environment.IsDevelopment(), app.Configuration);
 await app.RunAsync();

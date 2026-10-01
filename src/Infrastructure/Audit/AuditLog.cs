@@ -56,4 +56,22 @@ public sealed class AuditLog
             newValue: "Published",
             resourceType: "Event",
             source: "Direct");
+
+    public static AuditLog AvailabilityDeclared(
+        Guid availabilityResponseId,
+        Guid actorUserId,
+        Guid correlationId,
+        DateTimeOffset occurredAt,
+        string? previousValue,
+        string newValue) =>
+        Create(
+            actorUserId,
+            action: "AvailabilityDeclared",
+            resourceId: availabilityResponseId,
+            correlationId: correlationId,
+            occurredAt: occurredAt,
+            previousValue: previousValue,
+            newValue: newValue,
+            resourceType: "AvailabilityResponse",
+            source: "Direct");
 }

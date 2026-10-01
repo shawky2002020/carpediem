@@ -4,6 +4,7 @@ using Carpediem.Modules.Events.Domain.StaffingCycles;
 using Carpediem.Modules.Events.Infrastructure.Persistence;
 using Carpediem.Modules.Events.Domain.ChiefLeaderAssignments;
 using Carpediem.Modules.Notifications.Domain;
+using Carpediem.Modules.Staffing.Domain.Availability;
 using Carpediem.Infrastructure.Audit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -21,6 +22,7 @@ public sealed class CarpediemDbContext(DbContextOptions<CarpediemDbContext> opti
     public DbSet<ChiefLeaderAssignment> ChiefLeaderAssignments => Set<ChiefLeaderAssignment>();
     public DbSet<ChiefLeaderAppointmentRequest> ChiefLeaderAppointmentRequests => Set<ChiefLeaderAppointmentRequest>();
     public DbSet<InPlatformNotification> InPlatformNotifications => Set<InPlatformNotification>();
+    public DbSet<AvailabilityResponse> AvailabilityResponses => Set<AvailabilityResponse>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -38,6 +40,7 @@ public sealed class CarpediemDbContext(DbContextOptions<CarpediemDbContext> opti
         builder.ApplyConfigurationsFromAssembly(typeof(CarpediemDbContext).Assembly);
         builder.ApplyConfigurationsFromAssembly(typeof(Carpediem.Modules.Events.ServiceCollectionExtensions).Assembly);
         builder.ApplyConfigurationsFromAssembly(typeof(InPlatformNotification).Assembly);
+        builder.ApplyConfigurationsFromAssembly(typeof(Carpediem.Modules.Staffing.ServiceCollectionExtensions).Assembly);
 
         builder.Entity<Event>()
             .HasOne<CarpediemUser>()
@@ -105,5 +108,23 @@ public sealed class CarpediemDbContext(DbContextOptions<CarpediemDbContext> opti
             .HasForeignKey(item => item.EventId)
             .OnDelete(DeleteBehavior.NoAction)
             .HasConstraintName("FK_Notifications_Events");
+        builder.Entity<AvailabilityResponse>()
+            .HasOne<CarpediemUser>()
+            .WithMany()
+            .HasForeignKey(item => item.UserId)
+            .OnDelete(DeleteBehavior.NoAction)
+            .HasConstraintName("FK_AvailabilityResponses_Users");
+        builder.Entity<AvailabilityResponse>()
+            .HasOne<Event>()
+            .WithMany()
+            .HasForeignKey(item => item.EventId)
+            .OnDelete(DeleteBehavior.NoAction)
+            .HasConstraintName("FK_AvailabilityResponses_Events");
+        builder.Entity<AvailabilityResponse>()
+            .HasOne<StaffingCycle>()
+            .WithMany()
+            .HasForeignKey(item => item.StaffingCycleId)
+            .OnDelete(DeleteBehavior.NoAction)
+            .HasConstraintName("FK_AvailabilityResponses_StaffingCycles");
     }
 }

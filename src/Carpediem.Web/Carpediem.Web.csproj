@@ -4,6 +4,7 @@
     <ProjectReference Include="..\Modules\Identity\Carpediem.Modules.Identity.csproj" />
     <ProjectReference Include="..\Modules\Events\Carpediem.Modules.Events.csproj" />
     <ProjectReference Include="..\Modules\Notifications\Carpediem.Modules.Notifications.csproj" />
+    <ProjectReference Include="..\Modules\Staffing\Carpediem.Modules.Staffing.csproj" />
     <ProjectReference Include="..\Infrastructure\Carpediem.Infrastructure.csproj" />
   </ItemGroup>
 

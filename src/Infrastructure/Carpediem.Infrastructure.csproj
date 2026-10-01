@@ -1,9 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\Modules\Identity\Carpediem.Modules.Identity.csproj" />
     <ProjectReference Include="..\Modules\Events\Carpediem.Modules.Events.csproj" />
     <ProjectReference Include="..\Modules\Notifications\Carpediem.Modules.Notifications.csproj" />
+    <ProjectReference Include="..\Modules\Staffing\Carpediem.Modules.Staffing.csproj" />
   </ItemGroup>
 
   <ItemGroup>

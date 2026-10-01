@@ -406,6 +406,49 @@ namespace Carpediem.Infrastructure.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Carpediem.Modules.Staffing.Domain.Availability.AvailabilityResponse", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("DeclaredAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Response")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<Guid>("StaffingCycleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id")
+                        .HasName("PK_staffing_AvailabilityResponses");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("EventId", "Response")
+                        .HasDatabaseName("IX_AvailabilityResponses_Event_Response");
+
+                    b.HasIndex("StaffingCycleId", "UserId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_AvailabilityResponses_StaffingCycle_User");
+
+                    b.ToTable("AvailabilityResponses", "staffing");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
                 {
                     b.Property<Guid>("Id")
@@ -644,6 +687,30 @@ namespace Carpediem.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_Notifications_Users");
+                });
+
+            modelBuilder.Entity("Carpediem.Modules.Staffing.Domain.Availability.AvailabilityResponse", b =>
+                {
+                    b.HasOne("Carpediem.Modules.Events.Domain.Events.Event", null)
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_AvailabilityResponses_Events");
+
+                    b.HasOne("Carpediem.Modules.Events.Domain.StaffingCycles.StaffingCycle", null)
+                        .WithMany()
+                        .HasForeignKey("StaffingCycleId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_AvailabilityResponses_StaffingCycles");
+
+                    b.HasOne("Carpediem.Modules.Identity.Domain.CarpediemUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_AvailabilityResponses_Users");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>

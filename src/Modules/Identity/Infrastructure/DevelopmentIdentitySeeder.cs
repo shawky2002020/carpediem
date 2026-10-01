@@ -72,6 +72,30 @@ public static class DevelopmentIdentitySeeder
                 EnsureSucceeded(await userManager.AddToRoleAsync(user, role), $"assign {userName} to {role}");
             }
         }
+
+        for (var i = 1; i <= 100; i++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var userName = $"leader.{i}";
+            var user = await userManager.FindByNameAsync(userName);
+            if (user is null)
+            {
+                user = new CarpediemUser
+                {
+                    Id = Guid.NewGuid(),
+                    UserName = userName,
+                    Email = $"{userName}@localhost.invalid",
+                    EmailConfirmed = true,
+                    IsActive = true,
+                };
+                EnsureSucceeded(await userManager.CreateAsync(user, password), $"create development user {userName}");
+            }
+
+            if (!await userManager.IsInRoleAsync(user, CarpediemRoles.Leader))
+            {
+                EnsureSucceeded(await userManager.AddToRoleAsync(user, CarpediemRoles.Leader), $"assign {userName} to {CarpediemRoles.Leader}");
+            }
+        }
     }
 
     private static void EnsureSucceeded(IdentityResult result, string operation)

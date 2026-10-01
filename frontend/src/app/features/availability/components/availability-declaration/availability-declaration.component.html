@@ -1,0 +1,86 @@
+<div class="availability-container">
+  <header class="availability-header">
+    <p class="eyebrow">Volunteer Staffing</p>
+    <h1 id="availability-title">Event Availability</h1>
+    <p class="subtitle">Declare or update your schedule availability for this upcoming event.</p>
+  </header>
+
+  <div class="live-region" role="status" aria-live="polite" aria-atomic="true">
+    @if (loading()) { Loading availability details… }
+    @else if (submitting()) { Updating your availability… }
+    @else if (statusMessage()) { {{ statusMessage() }} }
+  </div>
+
+  @if (problem(); as error) {
+    <section class="alert-box error" role="alert">
+      <h2>{{ error.title }}</h2>
+      @if (error.code === 'chief_leader_conflict') {
+        <p>You are the Chief Leader for this event and cannot declare volunteer availability.</p>
+      } @else if (error.code === 'window_closed') {
+        <p>The availability declaration window has closed for this event.</p>
+      } @else if (error.code === 'invalid_event_status') {
+        <p>Availability can only be declared for published events.</p>
+      } @else if (error.code === 'stale_version') {
+        <p>Your availability was updated in another session. Please review and try again.</p>
+      } @else {
+        <p>{{ error.detail || 'An unexpected error occurred while saving your response.' }}</p>
+      }
+      <button type="button" class="btn-retry" (click)="load()">Refresh status</button>
+    </section>
+  }
+
+  @if (!loading() && availability(); as item) {
+    @if (isChiefLeader()) {
+      <section class="alert-box notice" role="note" aria-labelledby="chief-conflict-heading">
+        <h2 id="chief-conflict-heading">Chief Leader Assignment</h2>
+        <p>You are the appointed Chief Leader for this event. Chief Leaders cannot declare volunteer availability on events they lead.</p>
+      </section>
+    }
+
+    @if (isClosed() && !isChiefLeader()) {
+      <section class="alert-box warning" role="note" aria-labelledby="window-closed-heading">
+        <h2 id="window-closed-heading">Window Closed</h2>
+        <p>The availability window for this event is closed. Schedule declarations can no longer be modified.</p>
+      </section>
+    }
+
+    <section class="status-card" aria-labelledby="current-status-heading">
+      <div class="status-header">
+        <h2 id="current-status-heading">Your Schedule Response</h2>
+        <span class="status-badge" [class]="statusBadgeClass()" role="status">
+          {{ currentStatusLabel() }}
+        </span>
+      </div>
+
+      @if (item.declaredAt) {
+        <p class="declared-timestamp">
+          Last updated: <time [attr.datetime]="item.declaredAt">{{ formatDate(item.declaredAt) }}</time>
+        </p>
+      } @else {
+        <p class="declared-timestamp">
+          You have not submitted a response yet. Please indicate your availability below.
+        </p>
+      }
+
+      <div class="action-buttons">
+        <button
+          type="button"
+          class="btn-available"
+          [class.active]="item.response === 'Available'"
+          [disabled]="!canDeclare()"
+          (click)="declare('Available')">
+          Mark Available
+        </button>
+
+        <button
+          type="button"
+          class="btn-not-available"
+          [class.active]="item.response === 'NotAvailable'"
+          [disabled]="!canDeclare()"
+          (click)="declare('NotAvailable')">
+          Mark Not Available
+        </button>
+      </div>
+    </section>
+  }
+</div>

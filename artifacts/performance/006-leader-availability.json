@@ -1,0 +1,241 @@
+{
+    "root_group": {
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {
+            "setup": {
+                "name": "setup",
+                "path": "::setup",
+                "id": "5c0f8025f7e0b6654089e5b00e950f1a",
+                "groups": {},
+                "checks": {
+                        "antiforgery status is 200": {
+                            "fails": 0,
+                            "name": "antiforgery status is 200",
+                            "path": "::setup::antiforgery status is 200",
+                            "id": "e31047222094314774f0d1b0530bd1c0",
+                            "passes": 2
+                        },
+                        "antiforgery token present": {
+                            "fails": 0,
+                            "name": "antiforgery token present",
+                            "path": "::setup::antiforgery token present",
+                            "id": "526ed8e4098b71b521ed190d67227743",
+                            "passes": 2
+                        },
+                        "login status is 200": {
+                            "name": "login status is 200",
+                            "path": "::setup::login status is 200",
+                            "id": "bb27b460b057923f4a083e3603c038b9",
+                            "passes": 1,
+                            "fails": 0
+                        },
+                        "session active": {
+                            "passes": 1,
+                            "fails": 0,
+                            "name": "session active",
+                            "path": "::setup::session active",
+                            "id": "fdb2d7de4fe6219c621cbace87134b55"
+                        }
+                    }
+            }
+        },
+        "checks": {
+            "antiforgery status is 200": {
+                "id": "c20185627100c78e75d752b55a33f1e0",
+                "passes": 200,
+                "fails": 0,
+                "name": "antiforgery status is 200",
+                "path": "::antiforgery status is 200"
+            },
+            "antiforgery token present": {
+                "path": "::antiforgery token present",
+                "id": "43a3e483ea2e1315a65bee4aec00c58d",
+                "passes": 200,
+                "fails": 0,
+                "name": "antiforgery token present"
+            },
+            "login status is 200": {
+                "passes": 100,
+                "fails": 0,
+                "name": "login status is 200",
+                "path": "::login status is 200",
+                "id": "baba87e761865dc93085ee0c1fe25f4c"
+            },
+            "session active": {
+                "passes": 100,
+                "fails": 0,
+                "name": "session active",
+                "path": "::session active",
+                "id": "174933ba01228c1ddcddf0a1ffeee613"
+            },
+            "get_my_availability status is 200": {
+                "path": "::get_my_availability status is 200",
+                "id": "e95e98d87b632b7ae84f46973410bb39",
+                "passes": 100,
+                "fails": 0,
+                "name": "get_my_availability status is 200"
+            },
+            "declare_availability status is 201": {
+                "path": "::declare_availability status is 201",
+                "id": "e793ea68c2a18e8e8fd31e7a766be770",
+                "passes": 100,
+                "fails": 0,
+                "name": "declare_availability status is 201"
+            },
+            "availability response matches": {
+                "passes": 100,
+                "fails": 0,
+                "name": "availability response matches",
+                "path": "::availability response matches",
+                "id": "5caa72996d6063706c75ae9a3a053489"
+            },
+            "replay_availability status is 200": {
+                "name": "replay_availability status is 200",
+                "path": "::replay_availability status is 200",
+                "id": "01aefffe40813e9cbf6aa9eab85ac578",
+                "passes": 100,
+                "fails": 0
+            },
+            "replay has idempotent header": {
+                "name": "replay has idempotent header",
+                "path": "::replay has idempotent header",
+                "id": "3212a9365866cd56ac7e68d0522bd7bb",
+                "passes": 100,
+                "fails": 0
+            }
+        },
+        "name": "",
+        "path": ""
+    },
+    "metrics": {
+        "iterations": {
+            "count": 100,
+            "rate": 48.02925865590504
+        },
+        "vus_max": {
+            "value": 100,
+            "min": 100,
+            "max": 100
+        },
+        "checks": {
+            "passes": 1106,
+            "fails": 0,
+            "value": 1
+        },
+        "http_req_connecting": {
+            "max": 7.0973,
+            "p(90)": 1.4070200000000004,
+            "p(95)": 2.670360000000002,
+            "avg": 0.42145254515599345,
+            "min": 0,
+            "med": 0
+        },
+        "http_req_sending": {
+            "p(90)": 0.5234000000000001,
+            "p(95)": 0.55194,
+            "avg": 0.09457733990147782,
+            "min": 0,
+            "med": 0,
+            "max": 1.2625
+        },
+        "data_received": {
+            "count": 568468,
+            "rate": 273030.9660960503
+        },
+        "event_availability_journey": {
+            "min": 364,
+            "med": 1019,
+            "max": 1326,
+            "p(90)": 1286,
+            "p(95)": 1295.4,
+            "avg": 955.96
+        },
+        "event_availability_operation_errors": {
+            "count": 0,
+            "rate": 0,
+            "thresholds": {
+                "count==0": false
+            }
+        },
+        "http_req_blocked": {
+            "avg": 5.752564203612481,
+            "min": 0,
+            "med": 0,
+            "max": 49.8891,
+            "p(90)": 34.048180000000016,
+            "p(95)": 42.386340000000004
+        },
+        "http_req_duration": {
+            "avg": 152.28763382594417,
+            "min": 1.4361,
+            "med": 10.7422,
+            "max": 1246.8615,
+            "p(90)": 772.49756,
+            "p(95)": 1031.3543399999999
+        },
+        "http_req_duration{expected_response:true}": {
+            "min": 1.4361,
+            "med": 10.7422,
+            "max": 1246.8615,
+            "p(90)": 772.49756,
+            "p(95)": 1031.3543399999999,
+            "avg": 152.28763382594417
+        },
+        "data_sent": {
+            "count": 351829,
+            "rate": 168980.86043648413
+        },
+        "vus": {
+            "value": 28,
+            "min": 28,
+            "max": 100
+        },
+        "http_reqs": {
+            "count": 609,
+            "rate": 292.49818521446167
+        },
+        "http_req_waiting": {
+            "avg": 152.10884958949097,
+            "min": 1.0752,
+            "med": 10.6352,
+            "max": 1246.8615,
+            "p(90)": 772.49756,
+            "p(95)": 1031.3543399999999
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 609,
+            "thresholds": {
+                "rate==0": false
+            },
+            "value": 0
+        },
+        "http_req_tls_handshaking": {
+            "avg": 5.304901970443351,
+            "min": 0,
+            "med": 0,
+            "max": 47.3536,
+            "p(90)": 31.46748,
+            "p(95)": 39.35544000000003
+        },
+        "http_req_receiving": {
+            "max": 1.5122,
+            "p(90)": 0.5144,
+            "p(95)": 0.53496,
+            "avg": 0.0842068965517241,
+            "min": 0,
+            "med": 0
+        },
+        "iteration_duration": {
+            "avg": 956.1316080000001,
+            "min": 364.5998,
+            "med": 1019.5617,
+            "max": 1325.2169,
+            "p(90)": 1285.64823,
+            "p(95)": 1295.3694249999999
+        }
+    },
+    "setup_data": {
+        "eventId": "36220697-90b1-421f-8967-d400d801f89d"
+    }
+}

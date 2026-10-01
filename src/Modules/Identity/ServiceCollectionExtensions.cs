@@ -17,7 +17,10 @@ public static class ServiceCollectionExtensions
                     .AddRequirements(new CurrentAdminRequirement()))
             .AddPolicy(AuthorizationPolicies.RequireChiefLeader, policy =>
                 policy.RequireAuthenticatedUser()
-                    .RequireRole(CarpediemRoles.ChiefLeader));
+                    .RequireRole(CarpediemRoles.ChiefLeader))
+            .AddPolicy(AuthorizationPolicies.RequireLeader, policy =>
+                policy.RequireAuthenticatedUser()
+                    .RequireRole(CarpediemRoles.Leader));
         services.AddScoped<IAuthorizationHandler, CurrentAdminAuthorizationHandler>();
         services.AddScoped<IChiefLeaderCandidateDirectory, EfChiefLeaderCandidateDirectory>();
         services.AddScoped<IChiefLeaderResponseDirectory, EfChiefLeaderResponseDirectory>();

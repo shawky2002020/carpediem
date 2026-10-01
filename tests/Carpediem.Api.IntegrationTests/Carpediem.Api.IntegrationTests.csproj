@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Carpediem.Web\Carpediem.Web.csproj" />
     <ProjectReference Include="..\..\src\Infrastructure\Carpediem.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Staffing\Carpediem.Modules.Staffing.csproj" />
   </ItemGroup>
 
 </Project>

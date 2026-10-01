@@ -5,6 +5,7 @@ using Carpediem.Modules.Events.Application.ChiefLeaderResponses;
 using Carpediem.Modules.Events.Application.ChiefLeaderExternalAcceptances;
 using Carpediem.Modules.Events.Application.EventPublication;
 using Carpediem.Infrastructure.Audit;
+using Carpediem.Modules.Staffing.Application.Availability;
 using Carpediem.Modules.Notifications.Application;
 using Carpediem.Infrastructure.Notifications;
 using Microsoft.AspNetCore.Identity;
@@ -37,6 +38,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IChiefLeaderDeclineNotificationWriter, EfChiefLeaderDeclineNotificationWriter>();
         services.AddScoped<IEventPublicationStore, EfEventPublicationStore>();
         services.AddScoped<IEventPublishedNotificationWriter, EfEventPublishedNotificationWriter>();
+        services.AddScoped<IAvailabilityStore, EfAvailabilityStore>();
 
         services
             .AddIdentityCore<CarpediemUser>(options =>
