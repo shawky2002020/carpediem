@@ -1,0 +1,176 @@
+<div class="replacement-container">
+  <header class="replacement-header">
+    <p class="eyebrow">Volunteer Operations</p>
+    <h1 id="replacement-title">Replacement Leader Assignment</h1>
+    @if (context(); as ctx) {
+      <div class="event-summary-card">
+        <h2 class="event-title">{{ ctx.eventTitle }}</h2>
+        <div class="event-meta">
+          <p class="meta-item meta-text">
+            <strong>Schedule:</strong>
+            <time [attr.datetime]="ctx.startDateTime">{{ formatDate(ctx.startDateTime) }}</time>
+            –
+            <time [attr.datetime]="ctx.endDateTime">{{ formatDate(ctx.endDateTime) }}</time>
+          </p>
+          <p class="meta-item meta-text">
+            <strong>Location:</strong> {{ ctx.location }}
+          </p>
+        </div>
+      </div>
+    }
+  </header>
+
+  <div class="live-region" role="status" aria-live="polite" aria-atomic="true">
+    @if (loading()) { Loading replacement context… }
+    @else if (submitting()) { Assigning replacement volunteer… }
+    @else if (statusMessage()) { {{ statusMessage() }} }
+  </div>
+
+  @if (problem(); as error) {
+    <section class="alert-box error" role="alert">
+      <h2>{{ error.title }}</h2>
+      @if (error.code === 'unauthorized_chief_leader') {
+        <p>Only the active Chief Leader or an Administrator can draft replacements for this event.</p>
+      } @else if (error.code === 'window_closed') {
+        <p>Replacement assignment is closed because the event has already started.</p>
+      } @else if (error.code === 'invalid_event_status') {
+        <p>Replacements can only be assigned to published events.</p>
+      } @else if (error.code === 'chief_leader_conflict') {
+        <p>The Chief Leader cannot be assigned as a replacement volunteer member.</p>
+      } @else {
+        <p>{{ error.detail || 'An unexpected error occurred while assigning replacement.' }}</p>
+      }
+      <button type="button" class="btn-retry" (click)="load()">Refresh context</button>
+    </section>
+  }
+
+  @if (!loading() && context(); as ctx) {
+    @if (!ctx.isWindowOpen) {
+      <div class="alert-box warning window-closed-note" role="note">
+        <h3>Replacement Window Closed</h3>
+        <p>This event has already started. Replacement leader assignments are closed.</p>
+      </div>
+    }
+
+    <!-- Staffing Gaps (Cancelled Slots) -->
+    @if (ctx.cancelledAssignments.length > 0) {
+      <section class="gaps-section" aria-labelledby="gaps-heading">
+        <div class="section-header">
+          <h2 id="gaps-heading">
+            Staffing Gaps (Cancelled Slots)
+            <span class="count-badge">{{ cancelledCount() }}</span>
+          </h2>
+          <p class="section-hint">Select a vacant slot below to record which cancellation this replacement fills.</p>
+        </div>
+
+        <div class="gaps-list">
+          @for (cancelled of ctx.cancelledAssignments; track cancelled.assignmentId) {
+            <div
+              class="gap-item"
+              [class.selected]="selectedReplacedAssignmentId() === cancelled.assignmentId"
+              (click)="selectSlot(cancelled.assignmentId)"
+              role="button"
+              tabindex="0"
+              (keydown.enter)="selectSlot(cancelled.assignmentId)"
+              (keydown.space)="selectSlot(cancelled.assignmentId)">
+              <div class="gap-header">
+                <span class="cancelled-name">{{ cancelled.userName }}</span>
+                <span class="status-badge status-badge-cancelled">Cancelled</span>
+              </div>
+              <div class="gap-details">
+                <p class="meta-text"><strong>Cancelled On:</strong> {{ formatDate(cancelled.cancelledAt) }}</p>
+                <p class="meta-text reason-text"><strong>Reason:</strong> {{ cancelled.cancellationReason || 'No reason provided' }}</p>
+              </div>
+              <div class="slot-select-indicator">
+                @if (selectedReplacedAssignmentId() === cancelled.assignmentId) {
+                  <span class="selected-tag">Selected for Replacement</span>
+                } @else {
+                  <span class="unselected-tag">Click to link replacement</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Active Team Roster -->
+    <section class="roster-section" aria-labelledby="roster-heading">
+      <div class="section-header">
+        <h2 id="roster-heading">
+          Active Team Roster
+          <span class="count-badge">{{ activeCount() }}</span>
+        </h2>
+      </div>
+
+      @if (ctx.activeTeam.length === 0) {
+        <p class="meta-text">No volunteer leaders currently assigned to team roster.</p>
+      } @else {
+        <ul class="roster-list" role="list">
+          @for (member of ctx.activeTeam; track member.assignmentId) {
+            <li class="team-item">
+              <span class="member-name">{{ member.userName }}</span>
+              <span class="status-badge status-badge-active">Active</span>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <!-- Justification Input -->
+    <section class="justification-section" aria-labelledby="justification-heading">
+      <div class="section-header">
+        <label id="justification-heading" for="replacement-justification" class="justification-label">
+          Assignment Justification (Optional)
+        </label>
+      </div>
+      <input
+        id="replacement-justification"
+        type="text"
+        class="justification-input"
+        [value]="justification()"
+        (input)="onJustificationChange($event)"
+        placeholder="Add optional notes or justification for this replacement assignment" />
+    </section>
+
+    <!-- Eligible Replacement Candidates -->
+    <section class="candidates-section" aria-labelledby="candidates-heading">
+      <div class="section-header">
+        <h2 id="candidates-heading">
+          Eligible Replacement Candidates
+          <span class="count-badge">{{ candidates().length }}</span>
+        </h2>
+      </div>
+
+      @if (candidates().length === 0) {
+        <p class="meta-text">No eligible replacement candidates available.</p>
+      } @else {
+        <ul class="candidates-list" role="list">
+          @for (candidate of candidates(); track candidate.userId) {
+            <li class="candidate-item">
+              <div class="candidate-info">
+                <span class="candidate-name">{{ candidate.userName }}</span>
+                @if (candidate.availabilityStatus === 'Available') {
+                  <span class="availability-badge badge-available">Available</span>
+                } @else if (candidate.availabilityStatus === 'NotAvailable') {
+                  <span class="availability-badge badge-not-available">Unavailable</span>
+                } @else {
+                  <span class="availability-badge badge-no-response">No Response</span>
+                }
+              </div>
+
+              <button
+                type="button"
+                class="btn-action btn-select-replacement"
+                [disabled]="!ctx.isWindowOpen || submitting()"
+                [attr.aria-label]="'Assign ' + candidate.userName + ' as replacement'"
+                (click)="assignReplacement(candidate)">
+                @if (submitting()) { Assigning… } @else { Assign Replacement }
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+</div>

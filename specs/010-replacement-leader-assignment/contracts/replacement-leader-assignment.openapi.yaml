@@ -1,0 +1,321 @@
+openapi: 3.1.0
+info:
+  title: Carpediem - Replacement Leader Assignment API
+  description: Endpoints for querying replacement context and drafting replacement volunteer leaders to fill vacancies from cancelled assignments.
+  version: 1.0.0
+paths:
+  /api/events/{eventId}/replacement-assignment:
+    get:
+      summary: Query replacement context and candidate pool
+      description: Returns the active team roster, cancelled assignments creating staffing gaps, and eligible replacement candidates for a published event.
+      operationId: GetReplacementAssignmentContext
+      tags:
+        - Replacement Assignment
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          description: Unique identifier of the target event.
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Replacement context retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReplacementAssignmentContextResponse'
+        '400':
+          description: Malformed request parameters.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Unauthenticated session.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Forbidden; actor is not the active Chief Leader or an Administrator.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Event or active cycle not found.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Event is not published.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+    post:
+      summary: Draft replacement leader into active team
+      description: Creates a brand-new active team assignment for the specified candidate leader, filling a vacant staffing slot while preserving prior cancellation history.
+      operationId: AssignReplacementLeader
+      tags:
+        - Replacement Assignment
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          description: Unique identifier of the target event.
+          schema:
+            type: string
+            format: uuid
+        - name: X-XSRF-TOKEN
+          in: header
+          required: true
+          description: Antiforgery request token.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignReplacementLeaderRequest'
+      responses:
+        '201':
+          description: Replacement leader assigned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamAssignmentResponse'
+        '200':
+          description: Safe idempotent replay; the candidate already holds an active assignment.
+          headers:
+            Idempotent-Replay:
+              description: Indicates whether the request was an idempotent replay.
+              schema:
+                type: boolean
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamAssignmentResponse'
+        '400':
+          description: Malformed request or invalid candidate/replaced assignment ID.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Unauthenticated session.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Forbidden; actor is not the active Chief Leader or an Administrator.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Event, cycle, or candidate not found.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Business conflict (e.g. event window closed, not published, or candidate is Chief Leader).
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+components:
+  schemas:
+    ReplacementAssignmentContextResponse:
+      type: object
+      required:
+        - eventId
+        - eventTitle
+        - staffingCycleId
+        - startDateTime
+        - endDateTime
+        - location
+        - isWindowOpen
+        - activeTeam
+        - cancelledAssignments
+        - candidates
+      properties:
+        eventId:
+          type: string
+          format: uuid
+        eventTitle:
+          type: string
+        staffingCycleId:
+          type: string
+          format: uuid
+        startDateTime:
+          type: string
+          format: date-time
+        endDateTime:
+          type: string
+          format: date-time
+        location:
+          type: string
+        isWindowOpen:
+          type: boolean
+        activeTeam:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamMemberItem'
+        cancelledAssignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/CancelledMemberItem'
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReplacementCandidateItem'
+
+    TeamMemberItem:
+      type: object
+      required:
+        - assignmentId
+        - userId
+        - userName
+        - status
+        - assignedAt
+        - version
+      properties:
+        assignmentId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        userName:
+          type: string
+        status:
+          type: string
+          example: Active
+        assignedAt:
+          type: string
+          format: date-time
+        version:
+          type: string
+
+    CancelledMemberItem:
+      type: object
+      required:
+        - assignmentId
+        - userId
+        - userName
+        - status
+        - cancelledAt
+        - cancellationReason
+      properties:
+        assignmentId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        userName:
+          type: string
+        status:
+          type: string
+          example: Cancelled
+        cancelledAt:
+          type: string
+          format: date-time
+        cancellationReason:
+          type: string
+
+    ReplacementCandidateItem:
+      type: object
+      required:
+        - userId
+        - userName
+        - availabilityStatus
+      properties:
+        userId:
+          type: string
+          format: uuid
+        userName:
+          type: string
+        availabilityStatus:
+          type: string
+          enum: [Available, NotAvailable, NoResponse]
+        declaredAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    AssignReplacementLeaderRequest:
+      type: object
+      required:
+        - candidateUserId
+      properties:
+        candidateUserId:
+          type: string
+          format: uuid
+        replacedAssignmentId:
+          type: string
+          format: uuid
+          nullable: true
+        justification:
+          type: string
+          maxLength: 500
+          nullable: true
+
+    TeamAssignmentResponse:
+      type: object
+      required:
+        - id
+        - eventId
+        - staffingCycleId
+        - userId
+        - status
+        - assignedAt
+        - assignedByUserId
+        - version
+      properties:
+        id:
+          type: string
+          format: uuid
+        eventId:
+          type: string
+          format: uuid
+        staffingCycleId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          example: Active
+        assignedAt:
+          type: string
+          format: date-time
+        assignedByUserId:
+          type: string
+          format: uuid
+        version:
+          type: string
+
+    ProblemDetails:
+      type: object
+      required:
+        - status
+        - title
+      properties:
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        code:
+          type: string

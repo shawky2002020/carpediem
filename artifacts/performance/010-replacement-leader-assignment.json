@@ -1,0 +1,930 @@
+{
+    "root_group": {
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {
+            "setup": {
+                "checks": {
+                    "antiforgery status is 200": {
+                        "id": "e31047222094314774f0d1b0530bd1c0",
+                        "passes": 8,
+                        "fails": 0,
+                        "name": "antiforgery status is 200",
+                        "path": "::setup::antiforgery status is 200"
+                    },
+                    "antiforgery token present": {
+                        "name": "antiforgery token present",
+                        "path": "::setup::antiforgery token present",
+                        "id": "526ed8e4098b71b521ed190d67227743",
+                        "passes": 8,
+                        "fails": 0
+                    },
+                    "login status is 200": {
+                        "name": "login status is 200",
+                        "path": "::setup::login status is 200",
+                        "id": "bb27b460b057923f4a083e3603c038b9",
+                        "passes": 4,
+                        "fails": 0
+                    },
+                    "session active": {
+                        "id": "fdb2d7de4fe6219c621cbace87134b55",
+                        "passes": 4,
+                        "fails": 0,
+                        "name": "session active",
+                        "path": "::setup::session active"
+                    }
+                },
+                "name": "setup",
+                "path": "::setup",
+                "id": "5c0f8025f7e0b6654089e5b00e950f1a",
+                "groups": {}
+            }
+        },
+        "checks": {
+            "antiforgery status is 200": {
+                "id": "c20185627100c78e75d752b55a33f1e0",
+                "passes": 200,
+                "fails": 0,
+                "name": "antiforgery status is 200",
+                "path": "::antiforgery status is 200"
+            },
+            "antiforgery token present": {
+                "fails": 0,
+                "name": "antiforgery token present",
+                "path": "::antiforgery token present",
+                "id": "43a3e483ea2e1315a65bee4aec00c58d",
+                "passes": 200
+            },
+            "login status is 200": {
+                "name": "login status is 200",
+                "path": "::login status is 200",
+                "id": "baba87e761865dc93085ee0c1fe25f4c",
+                "passes": 100,
+                "fails": 0
+            },
+            "session active": {
+                "path": "::session active",
+                "id": "174933ba01228c1ddcddf0a1ffeee613",
+                "passes": 100,
+                "fails": 0,
+                "name": "session active"
+            },
+            "get_replacement_assignment_context status is 200": {
+                "name": "get_replacement_assignment_context status is 200",
+                "path": "::get_replacement_assignment_context status is 200",
+                "id": "b4d7d4361b552211fc3fc1102666b7d3",
+                "passes": 100,
+                "fails": 0
+            },
+            "context eventId match": {
+                "name": "context eventId match",
+                "path": "::context eventId match",
+                "id": "860e3590e1eb9a6679c7681a4bde7554",
+                "passes": 100,
+                "fails": 0
+            },
+            "context window open": {
+                "name": "context window open",
+                "path": "::context window open",
+                "id": "45050ac97ac322418f0ed3bbd932641e",
+                "passes": 100,
+                "fails": 0
+            },
+            "context has cancelled assignments": {
+                "name": "context has cancelled assignments",
+                "path": "::context has cancelled assignments",
+                "id": "f67a4ec6f6a310c9a4e716c69d1ed99f",
+                "passes": 100,
+                "fails": 0
+            },
+            "assign_replacement_leader status is 201": {
+                "name": "assign_replacement_leader status is 201",
+                "path": "::assign_replacement_leader status is 201",
+                "id": "c17c7b75d48435ff2f63960860417b07",
+                "passes": 100,
+                "fails": 0
+            },
+            "replacement status active": {
+                "name": "replacement status active",
+                "path": "::replacement status active",
+                "id": "4835245c84e73e1f84cfc33d9159c061",
+                "passes": 100,
+                "fails": 0
+            },
+            "replacement candidate userId match": {
+                "name": "replacement candidate userId match",
+                "path": "::replacement candidate userId match",
+                "id": "4fa17ebbdaceaba0e974857ed63b81e3",
+                "passes": 100,
+                "fails": 0
+            },
+            "replacement eventId match": {
+                "id": "aef1c3f7a1263c2066f3ebfce2524760",
+                "passes": 100,
+                "fails": 0,
+                "name": "replacement eventId match",
+                "path": "::replacement eventId match"
+            },
+            "replacement assignment id present": {
+                "path": "::replacement assignment id present",
+                "id": "8f218da4190a6c5a2d2ce202104bfbf9",
+                "passes": 100,
+                "fails": 0,
+                "name": "replacement assignment id present"
+            },
+            "replay_assign_replacement_leader status is 200": {
+                "name": "replay_assign_replacement_leader status is 200",
+                "path": "::replay_assign_replacement_leader status is 200",
+                "id": "fdc706a312a80c8a7dcc287811a54b62",
+                "passes": 100,
+                "fails": 0
+            },
+            "replay has idempotent header": {
+                "name": "replay has idempotent header",
+                "path": "::replay has idempotent header",
+                "id": "3212a9365866cd56ac7e68d0522bd7bb",
+                "passes": 100,
+                "fails": 0
+            },
+            "replay status active": {
+                "name": "replay status active",
+                "path": "::replay status active",
+                "id": "a231fbbddb92c1312479d8612e61fe26",
+                "passes": 100,
+                "fails": 0
+            },
+            "replay candidate userId match": {
+                "name": "replay candidate userId match",
+                "path": "::replay candidate userId match",
+                "id": "501f9d01f34c60171d81fcccb3aeddac",
+                "passes": 100,
+                "fails": 0
+            }
+        }
+    },
+    "metrics": {
+        "data_sent": {
+            "count": 389997,
+            "rate": 140512.90125524023
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 622,
+            "thresholds": {
+                "rate==0": false
+            },
+            "value": 0
+        },
+        "http_req_tls_handshaking": {
+            "p(95)": 29.09689499999991,
+            "avg": 3.945324758842442,
+            "min": 0,
+            "med": 0,
+            "max": 36.9422,
+            "p(90)": 22.725979999999993
+        },
+        "http_reqs": {
+            "count": 622,
+            "rate": 224.1017868874874
+        },
+        "data_received": {
+            "count": 2383120,
+            "rate": 858619.6951242909
+        },
+        "checks": {
+            "passes": 1924,
+            "fails": 0,
+            "value": 1
+        },
+        "http_req_connecting": {
+            "p(95)": 1.8535999999999941,
+            "avg": 0.38541704180064307,
+            "min": 0,
+            "med": 0,
+            "max": 17.0147,
+            "p(90)": 0.5762
+        },
+        "iteration_duration": {
+            "min": 219.5423,
+            "med": 1234.7325999999998,
+            "max": 1569.3048,
+            "p(90)": 1525.4336500000002,
+            "p(95)": 1551.1419199999998,
+            "avg": 1104.8943089999998
+        },
+        "vus": {
+            "value": 77,
+            "min": 0,
+            "max": 77
+        },
+        "http_req_sending": {
+            "p(90)": 0.53029,
+            "p(95)": 0.5511549999999998,
+            "avg": 0.14416623794212205,
+            "min": 0,
+            "med": 0,
+            "max": 6.4096
+        },
+        "replacement_assignment_errors": {
+            "count": 0,
+            "rate": 0,
+            "thresholds": {
+                "count==0": false
+            }
+        },
+        "vus_max": {
+            "value": 100,
+            "min": 100,
+            "max": 100
+        },
+        "http_req_blocked": {
+            "avg": 4.499863665594855,
+            "min": 0,
+            "med": 0,
+            "max": 46.2412,
+            "p(90)": 27.089929999999974,
+            "p(95)": 32.2576
+        },
+        "http_req_waiting": {
+            "p(90)": 881.5248699999984,
+            "p(95)": 1188.82107,
+            "avg": 174.46812443729908,
+            "min": 1.49,
+            "med": 19.646250000000002,
+            "max": 1466.2594
+        },
+        "http_req_receiving": {
+            "max": 4.1617,
+            "p(90)": 0.51986,
+            "p(95)": 0.5449499999999997,
+            "avg": 0.12535305466237942,
+            "min": 0,
+            "med": 0
+        },
+        "iterations": {
+            "count": 100,
+            "rate": 36.02922618769894
+        },
+        "replacement_assignment_journey": {
+            "avg": 1104.64,
+            "min": 219,
+            "med": 1234.5,
+            "max": 1567,
+            "p(90)": 1525,
+            "p(95)": 1551.1
+        },
+        "http_req_duration": {
+            "avg": 174.73764372990362,
+            "min": 1.5556,
+            "med": 19.859450000000002,
+            "max": 1466.2594,
+            "p(90)": 881.5248699999984,
+            "p(95)": 1188.9171450000001
+        },
+        "http_req_duration{expected_response:true}": {
+            "med": 19.859450000000002,
+            "max": 1466.2594,
+            "p(90)": 881.5248699999984,
+            "p(95)": 1188.9171450000001,
+            "avg": 174.73764372990362,
+            "min": 1.5556
+        }
+    },
+    "setup_data": {
+        "cancelledAssignmentId": "bd3823d3-4596-4f00-be1b-3a8de5ce106f",
+        "candidates": [
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "c56b48a4-a7f1-4908-ad9e-ade3b69cf5c6",
+                "userName": "leader.1"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "cdebfc96-5c4e-463a-bd02-4e8af16e1b6c",
+                "userName": "leader.10"
+            },
+            {
+                "userName": "leader.100",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "b75c6039-841c-4da1-8611-0d5c9ae17dde"
+            },
+            {
+                "userId": "ab2ac03c-0eb2-4098-8b24-b7e597a6861d",
+                "userName": "leader.11",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "ee7f72c9-6414-444d-aa66-0d5caacfc5ff",
+                "userName": "leader.12"
+            },
+            {
+                "declaredAt": null,
+                "userId": "5f3047fc-afb7-4163-b64e-2c6f96b2d207",
+                "userName": "leader.13",
+                "availabilityStatus": "NoResponse"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "bc381f44-3789-4c70-8039-4f89d1af92df",
+                "userName": "leader.14"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "34912684-c908-423d-8999-c25a02545dc5",
+                "userName": "leader.15"
+            },
+            {
+                "userId": "b3e4309a-60fd-4946-b78d-f46e939e2fad",
+                "userName": "leader.16",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "6d10471a-c1ee-42de-b77d-b383382400f6",
+                "userName": "leader.17"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "31c17671-b8a1-4ae0-9f64-d405d01fb8c8",
+                "userName": "leader.18"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "92ff9ca5-e94e-4652-9f88-5767789b3024",
+                "userName": "leader.19"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "33ad46dc-bb9b-48e9-bf74-99b68108bd0d",
+                "userName": "leader.2"
+            },
+            {
+                "userId": "071e2dfa-2b9b-4aed-86dc-8cf9587f6fc9",
+                "userName": "leader.20",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "79dca295-1bc0-4ccd-a0c0-2c41b114e496",
+                "userName": "leader.21"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "dc52c0d8-f6ef-462f-b191-dea5f09e4e63",
+                "userName": "leader.22"
+            },
+            {
+                "userName": "leader.23",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "2116dd56-5f50-4a8b-aeb7-e1c7c5098bf3"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "a9e43b0c-b76a-4480-b8bf-441e8d0a544c",
+                "userName": "leader.24"
+            },
+            {
+                "userName": "leader.25",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "5579dc05-bf15-4e40-9f55-b3dd82f2bf81"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "ccabe43c-5933-4186-bb04-74579646d272",
+                "userName": "leader.26"
+            },
+            {
+                "userId": "65a7158e-cc51-456f-9c48-5087a8da34fa",
+                "userName": "leader.27",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "7a5e6b38-29f0-4dd9-9e25-7a4f09406c2a",
+                "userName": "leader.28"
+            },
+            {
+                "userId": "9cc8b1b6-4183-439a-ae2a-d989449a2c26",
+                "userName": "leader.29",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null
+            },
+            {
+                "userId": "a756dcb7-8057-469f-8b6b-18b295753539",
+                "userName": "leader.3",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "fc1f4fe6-5202-4f80-a63b-00d4c2fcf625",
+                "userName": "leader.30"
+            },
+            {
+                "userId": "a7aab45a-84d8-4091-948e-e580a9b2ae1e",
+                "userName": "leader.31",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "86cd8060-e95e-4798-8fe0-58afe13b6ab9",
+                "userName": "leader.32"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "624fee39-11d0-4a7e-bd8e-f0190b878f00",
+                "userName": "leader.33"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "e61f8476-851b-4297-b6df-8f4ee61aeeb3",
+                "userName": "leader.34"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "75f8d811-8309-43db-8613-e146950ce09f",
+                "userName": "leader.35"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "5a075625-37a0-40c1-88b3-eb6db6ecd7c7",
+                "userName": "leader.36"
+            },
+            {
+                "userName": "leader.37",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "5b25ae86-379b-4cea-aa75-d13baed3b548"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "f7c79e26-8b22-4bcc-97af-3f2fcc8709db",
+                "userName": "leader.38"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "d59b9981-21f0-4dbe-860b-91f34ec993e1",
+                "userName": "leader.39"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "f6056c20-5718-4740-a77d-362cbbeaa0f9",
+                "userName": "leader.4"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "4c2d13d1-d83f-43a5-b079-90560ef2a93b",
+                "userName": "leader.40"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "a5b9a806-76a1-4d9e-a697-5c754f8b2ec7",
+                "userName": "leader.41"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "473104ca-e12c-4f07-af5b-9fc731e4936f",
+                "userName": "leader.42"
+            },
+            {
+                "userName": "leader.43",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "d8e0dda2-69dd-4ab4-aeab-c0d8454f6c1d"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "cf108782-59de-4e26-bfff-33d2005e61bd",
+                "userName": "leader.44"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "e25850e8-c9de-4bef-b045-e00e136ee603",
+                "userName": "leader.45"
+            },
+            {
+                "declaredAt": null,
+                "userId": "6c7779f5-6cbf-4de1-8004-1f54c279f08a",
+                "userName": "leader.46",
+                "availabilityStatus": "NoResponse"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "745f70a4-e9f4-4c12-b4ff-1de4b5dfdb17",
+                "userName": "leader.47"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "a105a568-a588-4587-a4ff-09253a9b7da7",
+                "userName": "leader.48"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "86e36db6-0b11-4f13-983f-582a95c0a72c",
+                "userName": "leader.49"
+            },
+            {
+                "userId": "79d56233-1474-46fc-8e6e-bdfa8fb77465",
+                "userName": "leader.5",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "971dd980-dc2a-4a21-ab2f-0533641797ce",
+                "userName": "leader.50"
+            },
+            {
+                "userId": "ecba54ea-69fb-43c8-8487-1baa40910d79",
+                "userName": "leader.51",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null
+            },
+            {
+                "declaredAt": null,
+                "userId": "07b54660-4417-4f66-a3f9-8842f18c21e5",
+                "userName": "leader.52",
+                "availabilityStatus": "NoResponse"
+            },
+            {
+                "declaredAt": null,
+                "userId": "25321190-2993-4380-a089-2a605b9dec65",
+                "userName": "leader.53",
+                "availabilityStatus": "NoResponse"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "98c65af9-022b-436b-bebc-3b670bea973b",
+                "userName": "leader.54"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "921dc3f0-a42e-4638-9a9f-3c5407ce2695",
+                "userName": "leader.55"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "8837f308-7159-4476-b627-4909ad5ced37",
+                "userName": "leader.56"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "8c21c07b-ae60-47c4-be76-2a5cd60e5ce1",
+                "userName": "leader.57"
+            },
+            {
+                "declaredAt": null,
+                "userId": "570fe8cd-9a70-4987-93a4-73814dd2dfd9",
+                "userName": "leader.58",
+                "availabilityStatus": "NoResponse"
+            },
+            {
+                "userName": "leader.59",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "38007981-49e1-4640-9ec4-5aa312572d29"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "f3a6b1c7-21fe-4641-9f31-3ad65d4cca4e",
+                "userName": "leader.6"
+            },
+            {
+                "userId": "989b0bef-ed0c-4321-90cd-fa69afb6cb31",
+                "userName": "leader.60",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "5b56bf1a-7e84-4292-9ae4-3ff6652a375e",
+                "userName": "leader.61"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "cdb9957a-6160-4f24-8489-70ec668f0d25",
+                "userName": "leader.62"
+            },
+            {
+                "userId": "b8bca96d-6433-4fa6-bbef-50af4c9fd0e1",
+                "userName": "leader.63",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "f40b643e-8958-4eec-bc92-7b0f4458adae",
+                "userName": "leader.64"
+            },
+            {
+                "declaredAt": null,
+                "userId": "fab20b64-7b9a-4908-af51-1af7077701f4",
+                "userName": "leader.65",
+                "availabilityStatus": "NoResponse"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "6a7ab29f-9ab7-43a0-891f-e7808030b625",
+                "userName": "leader.66"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "351818c0-f0c8-4ab4-b72f-c33889c3d216",
+                "userName": "leader.67"
+            },
+            {
+                "declaredAt": null,
+                "userId": "fcc8a914-65ec-41aa-b47c-eb46102daba1",
+                "userName": "leader.68",
+                "availabilityStatus": "NoResponse"
+            },
+            {
+                "userName": "leader.69",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "117c635b-1cd2-4b55-a2ba-af3925b79a44"
+            },
+            {
+                "userId": "b7affa68-9108-4708-afe3-8b8a93599658",
+                "userName": "leader.7",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "ed08033b-619a-46e1-906c-a015915d81d5",
+                "userName": "leader.70"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "1f17e93f-d77c-4374-aa2f-0e115e6ce24f",
+                "userName": "leader.71"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "71eebc6d-b2a3-496c-aa8d-8a6cf2e273f9",
+                "userName": "leader.72"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "b97c588f-432e-4839-899c-e1882a384146",
+                "userName": "leader.73"
+            },
+            {
+                "userId": "9c8076c9-e91d-430b-a2fd-2826d4826a6f",
+                "userName": "leader.74",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "8343ccdf-52c3-4792-943f-a8dcf7891f94",
+                "userName": "leader.75"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "31daaee9-b130-415f-836e-a6d6eec2ee1c",
+                "userName": "leader.76"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "b073e6c8-eb00-404a-907f-1b3821cbe1c9",
+                "userName": "leader.77"
+            },
+            {
+                "userId": "e1c122f4-e6f5-4e2a-ae29-48704dfd52d0",
+                "userName": "leader.78",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "3a2b5be2-e6cc-45f6-a04c-d62aa667b7af",
+                "userName": "leader.79"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "152aa3a8-77de-4300-9c77-343745418d13",
+                "userName": "leader.8"
+            },
+            {
+                "userId": "7f381cf7-f5d9-4fc9-a5d0-420fe7a18e62",
+                "userName": "leader.80",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "2854453f-9840-49a9-9da8-28c967e5bad0",
+                "userName": "leader.81"
+            },
+            {
+                "userId": "7494f5ee-493c-4ac0-90c6-5da226b10bdb",
+                "userName": "leader.82",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "48814180-2037-43ec-9d70-fb46111fe574",
+                "userName": "leader.83"
+            },
+            {
+                "userId": "675887f1-4e4f-494e-befe-aa29ca6f14cb",
+                "userName": "leader.84",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "6a76c570-b9e6-4cd6-ad06-5776187af461",
+                "userName": "leader.85"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "3f76ecfb-02c2-42a5-b5f0-8a8670fb6429",
+                "userName": "leader.86"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "42675bfd-04f4-4443-b294-7e5736012ca8",
+                "userName": "leader.87"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "0b22d85c-cf73-451f-a9cb-70947dbd47e3",
+                "userName": "leader.88"
+            },
+            {
+                "userId": "9050fb40-691f-4165-8b24-08d2e6874cdf",
+                "userName": "leader.89",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null
+            },
+            {
+                "declaredAt": null,
+                "userId": "809cba92-e471-4a74-82f7-c462ced77f60",
+                "userName": "leader.9",
+                "availabilityStatus": "NoResponse"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "3efee43d-0d70-471e-9723-de932c725397",
+                "userName": "leader.90"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "eb1bffff-9d24-458b-ab3d-b40f3b69761a",
+                "userName": "leader.91"
+            },
+            {
+                "declaredAt": null,
+                "userId": "ba5caaf4-9331-4cd0-b857-1d23e6190def",
+                "userName": "leader.92",
+                "availabilityStatus": "NoResponse"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "264e1228-78df-462d-86d1-f02b28022832",
+                "userName": "leader.93"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "769f060d-638d-449d-ba7d-25feefa47dab",
+                "userName": "leader.94"
+            },
+            {
+                "declaredAt": null,
+                "userId": "0d540f21-3964-4201-85bf-fe30ad2db3a3",
+                "userName": "leader.95",
+                "availabilityStatus": "NoResponse"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "a5f7b563-d92f-4a6c-be04-76e66311d510",
+                "userName": "leader.96"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "50faff8c-ee97-428c-afa8-7b5ae39e44c1",
+                "userName": "leader.97"
+            },
+            {
+                "userName": "leader.98",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "fed26ec6-74ec-4338-a352-2cbbc964df99"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "79c6d465-82dc-4c42-9633-1567d8163338",
+                "userName": "leader.99"
+            },
+            {
+                "declaredAt": null,
+                "userId": "f7fe8909-78a2-4c83-ba79-ea4bf20db8b9",
+                "userName": "leader.five",
+                "availabilityStatus": "NoResponse"
+            },
+            {
+                "userId": "321bd66a-4677-4547-978e-4c430a618345",
+                "userName": "leader.four",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "23b292dc-5957-4716-bc63-676bcecc1e81",
+                "userName": "leader.one"
+            },
+            {
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null,
+                "userId": "cef84a00-ada0-426e-99e4-2cf513260f01",
+                "userName": "leader.three"
+            },
+            {
+                "userId": "49f97d53-2fcb-44c5-8655-a6f2b97d836a",
+                "userName": "leader.two",
+                "availabilityStatus": "NoResponse",
+                "declaredAt": null
+            }
+        ],
+        "eventId": "016c677c-14c1-48e9-866c-216588fb7293"
+    }
+}

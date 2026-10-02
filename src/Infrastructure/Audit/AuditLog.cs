@@ -128,4 +128,24 @@ public sealed class AuditLog
             resourceType: "TeamAssignment",
             source: isAdminActor ? "AdminOverrideCancellation" : "VolunteerSelfCancellation",
             mandatoryReason: mandatoryReason);
+
+    public static AuditLog ReplacementLeaderAssigned(
+        Guid teamAssignmentId,
+        Guid actorUserId,
+        Guid correlationId,
+        DateTimeOffset occurredAt,
+        Guid? replacedAssignmentId,
+        string? mandatoryReason,
+        bool isAdminActor) =>
+        Create(
+            actorUserId,
+            action: "ReplacementLeaderAssigned",
+            resourceId: teamAssignmentId,
+            correlationId: correlationId,
+            occurredAt: occurredAt,
+            previousValue: replacedAssignmentId?.ToString(),
+            newValue: "Active",
+            resourceType: "TeamAssignment",
+            source: isAdminActor ? "AdminOverrideReplacement" : "ChiefLeaderReplacement",
+            mandatoryReason: mandatoryReason ?? "Drafted as replacement leader");
 }

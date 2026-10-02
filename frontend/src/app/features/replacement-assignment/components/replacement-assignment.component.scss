@@ -1,0 +1,73 @@
+.replacement-container { max-width: 800px; margin: 0 auto; padding: .75rem; box-sizing: border-box; overflow-wrap: anywhere; word-break: break-word; }
+.eyebrow { font-size: .8125rem; font-weight: 700; color: #4b5563; margin: 0 0 .25rem; }
+#replacement-title { font-size: 1.5rem; font-weight: 700; margin: 0 0 1rem; }
+.event-summary-card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: .5rem; padding: .75rem 1rem; margin-bottom: 2rem; box-sizing: border-box; }
+.event-title { font-size: 1.125rem; font-weight: 700; margin: 0 0 .25rem; }
+.event-meta { display: flex; flex-direction: column; gap: .25rem; }
+.meta-text { font-size: .875rem; color: #4b5563; margin: 0; }
+.live-region { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
+.alert-box {
+  padding: .75rem; border-radius: .5rem; margin-bottom: 1.5rem; box-sizing: border-box;
+  h2, h3 { font-size: 1rem; margin: 0 0 .25rem; }
+  p { font-size: .875rem; margin: 0; }
+  &.error { background: #fef2f2; border: 1px solid #f87171; color: #991b1b; }
+  &.warning { background: #fffbeb; border: 1px solid #fcd34d; color: #92400e; }
+}
+
+.btn-retry { margin-top: .5rem; min-height: 44px; min-width: 44px; padding: .5rem; background: #dc2626; color: #fff; border: 0; border-radius: .25rem; font-weight: 600; cursor: pointer; }
+
+section { margin-bottom: 2rem; }
+.section-header {
+  margin-bottom: .75rem;
+  h2 { font-size: 1.2rem; margin: 0; display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; }
+}
+.section-hint { font-size: .8125rem; color: #6b7280; margin: .25rem 0 0; }
+.count-badge { font-size: .75rem; font-weight: 700; padding: .125rem .5rem; border-radius: 9999px; background: #e5e7eb; color: #374151; }
+
+.justification-label { font-size: 1rem; font-weight: 700; color: #111827; display: block; margin-bottom: .375rem; }
+.justification-input {
+  width: 100%; box-sizing: border-box; min-height: 44px; padding: .5rem .75rem; border: 1px solid #d1d5db; border-radius: .25rem; font-size: .875rem; outline: 0;
+  &:focus-visible { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.25); }
+}
+
+ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .75rem; }
+
+.gap-item, .team-item, .candidate-item {
+  border: 1px solid #e5e7eb; border-radius: .5rem; padding: .75rem 1rem; background: #fff; box-sizing: border-box;
+}
+
+.gap-item {
+  border-width: 2px; cursor: pointer; outline: 0; min-height: 44px;
+  &:hover, &:focus-visible { border-color: #93c5fd; }
+  &.selected { border-color: #2563eb; background: #eff6ff; }
+}
+
+.gap-header, .team-item { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .5rem; }
+.gap-header { margin-bottom: .25rem; }
+.team-item { background: #f9fafb; }
+
+.cancelled-name, .member-name, .candidate-name { font-weight: 700; color: #111827; word-break: break-word; }
+.slot-select-indicator { margin-top: .375rem; font-size: .75rem; font-weight: 600; }
+.selected-tag { color: #1d4ed8; }
+.unselected-tag { color: #6b7280; }
+
+.candidate-item {
+  display: flex; flex-direction: column; gap: .75rem;
+  @media (min-width: 600px) { flex-direction: row; justify-content: space-between; align-items: center; }
+}
+
+.candidate-info { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.status-badge, .availability-badge { font-size: .75rem; font-weight: 700; padding: .2rem .5rem; border-radius: .25rem; }
+.status-badge-active, .badge-available { background: #dcfce7; color: #166534; }
+.status-badge-cancelled { background: #fee2e2; color: #991b1b; }
+.badge-not-available { background: #fef3c7; color: #92400e; }
+.badge-no-response { background: #f3f4f6; color: #4b5563; }
+
+.btn-action {
+  min-height: 44px; min-width: 44px; max-width: 100%; width: 100%; padding: .5rem 1rem; border-radius: .25rem; font-size: .875rem; font-weight: 600; border: 0; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; outline: 0; box-sizing: border-box; background: #2563eb; color: #fff;
+  &:hover:not(:disabled) { background: #1d4ed8; }
+  &:focus-visible { box-shadow: 0 0 0 3px rgba(37,99,235,.4); }
+  &:disabled { opacity: .5; cursor: not-allowed; }
+  @media (min-width: 600px) { width: auto; }
+}

@@ -27,6 +27,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/team-selection/components/team-selection.component').then(m => m.TeamSelectionComponent),
   },
   {
+    path: 'events/:eventId/replacement-assignment',
+    canActivate: [chiefLeaderGuard],
+    loadComponent: () => import('./features/replacement-assignment/components/replacement-assignment.component').then(m => m.ReplacementAssignmentComponent),
+  },
+  {
     path: 'my-appointments',
     canActivate: [chiefLeaderGuard],
     children: [
