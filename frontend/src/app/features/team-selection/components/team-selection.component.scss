@@ -3,6 +3,8 @@
   max-inline-size: 48rem;
   margin-inline: auto;
   padding: var(--cd-space-4);
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
 }
 
 .eyebrow {
@@ -16,14 +18,13 @@
 
 h1 {
   margin-block: var(--cd-space-2);
-  font: var(--cd-weight-bold) clamp(1.75rem, 5vw, 2.4rem)/var(--cd-line-tight) var(--cd-font-display);
+  font: var(--cd-weight-bold) clamp(1.4rem, 5vw, 2.4rem)/var(--cd-line-tight) var(--cd-font-display);
   color: var(--cd-text-primary);
+  word-break: break-word;
 }
 
-.event-summary-card,
-.alert-box,
-.roster-section,
-.candidates-section {
+section,
+.event-summary-card {
   margin-block: var(--cd-space-4);
   padding: var(--cd-space-4);
   border: 1px solid var(--cd-border-default);
@@ -36,6 +37,7 @@ h1 {
   margin: 0;
   font-size: var(--cd-font-size-lg);
   font-weight: var(--cd-weight-bold);
+  word-break: break-word;
 }
 
 .event-meta {
@@ -45,9 +47,7 @@ h1 {
   gap: var(--cd-space-1);
 }
 
-.meta-item,
-.member-timestamp,
-.candidate-timestamp,
+.meta-text,
 .empty-state {
   margin: 0;
   color: var(--cd-text-secondary);
@@ -62,40 +62,41 @@ h1 {
   font-size: var(--cd-font-size-sm);
 }
 
-.alert-box {
-  &.error {
-    border-inline-start: 4px solid var(--cd-status-danger-fg);
-    background: var(--cd-status-danger-bg);
-    color: var(--cd-status-danger-fg);
-  }
-  &.warning {
-    border-inline-start: 4px solid var(--cd-status-warning-fg);
-    background: var(--cd-status-warning-bg);
-    color: var(--cd-text-primary);
-  }
+.alert-box.error {
+  border-inline-start: 4px solid var(--cd-status-danger-fg);
+  background: var(--cd-status-danger-bg);
+  color: var(--cd-status-danger-fg);
+}
+
+.alert-box.warning {
+  border-inline-start: 4px solid var(--cd-status-warning-fg);
+  background: var(--cd-status-warning-bg);
+  color: var(--cd-text-primary);
 }
 
 .btn-retry {
-  min-block-size: var(--cd-touch-target-min, 44px);
+  min-block-size: 44px;
   margin-block-start: var(--cd-space-3);
   padding-inline: var(--cd-space-4);
   border: 1px solid var(--cd-border-strong);
   border-radius: var(--cd-radius-control);
   background: var(--cd-bg-surface);
   font-weight: var(--cd-weight-semibold);
-  cursor: pointer;
 }
 
 .section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--cd-space-2);
   margin-block-end: var(--cd-space-3);
   padding-block-end: var(--cd-space-2);
-  border-block-end: 1px solid var(--cd-border-subtle, #e5e7eb);
+  border-block-end: 1px solid var(--cd-border-subtle);
 }
 
-.count-badge {
+.count-badge,
+.status-badge {
   display: inline-flex;
   padding: 0.2rem 0.55rem;
   border-radius: var(--cd-radius-pill);
@@ -103,15 +104,27 @@ h1 {
   font-weight: var(--cd-weight-bold);
   background: var(--cd-status-success-bg);
   color: var(--cd-status-success-fg);
+}
 
-  &-candidates {
-    background: var(--cd-bg-muted, #f3f4f6);
-    color: var(--cd-text-secondary);
+.count-badge.muted {
+  background: var(--cd-bg-muted);
+  color: var(--cd-text-secondary);
+}
+
+.status-badge {
+  padding: 0.25rem 0.65rem;
+
+  &.danger {
+    background: var(--cd-status-danger-bg);
+    color: var(--cd-status-danger-fg);
+  }
+  &.warning {
+    background: var(--cd-status-warning-bg);
+    color: var(--cd-status-warning-fg);
   }
 }
 
-.team-list,
-.candidates-list {
+.item-list {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -120,24 +133,29 @@ h1 {
   gap: var(--cd-space-3);
 }
 
-.team-item,
-.candidate-item {
+.list-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: var(--cd-space-3);
   padding: var(--cd-space-3);
-  border: 1px solid var(--cd-border-subtle, #e5e7eb);
+  border: 1px solid var(--cd-border-subtle);
   border-radius: var(--cd-radius-control);
-  background: var(--cd-bg-surface-elevated, #fafafa);
+  background: var(--cd-bg-surface-elevated);
 }
 
-.member-info,
-.candidate-info {
+.item-info {
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+.candidate-name-row {
+  display: flex;
+  align-items: center;
+  gap: var(--cd-space-2);
+  flex-wrap: wrap;
 }
 
 .member-name,
@@ -147,19 +165,10 @@ h1 {
   word-break: break-word;
 }
 
-.status-badge-active {
-  display: inline-flex;
-  padding: 0.25rem 0.65rem;
-  border-radius: var(--cd-radius-pill);
-  font-size: var(--cd-font-size-xs);
-  font-weight: var(--cd-weight-bold);
-  background: var(--cd-status-success-bg);
-  color: var(--cd-status-success-fg);
-}
-
-.btn-select {
-  min-block-size: var(--cd-touch-target-min, 44px);
-  min-inline-size: 8rem;
+.btn-action {
+  min-block-size: 44px;
+  min-inline-size: 7rem;
+  max-inline-size: 100%;
   padding: var(--cd-space-2) var(--cd-space-4);
   border: 2px solid var(--cd-action-primary);
   border-radius: var(--cd-radius-control);
@@ -167,30 +176,26 @@ h1 {
   color: var(--cd-text-inverse);
   font-weight: var(--cd-weight-semibold);
   font-size: var(--cd-font-size-sm);
-  cursor: pointer;
 
   &:hover:not(:disabled) {
-    background: var(--cd-action-primary-hover, #065f46);
-  }
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    background: var(--cd-action-primary-hover);
   }
 }
 
 @media (max-width: 30rem) {
-  .team-item,
-  .candidate-item {
+  :host {
+    padding-inline: var(--cd-space-2);
+  }
+  section,
+  .event-summary-card {
+    padding-inline: var(--cd-space-3);
+  }
+  .list-item {
     flex-direction: column;
     align-items: flex-start;
   }
-  .btn-select {
+  .btn-action {
     inline-size: 100%;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    transition-duration: 0.01ms !important;
+    min-inline-size: 0;
   }
 }

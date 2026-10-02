@@ -91,4 +91,22 @@ public sealed class AuditLog
             newValue: "Active",
             resourceType: "TeamAssignment",
             source: isAdminActor ? "AdminSelection" : "Direct");
+
+    public static AuditLog DirectLeaderAssignmentExecuted(
+        Guid teamAssignmentId,
+        Guid actorUserId,
+        Guid correlationId,
+        DateTimeOffset occurredAt,
+        string priorAvailability,
+        bool isAdminActor) =>
+        Create(
+            actorUserId,
+            action: "DirectLeaderAssignmentExecuted",
+            resourceId: teamAssignmentId,
+            correlationId: correlationId,
+            occurredAt: occurredAt,
+            previousValue: priorAvailability,
+            newValue: "Active",
+            resourceType: "TeamAssignment",
+            source: isAdminActor ? "AdminDirectDraft" : "ChiefLeaderDirectDraft");
 }

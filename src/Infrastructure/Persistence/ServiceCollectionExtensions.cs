@@ -7,6 +7,7 @@ using Carpediem.Modules.Events.Application.EventPublication;
 using Carpediem.Infrastructure.Audit;
 using Carpediem.Modules.Staffing.Application.Availability;
 using Carpediem.Modules.Staffing.Application.TeamSelection;
+using Carpediem.Modules.Staffing.Application.DirectAssignment;
 using Carpediem.Modules.Notifications.Application;
 using Carpediem.Infrastructure.Notifications;
 using Microsoft.AspNetCore.Identity;
@@ -42,6 +43,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAvailabilityStore, EfAvailabilityStore>();
         services.AddScoped<ITeamSelectionStore, EfTeamSelectionStore>();
         services.AddScoped<IVolunteerSelectedNotificationWriter, EfVolunteerSelectedNotificationWriter>();
+        services.AddScoped<IDirectAssignmentStore, EfDirectAssignmentStore>();
+        services.AddScoped<IDirectLeaderAssignedNotificationWriter, EfDirectLeaderAssignedNotificationWriter>();
 
         services
             .AddIdentityCore<CarpediemUser>(options =>

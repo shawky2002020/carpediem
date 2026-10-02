@@ -210,6 +210,29 @@ builder.Services.AddOpenApi(options =>
                 };
             }
         }
+        if (operation.OperationId == "DirectAssignLeader")
+        {
+            operation.Parameters ??= [];
+            operation.Parameters.Add(new OpenApiParameter
+            {
+                Name = "X-XSRF-TOKEN",
+                In = ParameterLocation.Header,
+                Required = true,
+                Description = "Antiforgery request token paired with the session cookie.",
+                Schema = new OpenApiSchema { Type = JsonSchemaType.String },
+            });
+            if (operation.Responses?.TryGetValue("200", out var replayResponse) == true &&
+                replayResponse is OpenApiResponse concreteReplayResponse)
+            {
+                concreteReplayResponse.Headers ??= new Dictionary<string, IOpenApiHeader>();
+                concreteReplayResponse.Headers["Idempotent-Replay"] = new OpenApiHeader
+                {
+                    Description = "True when the response replays the committed active team assignment.",
+                    Required = false,
+                    Schema = new OpenApiSchema { Type = JsonSchemaType.Boolean },
+                };
+            }
+        }
         return Task.CompletedTask;
     });
     options.AddSchemaTransformer((schema, context, _) =>
@@ -263,6 +286,7 @@ app.MapChiefLeaderAppointmentEndpoints();
 app.MapChiefLeaderResponseEndpoints();
 app.MapEventAvailabilityEndpoints();
 app.MapEventTeamSelectionEndpoints();
+app.MapEventDirectAssignmentEndpoints();
 
 await app.Services.SeedDevelopmentIdentityAsync(app.Environment.IsDevelopment(), app.Configuration);
 await app.RunAsync();

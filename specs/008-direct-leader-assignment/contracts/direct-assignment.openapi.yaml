@@ -1,0 +1,233 @@
+openapi: 3.0.3
+info:
+  title: Carpediem Direct Leader Assignment API
+  version: 1.0.0
+  description: API endpoints for Chief Leader and Administrator direct leader drafting of non-respondents and NotAvailable volunteers.
+paths:
+  /api/events/{eventId}/direct-assignment/candidates:
+    get:
+      tags:
+        - Direct Assignment
+      summary: Get eligible direct assignment candidate pool (non-respondents and NotAvailable leaders)
+      operationId: GetDirectAssignmentCandidates
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Direct assignment candidates retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DirectAssignmentCandidatesResponse'
+        '400':
+          description: Malformed event ID
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Unauthenticated
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Forbidden - Not the active Chief Leader or Admin on this event
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Event not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Invalid event status (e.g. not Published)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+    post:
+      tags:
+        - Direct Assignment
+      summary: Directly assign a leader onto the active event team roster
+      operationId: DirectAssignLeader
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-XSRF-TOKEN
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Antiforgery request token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DirectAssignLeaderRequest'
+      responses:
+        '201':
+          description: Leader directly assigned and placed into Active team status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamAssignmentResponse'
+        '200':
+          description: Idempotent replay of existing active team placement
+          headers:
+            Idempotent-Replay:
+              schema:
+                type: string
+                example: 'true'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamAssignmentResponse'
+        '400':
+          description: Malformed request or invalid candidate ID
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Unauthenticated
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Forbidden - Not the active Chief Leader or Admin on this event
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '404':
+          description: Event or Candidate not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Conflict (chief_leader_conflict, window_closed, invalid_event_status)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+components:
+  schemas:
+    DirectAssignmentCandidatesResponse:
+      type: object
+      required:
+        - eventId
+        - staffingCycleId
+        - isWindowOpen
+        - candidates
+      properties:
+        eventId:
+          type: string
+          format: uuid
+        staffingCycleId:
+          type: string
+          format: uuid
+        isWindowOpen:
+          type: boolean
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/DirectAssignmentCandidateItem'
+    DirectAssignmentCandidateItem:
+      type: object
+      required:
+        - userId
+        - userName
+        - availabilityStatus
+      properties:
+        userId:
+          type: string
+          format: uuid
+        userName:
+          type: string
+        availabilityStatus:
+          type: string
+          enum: [NotAvailable, NoResponse]
+        declaredAt:
+          type: string
+          format: date-time
+          nullable: true
+    DirectAssignLeaderRequest:
+      type: object
+      required:
+        - candidateUserId
+      properties:
+        candidateUserId:
+          type: string
+          format: uuid
+    TeamAssignmentResponse:
+      type: object
+      required:
+        - id
+        - eventId
+        - staffingCycleId
+        - userId
+        - status
+        - assignedAt
+        - assignedByUserId
+        - version
+      properties:
+        id:
+          type: string
+          format: uuid
+        eventId:
+          type: string
+          format: uuid
+        staffingCycleId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          example: Active
+        assignedAt:
+          type: string
+          format: date-time
+        assignedByUserId:
+          type: string
+          format: uuid
+        version:
+          type: string
+    ProblemDetails:
+      type: object
+      required:
+        - type
+        - title
+        - status
+        - code
+        - traceId
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        code:
+          type: string
+        detail:
+          type: string
+        traceId:
+          type: string

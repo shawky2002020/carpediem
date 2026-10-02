@@ -38,3 +38,21 @@ export interface TeamAssignmentResponse {
   assignedByUserId: string;
   version: string;
 }
+
+export interface DirectAssignmentCandidate {
+  userId: string;
+  userName: string;
+  availabilityStatus: 'NotAvailable' | 'NoResponse';
+  declaredAt: string | null;
+}
+
+export interface DirectAssignmentCandidatesResponse {
+  eventId: string;
+  staffingCycleId: string;
+  isWindowOpen: boolean;
+  candidates: DirectAssignmentCandidate[];
+}
+
+export interface DirectAssignLeaderRequest {
+  candidateUserId: string;
+}

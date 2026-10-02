@@ -66,4 +66,48 @@ public sealed class TeamAssignment
             AssignedByUserId = assignedByUserId
         };
     }
+
+    public static TeamAssignment CreateDirectAssignment(
+        Guid staffingCycleId,
+        Guid eventId,
+        Guid candidateUserId,
+        Guid assignedByUserId,
+        DateTimeOffset eventStartUtc,
+        DateTimeOffset assignedAtUtc,
+        bool isCandidateChiefLeaderOnEvent,
+        string eventStatus)
+    {
+        if (staffingCycleId == Guid.Empty) throw new ArgumentException("StaffingCycleId cannot be empty.", nameof(staffingCycleId));
+        if (eventId == Guid.Empty) throw new ArgumentException("EventId cannot be empty.", nameof(eventId));
+        if (candidateUserId == Guid.Empty) throw new ArgumentException("CandidateUserId cannot be empty.", nameof(candidateUserId));
+        if (assignedByUserId == Guid.Empty) throw new ArgumentException("AssignedByUserId cannot be empty.", nameof(assignedByUserId));
+        if (assignedAtUtc.Offset != TimeSpan.Zero) throw new ArgumentException("AssignedAt must be UTC.", nameof(assignedAtUtc));
+        if (eventStartUtc.Offset != TimeSpan.Zero) throw new ArgumentException("EventStart must be UTC.", nameof(eventStartUtc));
+
+        if (!string.Equals(eventStatus, "Published", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidEventStatusException(eventId, eventStatus);
+        }
+
+        if (eventStartUtc <= assignedAtUtc)
+        {
+            throw new TeamSelectionWindowClosedException(eventId);
+        }
+
+        if (isCandidateChiefLeaderOnEvent)
+        {
+            throw new ChiefLeaderExclusivityException(eventId, candidateUserId);
+        }
+
+        return new TeamAssignment
+        {
+            Id = Guid.NewGuid(),
+            StaffingCycleId = staffingCycleId,
+            EventId = eventId,
+            UserId = candidateUserId,
+            Status = TeamAssignmentStatus.Active,
+            AssignedAt = assignedAtUtc,
+            AssignedByUserId = assignedByUserId
+        };
+    }
 }

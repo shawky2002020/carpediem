@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import { TeamSelectionService } from './team-selection.service';
 import {
+  DirectAssignmentCandidatesResponse,
   TeamAssignmentResponse,
   TeamSelectionContext,
 } from './team-selection.model';
@@ -84,6 +85,61 @@ describe('TeamSelectionService', () => {
     });
 
     const req = httpMock.expectOne(`/api/events/${eventId}/team-selection`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ candidateUserId });
+    req.flush(mockResponse);
+  });
+
+  it('retrieves direct assignment candidates for event', () => {
+    const eventId = '11111111-1111-1111-1111-111111111111';
+    const mockCandidatesResponse: DirectAssignmentCandidatesResponse = {
+      eventId,
+      staffingCycleId: '22222222-2222-2222-2222-222222222222',
+      isWindowOpen: true,
+      candidates: [
+        {
+          userId: '33333333-3333-3333-3333-333333333333',
+          userName: 'omar_not_available',
+          availabilityStatus: 'NotAvailable',
+          declaredAt: '2026-10-01T10:00:00Z',
+        },
+        {
+          userId: '88888888-8888-8888-8888-888888888888',
+          userName: 'fatma_no_response',
+          availabilityStatus: 'NoResponse',
+          declaredAt: null,
+        },
+      ],
+    };
+
+    service.getDirectAssignmentCandidates(eventId).subscribe(res => {
+      expect(res).toEqual(mockCandidatesResponse);
+    });
+
+    const req = httpMock.expectOne(`/api/events/${eventId}/direct-assignment/candidates`);
+    expect(req.request.method).toBe('GET');
+    req.flush(mockCandidatesResponse);
+  });
+
+  it('submits direct leader assignment request', () => {
+    const eventId = '11111111-1111-1111-1111-111111111111';
+    const candidateUserId = '33333333-3333-3333-3333-333333333333';
+    const mockResponse: TeamAssignmentResponse = {
+      id: '99999999-9999-9999-9999-999999999999',
+      eventId,
+      staffingCycleId: '22222222-2222-2222-2222-222222222222',
+      userId: candidateUserId,
+      status: 'Active',
+      assignedAt: '2026-10-01T12:00:00Z',
+      assignedByUserId: '77777777-7777-7777-7777-777777777777',
+      version: 'CCCCCCC=',
+    };
+
+    service.directAssignLeader(eventId, candidateUserId).subscribe(res => {
+      expect(res).toEqual(mockResponse);
+    });
+
+    const req = httpMock.expectOne(`/api/events/${eventId}/direct-assignment`);
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({ candidateUserId });
     req.flush(mockResponse);

@@ -160,6 +160,19 @@ async function mockTeamSelectionApi(page: Page, options: MockTeamSelectionOption
       });
     }
 
+    if (path === `/api/events/${targetEventId}/direct-assignment/candidates` && request.method() === 'GET') {
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          eventId: targetEventId,
+          staffingCycleId,
+          isWindowOpen: options.isWindowOpen ?? true,
+          candidates: [],
+        }),
+      });
+    }
+
     if (path === `/api/events/${targetEventId}/team-selection` && request.method() === 'POST') {
       postCalls += 1;
       const body = JSON.parse(request.postData() ?? '{}');

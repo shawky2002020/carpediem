@@ -2,6 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import {
+  DirectAssignmentCandidatesResponse,
+  DirectAssignLeaderRequest,
   SelectVolunteerRequest,
   TeamAssignmentResponse,
   TeamSelectionContext,
@@ -19,6 +21,20 @@ export class TeamSelectionService {
     const payload: SelectVolunteerRequest = { candidateUserId };
     return this.http.post<TeamAssignmentResponse>(
       `/api/events/${eventId}/team-selection`,
+      payload,
+    );
+  }
+
+  getDirectAssignmentCandidates(eventId: string): Observable<DirectAssignmentCandidatesResponse> {
+    return this.http.get<DirectAssignmentCandidatesResponse>(
+      `/api/events/${eventId}/direct-assignment/candidates`,
+    );
+  }
+
+  directAssignLeader(eventId: string, candidateUserId: string): Observable<TeamAssignmentResponse> {
+    const payload: DirectAssignLeaderRequest = { candidateUserId };
+    return this.http.post<TeamAssignmentResponse>(
+      `/api/events/${eventId}/direct-assignment`,
       payload,
     );
   }

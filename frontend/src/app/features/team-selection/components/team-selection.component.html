@@ -6,13 +6,13 @@
       <div class="event-summary-card">
         <h2 class="event-title">{{ ctx.eventTitle }}</h2>
         <div class="event-meta">
-          <p class="meta-item">
+          <p class="meta-item meta-text">
             <strong>Schedule:</strong>
             <time [attr.datetime]="ctx.startDateTime">{{ formatDate(ctx.startDateTime) }}</time>
             –
             <time [attr.datetime]="ctx.endDateTime">{{ formatDate(ctx.endDateTime) }}</time>
           </p>
-          <p class="meta-item">
+          <p class="meta-item meta-text">
             <strong>Location:</strong> {{ ctx.location }}
           </p>
         </div>
@@ -22,7 +22,7 @@
 
   <div class="live-region" role="status" aria-live="polite" aria-atomic="true">
     @if (loading()) { Loading team selection context… }
-    @else if (submittingId()) { Adding volunteer to active team… }
+    @else if (submittingId()) { Processing team assignment… }
     @else if (statusMessage()) { {{ statusMessage() }} }
   </div>
 
@@ -33,12 +33,14 @@
         <p>The Chief Leader cannot be selected as a volunteer team member on this event.</p>
       } @else if (error.code === 'candidate_not_available') {
         <p>This volunteer is no longer available in the current staffing cycle.</p>
+      } @else if (error.code === 'leader_role_required') {
+        <p>Direct assignment requires the candidate to hold the Leader role.</p>
       } @else if (error.code === 'window_closed') {
         <p>Team selection is closed because the event has already started.</p>
       } @else if (error.code === 'invalid_event_status') {
         <p>Team selection is only permitted for published events.</p>
       } @else if (error.code === 'unauthorized_chief_leader') {
-        <p>You are not authorized to select volunteers for this event.</p>
+        <p>You are not authorized to assign team members for this event.</p>
       } @else {
         <p>{{ error.detail || 'An unexpected error occurred while processing team selection.' }}</p>
       }
@@ -66,12 +68,12 @@
       @if (activeTeam().length === 0) {
         <p class="empty-state">No team members selected yet. Select available volunteers below.</p>
       } @else {
-        <ul class="team-list" role="list">
+        <ul class="item-list team-list" role="list">
           @for (member of activeTeam(); track member.assignmentId) {
-            <li class="team-item">
-              <div class="member-info">
+            <li class="list-item team-item">
+              <div class="item-info member-info">
                 <span class="member-name">{{ member.userName }}</span>
-                <span class="member-timestamp">Selected: {{ formatDate(member.assignedAt) }}</span>
+                <span class="member-timestamp meta-text">Selected: {{ formatDate(member.assignedAt) }}</span>
               </div>
               <span class="status-badge status-badge-active" role="status">Active</span>
             </li>
@@ -84,7 +86,7 @@
     <section class="candidates-section" aria-labelledby="available-candidates-heading">
       <div class="section-header">
         <h2 id="available-candidates-heading">Available Volunteers</h2>
-        <span class="count-badge count-badge-candidates" [attr.aria-label]="availableCandidatesCount() + ' available volunteers'">
+        <span class="count-badge count-badge-candidates muted" [attr.aria-label]="availableCandidatesCount() + ' available volunteers'">
           {{ availableCandidatesCount() }}
         </span>
       </div>
@@ -92,16 +94,16 @@
       @if (availableCandidates().length === 0) {
         <p class="empty-state">No available volunteers found in the pool for this cycle.</p>
       } @else {
-        <ul class="candidates-list" role="list">
+        <ul class="item-list candidates-list" role="list">
           @for (candidate of availableCandidates(); track candidate.userId) {
-            <li class="candidate-item">
-              <div class="candidate-info">
+            <li class="list-item candidate-item">
+              <div class="item-info candidate-info">
                 <span class="candidate-name">{{ candidate.userName }}</span>
-                <span class="candidate-timestamp">Available since: {{ formatDate(candidate.declaredAt) }}</span>
+                <span class="candidate-timestamp meta-text">Available since: {{ formatDate(candidate.declaredAt) }}</span>
               </div>
               <button
                 type="button"
-                class="btn-select"
+                class="btn-action btn-select"
                 [disabled]="!ctx.isWindowOpen || submittingId() !== null"
                 [attr.aria-label]="'Select ' + candidate.userName + ' for team'"
                 (click)="selectVolunteer(candidate)">
@@ -109,6 +111,52 @@
                   Selecting…
                 } @else {
                   Select for Team
+                }
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <!-- Direct Draft Pool Section (SLICE-09) -->
+    <section class="direct-assignment-section" aria-labelledby="direct-candidates-heading">
+      <div class="section-header">
+        <h2 id="direct-candidates-heading">Direct Draft Pool (Non-Respondents & Not Available)</h2>
+        <span class="count-badge count-badge-direct muted" [attr.aria-label]="directCandidatesCount() + ' direct draft candidates'">
+          {{ directCandidatesCount() }}
+        </span>
+      </div>
+
+      @if (directCandidates().length === 0) {
+        <p class="empty-state">No leaders available for direct drafting.</p>
+      } @else {
+        <ul class="item-list direct-candidates-list" role="list">
+          @for (candidate of directCandidates(); track candidate.userId) {
+            <li class="list-item candidate-item">
+              <div class="item-info candidate-info">
+                <div class="candidate-name-row">
+                  <span class="candidate-name">{{ candidate.userName }}</span>
+                  @if (candidate.availabilityStatus === 'NotAvailable') {
+                    <span class="status-badge danger status-badge-unavailable badge-unavailable">Not Available</span>
+                  } @else {
+                    <span class="status-badge warning status-badge-no-response badge-no-response">Response Needed</span>
+                  }
+                </div>
+                @if (candidate.declaredAt) {
+                  <span class="candidate-timestamp meta-text">Declined: {{ formatDate(candidate.declaredAt) }}</span>
+                }
+              </div>
+              <button
+                type="button"
+                class="btn-action btn-direct-assign"
+                [disabled]="!ctx.isWindowOpen || submittingId() !== null"
+                [attr.aria-label]="'Directly assign ' + candidate.userName + ' to team'"
+                (click)="directAssignLeader(candidate)">
+                @if (submittingId() === candidate.userId) {
+                  Assigning…
+                } @else {
+                  Direct Assign
                 }
               </button>
             </li>
