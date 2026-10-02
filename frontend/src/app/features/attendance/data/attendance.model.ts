@@ -4,6 +4,7 @@ export interface AttendanceRollSheetEntry {
   teamAssignmentId: string;
   volunteerUserId: string;
   volunteerName: string;
+  attendanceOutcomeId: string | null;
   outcome: AttendanceOutcomeType | null;
   finalizedAt: string | null;
   version: string | null;
@@ -38,4 +39,18 @@ export interface FinalizeAttendanceResponse {
   attendedCount: number;
   noShowCount: number;
   unrecordedCount: number;
+}
+
+export interface CorrectAttendanceRequest {
+  newOutcome: AttendanceOutcomeType;
+  reason: string;
+}
+
+export interface CorrectAttendanceResponse {
+  attendanceOutcomeId: string;
+  teamAssignmentId: string;
+  previousOutcome: AttendanceOutcomeType;
+  newOutcome: AttendanceOutcomeType;
+  correctedAt: string;
+  version: string | null;
 }

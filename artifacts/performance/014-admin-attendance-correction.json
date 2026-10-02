@@ -1,0 +1,285 @@
+{
+    "root_group": {
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {},
+        "checks": {
+                "antiforgery status 200": {
+                    "name": "antiforgery status 200",
+                    "path": "::antiforgery status 200",
+                    "id": "e897c796bde5fc25ac02afa3290b6a05",
+                    "passes": 100,
+                    "fails": 0
+                },
+                "login status 200": {
+                    "id": "a9f04e9f501317c68a9f824e04811bea",
+                    "passes": 50,
+                    "fails": 0,
+                    "name": "login status 200",
+                    "path": "::login status 200"
+                },
+                "create_draft status 201": {
+                    "name": "create_draft status 201",
+                    "path": "::create_draft status 201",
+                    "id": "0f702049676cc993a21d3448d4fcdc9e",
+                    "passes": 50,
+                    "fails": 0
+                },
+                "read_candidates status 200": {
+                    "name": "read_candidates status 200",
+                    "path": "::read_candidates status 200",
+                    "id": "3535f2f630948192e0a2471df8f0c085",
+                    "passes": 50,
+                    "fails": 0
+                },
+                "candidate exists": {
+                    "name": "candidate exists",
+                    "path": "::candidate exists",
+                    "id": "86b6bb1cef796857f220a24dbb591995",
+                    "passes": 50,
+                    "fails": 0
+                },
+                "appoint status 201": {
+                    "name": "appoint status 201",
+                    "path": "::appoint status 201",
+                    "id": "e61543a92b6682c9eb830d8a0f81aa7a",
+                    "passes": 50,
+                    "fails": 0
+                },
+                "record_external_acceptance status 200": {
+                    "name": "record_external_acceptance status 200",
+                    "path": "::record_external_acceptance status 200",
+                    "id": "abbf0eb3aac9f2826ceaf7bcd3e6f21c",
+                    "passes": 50,
+                    "fails": 0
+                },
+                "get_draft_detail status 200": {
+                    "name": "get_draft_detail status 200",
+                    "path": "::get_draft_detail status 200",
+                    "id": "da0cbcd99f114af6088369dc9dcc5cd9",
+                    "passes": 50,
+                    "fails": 0
+                },
+                "publish_event status 200": {
+                    "path": "::publish_event status 200",
+                    "id": "305a67da3fbac037b74de13e85f7b15a",
+                    "passes": 50,
+                    "fails": 0,
+                    "name": "publish_event status 200"
+                },
+                "get_direct_candidates status 200": {
+                    "name": "get_direct_candidates status 200",
+                    "path": "::get_direct_candidates status 200",
+                    "id": "23d82f07f9e33740827cb8cd67369fc0",
+                    "passes": 50,
+                    "fails": 0
+                },
+                "volunteer candidate exists": {
+                    "path": "::volunteer candidate exists",
+                    "id": "db107accbe0deda7fd67f328a5738bce",
+                    "passes": 50,
+                    "fails": 0,
+                    "name": "volunteer candidate exists"
+                },
+                "direct_assign_volunteer status 201": {
+                    "name": "direct_assign_volunteer status 201",
+                    "path": "::direct_assign_volunteer status 201",
+                    "id": "a5d80de72085314ebec1d9e7c00cf647",
+                    "passes": 50,
+                    "fails": 0
+                },
+                "get_roll_sheet status 200": {
+                    "name": "get_roll_sheet status 200",
+                    "path": "::get_roll_sheet status 200",
+                    "id": "6f3a14f97d14c41b0757bcb50f5d4f62",
+                    "passes": 50,
+                    "fails": 0
+                },
+                "roll sheet has valid structure": {
+                    "id": "7608d23cd9163c824be2d4c226c120c7",
+                    "passes": 50,
+                    "fails": 0,
+                    "name": "roll sheet has valid structure",
+                    "path": "::roll sheet has valid structure"
+                },
+                "finalize_attendance status 200": {
+                    "name": "finalize_attendance status 200",
+                    "path": "::finalize_attendance status 200",
+                    "id": "7eb2326f6ee02ddcf9a43580e69096b9",
+                    "passes": 50,
+                    "fails": 0
+                },
+                "finalize response counts valid": {
+                    "name": "finalize response counts valid",
+                    "path": "::finalize response counts valid",
+                    "id": "8a21bd0ddd1aa589d28cf9bc1a33672f",
+                    "passes": 50,
+                    "fails": 0
+                },
+                "get_roll_sheet_for_correction status 200": {
+                    "id": "2e2522bce84ee5b037b897883b932e0a",
+                    "passes": 50,
+                    "fails": 0,
+                    "name": "get_roll_sheet_for_correction status 200",
+                    "path": "::get_roll_sheet_for_correction status 200"
+                },
+                "admin_correct_attendance status 200": {
+                    "name": "admin_correct_attendance status 200",
+                    "path": "::admin_correct_attendance status 200",
+                    "id": "4c958a25c039d56128faaaa74dfa2628",
+                    "passes": 50,
+                    "fails": 0
+                },
+                "corrected response valid": {
+                    "name": "corrected response valid",
+                    "path": "::corrected response valid",
+                    "id": "c8739c7feccb60ef77efde6fef3da8eb",
+                    "passes": 50,
+                    "fails": 0
+                },
+                "get_final_roll_sheet status 200": {
+                    "fails": 0,
+                    "name": "get_final_roll_sheet status 200",
+                    "path": "::get_final_roll_sheet status 200",
+                    "id": "29b4b203a68db16a85dcd70af6d48a67",
+                    "passes": 50
+                },
+                "final roll sheet is all finalized": {
+                    "name": "final roll sheet is all finalized",
+                    "path": "::final roll sheet is all finalized",
+                    "id": "d8b4aff50e4f89d2c45c90c63dcba035",
+                    "passes": 50,
+                    "fails": 0
+                }
+            }
+    },
+    "metrics": {
+        "iterations": {
+            "count": 50,
+            "rate": 23.043088732482644
+        },
+        "http_req_sending": {
+            "avg": 0.14496324999999996,
+            "min": 0,
+            "med": 0,
+            "max": 3.4407,
+            "p(90)": 0.5417,
+            "p(95)": 0.6344
+        },
+        "http_req_blocked": {
+            "avg": 1.0818555000000005,
+            "min": 0,
+            "med": 0,
+            "max": 23.4837,
+            "p(90)": 0,
+            "p(95)": 12.31192999999998
+        },
+        "http_req_duration{expected_response:true}": {
+            "med": 26.5643,
+            "max": 1918.1234,
+            "p(90)": 491.8178,
+            "p(95)": 691.6149449999999,
+            "avg": 118.56515050000007,
+            "min": 1.568
+        },
+        "data_sent": {
+            "count": 250157,
+            "rate": 115287.79896103322
+        },
+        "http_req_waiting": {
+            "avg": 118.20043537500018,
+            "min": 1.568,
+            "med": 26.16385,
+            "max": 1918.1234,
+            "p(90)": 491.8178,
+            "p(95)": 691.6149449999999
+        },
+        "http_req_receiving": {
+            "avg": 0.2197518749999999,
+            "min": 0,
+            "med": 0,
+            "max": 22.8789,
+            "p(90)": 0.53201,
+            "p(95)": 0.9997149999999991
+        },
+        "http_req_connecting": {
+            "p(95)": 0,
+            "avg": 0.06975050000000001,
+            "min": 0,
+            "med": 0,
+            "max": 2.7412,
+            "p(90)": 0
+        },
+        "vus_max": {
+            "value": 50,
+            "min": 50,
+            "max": 50
+        },
+        "http_req_tls_handshaking": {
+            "p(95)": 10.0967,
+            "avg": 0.9888395000000003,
+            "min": 0,
+            "med": 0,
+            "max": 22.4142,
+            "p(90)": 0
+        },
+        "attendance_journey": {
+            "avg": 1918.1,
+            "min": 1581,
+            "med": 1971,
+            "max": 2166,
+            "p(90)": 2098.6,
+            "p(95)": 2126.45
+        },
+        "attendance_correction_errors": {
+            "rate": 0,
+            "count": 0,
+            "thresholds": {
+                "count==0": false
+            }
+        },
+        "http_reqs": {
+            "count": 800,
+            "rate": 368.6894197197223
+        },
+        "checks": {
+            "passes": 1100,
+            "fails": 0,
+            "value": 1
+        },
+        "iteration_duration": {
+            "avg": 1918.242422,
+            "min": 1581.2475,
+            "med": 1970.9025499999998,
+            "max": 2166.279,
+            "p(90)": 2098.30323,
+            "p(95)": 2126.49501
+        },
+        "http_req_duration": {
+            "avg": 118.56515050000007,
+            "min": 1.568,
+            "med": 26.5643,
+            "max": 1918.1234,
+            "p(90)": 491.8178,
+            "p(95)": 691.6149449999999
+        },
+        "data_received": {
+            "count": 1217691,
+            "rate": 561187.2352349105
+        },
+        "vus": {
+            "value": 23,
+            "min": 23,
+            "max": 50
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 800,
+            "thresholds": {
+                "rate==0": false
+            },
+            "value": 0
+        }
+    }
+}

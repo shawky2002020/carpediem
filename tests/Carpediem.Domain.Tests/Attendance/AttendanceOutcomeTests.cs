@@ -96,4 +96,56 @@ public sealed class AttendanceOutcomeTests
         Assert.Throws<ArgumentOutOfRangeException>(() =>
             outcome.UpdateOutcome((AttendanceOutcomeValue)888, _chiefLeaderUserId, DateTimeOffset.UtcNow));
     }
+
+    [Fact]
+    public void CorrectOutcomeSetsOutcomeAndRecordsCorrectedUserAndTime()
+    {
+        var outcome = AttendanceOutcome.Create(
+            _teamAssignmentId,
+            AttendanceOutcomeValue.Attended,
+            _chiefLeaderUserId,
+            _finalizedAt);
+
+        var adminUserId = Guid.NewGuid();
+        var correctedAt = _finalizedAt.AddDays(1);
+
+        outcome.CorrectOutcome(AttendanceOutcomeValue.NoShow, adminUserId, correctedAt);
+
+        Assert.Equal(AttendanceOutcomeValue.NoShow, outcome.Outcome);
+        Assert.Equal(adminUserId, outcome.CorrectedByUserId);
+        Assert.Equal(correctedAt, outcome.CorrectedAt);
+        // Original finalizer stays unchanged
+        Assert.Equal(_chiefLeaderUserId, outcome.FinalizedByUserId);
+        Assert.Equal(_finalizedAt, outcome.FinalizedAt);
+    }
+
+    [Fact]
+    public void CorrectOutcomeWithEmptyUserIdThrowsArgumentException()
+    {
+        var outcome = AttendanceOutcome.Create(
+            _teamAssignmentId,
+            AttendanceOutcomeValue.Attended,
+            _chiefLeaderUserId,
+            _finalizedAt);
+
+        var ex = Assert.Throws<ArgumentException>(() =>
+            outcome.CorrectOutcome(AttendanceOutcomeValue.NoShow, Guid.Empty, DateTimeOffset.UtcNow));
+
+        Assert.Equal("correctedByUserId", ex.ParamName);
+    }
+
+    [Fact]
+    public void CorrectOutcomeWithInvalidOutcomeValueThrowsArgumentOutOfRangeException()
+    {
+        var outcome = AttendanceOutcome.Create(
+            _teamAssignmentId,
+            AttendanceOutcomeValue.Attended,
+            _chiefLeaderUserId,
+            _finalizedAt);
+
+        var ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
+            outcome.CorrectOutcome((AttendanceOutcomeValue)999, Guid.NewGuid(), DateTimeOffset.UtcNow));
+            
+        Assert.Equal("newOutcome", ex.ParamName);
+    }
 }

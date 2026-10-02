@@ -16,6 +16,7 @@ public sealed record AttendanceRollSheetEntryResult(
     Guid TeamAssignmentId,
     Guid VolunteerUserId,
     string VolunteerName,
+    Guid? AttendanceOutcomeId,
     string? Outcome,
     DateTimeOffset? FinalizedAt,
     byte[]? RowVersion);
@@ -32,6 +33,14 @@ public sealed record FinalizeAttendanceResult(
     int NoShowCount,
     int UnrecordedCount);
 
+public sealed record CorrectAttendanceResult(
+    Guid AttendanceOutcomeId,
+    Guid TeamAssignmentId,
+    string PreviousOutcome,
+    string NewOutcome,
+    DateTimeOffset CorrectedAt,
+    string RowVersionBase64);
+
 public interface IAttendanceStore
 {
     Task<AttendanceRollSheetResult?> GetRollSheetAsync(
@@ -45,5 +54,15 @@ public interface IAttendanceStore
         Guid actorUserId,
         Guid correlationId,
         DateTimeOffset utcNow,
+        CancellationToken cancellationToken = default);
+
+    Task<CorrectAttendanceResult> CorrectAttendanceAsync(
+        Guid attendanceOutcomeId,
+        string newOutcome,
+        string mandatoryReason,
+        Guid actorUserId,
+        Guid correlationId,
+        DateTimeOffset utcNow,
+        byte[]? expectedRowVersion = null,
         CancellationToken cancellationToken = default);
 }

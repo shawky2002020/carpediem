@@ -83,6 +83,7 @@ public sealed class EfAttendanceStore(
                 TeamAssignmentId: x.Assignment.Id,
                 VolunteerUserId: x.Assignment.UserId,
                 VolunteerName: x.UserName,
+                AttendanceOutcomeId: outcome?.Id,
                 Outcome: outcome?.Outcome.ToString(),
                 FinalizedAt: outcome?.FinalizedAt,
                 RowVersion: outcome?.RowVersion);
@@ -219,5 +220,68 @@ public sealed class EfAttendanceStore(
                 NoShowCount: noShowCount,
                 UnrecordedCount: unrecordedCount);
         });
+    }
+
+    public async Task<CorrectAttendanceResult> CorrectAttendanceAsync(
+        Guid attendanceOutcomeId,
+        string newOutcome,
+        string mandatoryReason,
+        Guid actorUserId,
+        Guid correlationId,
+        DateTimeOffset utcNow,
+        byte[]? expectedRowVersion = null,
+        CancellationToken cancellationToken = default)
+    {
+        var outcome = await db.AttendanceOutcomes
+            .SingleOrDefaultAsync(o => o.Id == attendanceOutcomeId, cancellationToken)
+            ?? throw new KeyNotFoundException($"Attendance record {attendanceOutcomeId} was not found.");
+
+        var actorUser = await userManager.FindByIdAsync(actorUserId.ToString());
+        var isAdmin = actorUser is not null && actorUser.IsActive && await userManager.IsInRoleAsync(actorUser, CarpediemRoles.Admin);
+        
+        if (!isAdmin)
+        {
+            throw new InvalidOperationException("Only an Admin can correct an attendance record.");
+        }
+
+        if (string.IsNullOrWhiteSpace(mandatoryReason))
+        {
+            throw new ArgumentException("A mandatory reason is required for attendance correction.", nameof(mandatoryReason));
+        }
+
+        if (!Enum.TryParse<AttendanceOutcomeValue>(newOutcome, ignoreCase: true, out var outcomeVal) || !Enum.IsDefined(outcomeVal))
+        {
+            throw new ArgumentException($"Invalid attendance outcome '{newOutcome}'. Permitted values are 'Attended' or 'NoShow'.", nameof(newOutcome));
+        }
+
+        var previousOutcomeStr = outcome.Outcome.ToString();
+
+        if (expectedRowVersion != null)
+        {
+            db.Entry(outcome).Property(e => e.RowVersion).OriginalValue = expectedRowVersion;
+        }
+
+        outcome.CorrectOutcome(outcomeVal, actorUserId, utcNow);
+
+        var audit = AuditLog.AttendanceCorrected(
+            attendanceOutcomeId: outcome.Id,
+            actorUserId: actorUserId,
+            correlationId: correlationId,
+            occurredAt: utcNow,
+            previousOutcome: previousOutcomeStr,
+            newOutcome: outcomeVal.ToString(),
+            mandatoryReason: mandatoryReason);
+
+        db.AuditLogs.Add(audit);
+
+        await db.SaveChangesAsync(cancellationToken);
+
+        return new CorrectAttendanceResult(
+            AttendanceOutcomeId: outcome.Id,
+            TeamAssignmentId: outcome.TeamAssignmentId,
+            PreviousOutcome: previousOutcomeStr,
+            NewOutcome: outcomeVal.ToString(),
+            CorrectedAt: utcNow,
+            RowVersionBase64: Convert.ToBase64String(outcome.RowVersion));
     }
 }

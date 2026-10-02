@@ -118,27 +118,79 @@
             </div>
 
             <div class="cd-action-group" role="group" [attr.aria-label]="'Attendance controls for ' + entry.volunteerName">
-              <button
-                type="button"
-                class="cd-toggle-btn cd-toggle-btn--attended"
-                [class.active]="getEffectiveOutcome(entry.teamAssignmentId) === 'Attended'"
-                [attr.aria-pressed]="getEffectiveOutcome(entry.teamAssignmentId) === 'Attended'"
-                (click)="setOutcome(entry.teamAssignmentId, 'Attended')"
-                [disabled]="submitting()"
-                [attr.aria-label]="'Mark ' + entry.volunteerName + ' as attended'">
-                Attended
-              </button>
+              @if (entry.finalizedAt) {
+                @if (sessionService.isAdmin()) {
+                  @if (correctingOutcomeId() === entry.teamAssignmentId) {
+                    <div class="cd-correction-form">
+                      <div class="cd-correction-fields">
+                        <label class="cd-sr-only" for="newOutcome-{{entry.teamAssignmentId}}">New Outcome</label>
+                        <select
+                          id="newOutcome-{{entry.teamAssignmentId}}"
+                          class="cd-select"
+                          [ngModel]="correctionOutcome()"
+                          (ngModelChange)="correctionOutcome.set($event)">
+                          <option value="Attended">Attended</option>
+                          <option value="NoShow">No Show</option>
+                        </select>
+                        <label class="cd-sr-only" for="reason-{{entry.teamAssignmentId}}">Reason</label>
+                        <input
+                          type="text"
+                          id="reason-{{entry.teamAssignmentId}}"
+                          class="cd-input"
+                          placeholder="Reason required"
+                          [ngModel]="correctionReason()"
+                          (ngModelChange)="correctionReason.set($event)">
+                      </div>
+                      <div class="cd-correction-actions">
+                        <button
+                          type="button"
+                          class="cd-btn cd-btn--primary cd-btn--small"
+                          (click)="submitCorrection(entry.teamAssignmentId)"
+                          [disabled]="correctionSubmitting()">Save</button>
+                        <button
+                          type="button"
+                          class="cd-btn cd-btn--secondary cd-btn--small"
+                          (click)="cancelCorrection()"
+                          [disabled]="correctionSubmitting()">Cancel</button>
+                      </div>
+                    </div>
+                  } @else {
+                    <span class="cd-finalized-text">Finalized</span>
+                    <button
+                      type="button"
+                      class="cd-btn cd-btn--secondary cd-btn--small"
+                      (click)="startCorrection(entry.teamAssignmentId, entry.outcome!)"
+                      [disabled]="submitting() || correctionSubmitting()"
+                      aria-label="Correct attendance for {{entry.volunteerName}}">
+                      Correct
+                    </button>
+                  }
+                } @else {
+                  <span class="cd-finalized-text">Finalized</span>
+                }
+              } @else {
+                <button
+                  type="button"
+                  class="cd-toggle-btn cd-toggle-btn--attended"
+                  [class.active]="getEffectiveOutcome(entry.teamAssignmentId) === 'Attended'"
+                  [attr.aria-pressed]="getEffectiveOutcome(entry.teamAssignmentId) === 'Attended'"
+                  (click)="setOutcome(entry.teamAssignmentId, 'Attended')"
+                  [disabled]="submitting()"
+                  [attr.aria-label]="'Mark ' + entry.volunteerName + ' as attended'">
+                  Attended
+                </button>
 
-              <button
-                type="button"
-                class="cd-toggle-btn cd-toggle-btn--noshow"
-                [class.active]="getEffectiveOutcome(entry.teamAssignmentId) === 'NoShow'"
-                [attr.aria-pressed]="getEffectiveOutcome(entry.teamAssignmentId) === 'NoShow'"
-                (click)="setOutcome(entry.teamAssignmentId, 'NoShow')"
-                [disabled]="submitting()"
-                [attr.aria-label]="'Mark ' + entry.volunteerName + ' as no show'">
-                No Show
-              </button>
+                <button
+                  type="button"
+                  class="cd-toggle-btn cd-toggle-btn--noshow"
+                  [class.active]="getEffectiveOutcome(entry.teamAssignmentId) === 'NoShow'"
+                  [attr.aria-pressed]="getEffectiveOutcome(entry.teamAssignmentId) === 'NoShow'"
+                  (click)="setOutcome(entry.teamAssignmentId, 'NoShow')"
+                  [disabled]="submitting()"
+                  [attr.aria-label]="'Mark ' + entry.volunteerName + ' as no show'">
+                  No Show
+                </button>
+              }
             </div>
           </li>
         }

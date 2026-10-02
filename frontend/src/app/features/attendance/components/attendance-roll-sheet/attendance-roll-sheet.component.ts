@@ -6,13 +6,16 @@ import {
   AttendanceOutcomeType,
   AttendanceRollSheet,
   FinalizeAttendanceRequest,
+  CorrectAttendanceRequest
 } from '../../data/attendance.model';
 import { AttendanceService } from '../../data/attendance.service';
+import { SessionService } from '../../../../core/auth/session.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-attendance-roll-sheet',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './attendance-roll-sheet.component.html',
   styleUrl: './attendance-roll-sheet.component.scss',
 })
@@ -20,6 +23,7 @@ export class AttendanceRollSheetComponent implements OnInit {
   private readonly service = inject(AttendanceService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  readonly sessionService = inject(SessionService);
 
   @Input() eventId?: string;
 
@@ -34,6 +38,12 @@ export class AttendanceRollSheetComponent implements OnInit {
   readonly errorMessage = signal<string | null>(null);
   readonly successMessage = signal<string | null>(null);
   readonly statusMessage = signal<string | null>(null);
+
+  // Correction state
+  readonly correctingOutcomeId = signal<string | null>(null);
+  readonly correctionReason = signal<string>('');
+  readonly correctionOutcome = signal<AttendanceOutcomeType>('Attended');
+  readonly correctionSubmitting = signal(false);
 
   readonly entries = computed(() => this.rollSheet()?.entries ?? []);
   readonly totalCount = computed(() => this.entries().length);
@@ -171,6 +181,53 @@ export class AttendanceRollSheetComponent implements OnInit {
         },
         error: err => {
           const detail = err.error?.detail ?? err.message ?? 'Failed to finalize attendance.';
+          this.errorMessage.set(detail);
+        },
+      });
+  }
+
+  startCorrection(teamAssignmentId: string, currentOutcome: AttendanceOutcomeType): void {
+    this.correctingOutcomeId.set(teamAssignmentId);
+    this.correctionOutcome.set(currentOutcome === 'Attended' ? 'NoShow' : 'Attended');
+    this.correctionReason.set('');
+    this.errorMessage.set(null);
+    this.successMessage.set(null);
+  }
+
+  cancelCorrection(): void {
+    this.correctingOutcomeId.set(null);
+    this.correctionReason.set('');
+  }
+
+  submitCorrection(teamAssignmentId: string): void {
+    const entry = this.entries().find(e => e.teamAssignmentId === teamAssignmentId);
+    if (!entry || !entry.attendanceOutcomeId) return;
+
+    if (!this.correctionReason().trim()) {
+      this.errorMessage.set('Please provide a mandatory reason for the correction.');
+      return;
+    }
+
+    this.correctionSubmitting.set(true);
+    this.errorMessage.set(null);
+    this.successMessage.set(null);
+
+    const request: CorrectAttendanceRequest = {
+      newOutcome: this.correctionOutcome(),
+      reason: this.correctionReason().trim(),
+    };
+
+    this.service
+      .correctAttendance(entry.attendanceOutcomeId, request, entry.version)
+      .pipe(finalize(() => this.correctionSubmitting.set(false)))
+      .subscribe({
+        next: () => {
+          this.successMessage.set('Attendance corrected successfully.');
+          this.correctingOutcomeId.set(null);
+          this.load();
+        },
+        error: err => {
+          const detail = err.error?.detail ?? err.message ?? 'Failed to correct attendance.';
           this.errorMessage.set(detail);
         },
       });

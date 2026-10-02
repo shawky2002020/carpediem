@@ -46,6 +46,7 @@ describe('AttendanceService', () => {
           teamAssignmentId: '33333333-3333-3333-3333-333333333333',
           volunteerUserId: '44444444-4444-4444-4444-444444444444',
           volunteerName: 'Alice Volunteer',
+          attendanceOutcomeId: null,
           outcome: null,
           finalizedAt: null,
           version: null,

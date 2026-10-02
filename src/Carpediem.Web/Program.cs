@@ -351,6 +351,26 @@ builder.Services.AddOpenApi(options =>
                 Schema = new OpenApiSchema { Type = JsonSchemaType.String },
             });
         }
+        if (operation.OperationId == "CorrectAttendance")
+        {
+            operation.Parameters ??= [];
+            operation.Parameters.Add(new OpenApiParameter
+            {
+                Name = "If-Match",
+                In = ParameterLocation.Header,
+                Required = false,
+                Description = "Base64-encoded rowversion of the existing attendance record for optimistic concurrency.",
+                Schema = new OpenApiSchema { Type = JsonSchemaType.String },
+            });
+            operation.Parameters.Add(new OpenApiParameter
+            {
+                Name = "X-XSRF-TOKEN",
+                In = ParameterLocation.Header,
+                Required = true,
+                Description = "Antiforgery request token paired with the session cookie.",
+                Schema = new OpenApiSchema { Type = JsonSchemaType.String },
+            });
+        }
         return Task.CompletedTask;
     });
     options.AddSchemaTransformer((schema, context, _) =>

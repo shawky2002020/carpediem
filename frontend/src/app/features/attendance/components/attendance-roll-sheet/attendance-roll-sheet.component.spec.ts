@@ -3,6 +3,7 @@ import { ActivatedRoute, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { AttendanceRollSheet, FinalizeAttendanceResponse } from '../../data/attendance.model';
 import { AttendanceService } from '../../data/attendance.service';
+import { SessionService } from '../../../../core/auth/session.service';
 import { AttendanceRollSheetComponent } from './attendance-roll-sheet.component';
 
 describe('AttendanceRollSheetComponent', () => {
@@ -30,6 +31,7 @@ describe('AttendanceRollSheetComponent', () => {
         teamAssignmentId: '33333333-3333-3333-3333-333333333333',
         volunteerUserId: '44444444-4444-4444-4444-444444444444',
         volunteerName: 'Alice Volunteer',
+        attendanceOutcomeId: null,
         outcome: null,
         finalizedAt: null,
         version: null,
@@ -38,6 +40,7 @@ describe('AttendanceRollSheetComponent', () => {
         teamAssignmentId: '55555555-5555-5555-5555-555555555555',
         volunteerUserId: '66666666-6666-6666-6666-666666666666',
         volunteerName: 'Bob Volunteer',
+        attendanceOutcomeId: null,
         outcome: null,
         finalizedAt: null,
         version: null,
@@ -56,6 +59,10 @@ describe('AttendanceRollSheetComponent', () => {
       providers: [
         provideRouter([]),
         { provide: AttendanceService, useValue: attendanceServiceMock },
+        {
+          provide: SessionService,
+          useValue: { isAdmin: () => true }
+        },
         {
           provide: ActivatedRoute,
           useValue: {

@@ -207,4 +207,24 @@ public sealed class AuditLog
             resourceType: "Event",
             source: "ChiefLeaderRollCall",
             mandatoryReason: null);
+
+    public static AuditLog AttendanceCorrected(
+        Guid attendanceOutcomeId,
+        Guid actorUserId,
+        Guid correlationId,
+        DateTimeOffset occurredAt,
+        string previousOutcome,
+        string newOutcome,
+        string mandatoryReason) =>
+        Create(
+            actorUserId,
+            action: "AttendanceCorrected",
+            resourceId: attendanceOutcomeId,
+            correlationId: correlationId,
+            occurredAt: occurredAt,
+            previousValue: previousOutcome,
+            newValue: newOutcome,
+            resourceType: "AttendanceOutcome",
+            source: "AdminOverride",
+            mandatoryReason: mandatoryReason);
 }

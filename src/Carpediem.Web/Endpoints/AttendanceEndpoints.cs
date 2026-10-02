@@ -38,6 +38,23 @@ public static class AttendanceEndpoints
             .Produces<ApiProblemResponse>(500, "application/problem+json")
             .WithMetadata(new RequireAntiforgeryTokenAttribute());
 
+        var correctionGroup = endpoints
+            .MapGroup("/api/attendance/{attendanceId}/correct")
+            .WithTags("Attendance")
+            .RequireAuthorization(AuthorizationPolicies.RequireAdmin);
+
+        correctionGroup.MapPost("/", CorrectAttendanceAsync)
+            .WithName("CorrectAttendance")
+            .Accepts<CorrectAttendanceRequest>("application/json")
+            .Produces<CorrectAttendanceResponse>(200)
+            .Produces<ApiProblemResponse>(400, "application/problem+json")
+            .Produces<ApiProblemResponse>(401, "application/problem+json")
+            .Produces<ApiProblemResponse>(403, "application/problem+json")
+            .Produces<ApiProblemResponse>(404, "application/problem+json")
+            .Produces<ApiProblemResponse>(409, "application/problem+json")
+            .Produces<ApiProblemResponse>(500, "application/problem+json")
+            .WithMetadata(new RequireAntiforgeryTokenAttribute());
+
         return endpoints;
     }
 
@@ -86,6 +103,7 @@ public static class AttendanceEndpoints
                     TeamAssignmentId: e.TeamAssignmentId,
                     VolunteerUserId: e.VolunteerUserId,
                     VolunteerName: e.VolunteerName,
+                    AttendanceOutcomeId: e.AttendanceOutcomeId,
                     Outcome: e.Outcome,
                     FinalizedAt: e.FinalizedAt,
                     Version: e.RowVersion is not null ? Convert.ToBase64String(e.RowVersion) : null
@@ -197,6 +215,116 @@ public static class AttendanceEndpoints
         return Guid.TryParse(rawId, out actorUserId);
     }
 
+    public sealed record CorrectAttendanceRequest(string NewOutcome, string Reason);
+    public sealed record CorrectAttendanceResponse(
+        Guid AttendanceOutcomeId,
+        Guid TeamAssignmentId,
+        string PreviousOutcome,
+        string NewOutcome,
+        DateTimeOffset CorrectedAt,
+        string Version);
+
+    private static async Task<IResult> CorrectAttendanceAsync(
+        string attendanceId,
+        CorrectAttendanceRequest request,
+        HttpContext context,
+        IAntiforgery antiforgery,
+        IAttendanceStore store,
+        CancellationToken cancellationToken)
+    {
+        using var activity = AttendanceTelemetry.Source.StartActivity("CorrectAttendance");
+
+        if (context.Features.Get<IAntiforgeryValidationFeature>() is { IsValid: false } ||
+            !await HasValidAntiforgeryAsync(context, antiforgery))
+        {
+            AttendanceTelemetry.Record(activity, "CorrectAttendance", "antiforgery_failed");
+            return ApiProblemDetailsService.Problem(context, 400, "antiforgery_failed", "The request could not be verified.");
+        }
+
+        if (!Guid.TryParse(attendanceId, out var parsedAttendanceId))
+        {
+            AttendanceTelemetry.Record(activity, "CorrectAttendance", "malformed_request");
+            return ApiProblemDetailsService.Problem(context, 400, "malformed_request", "A valid Attendance identifier is required.");
+        }
+
+        if (!TryGetActor(context, out var actorUserId))
+        {
+            AttendanceTelemetry.Record(activity, "CorrectAttendance", "unauthenticated");
+            return ApiProblemDetailsService.Problem(context, 401, "unauthenticated", "The session is no longer active.");
+        }
+
+        if (string.IsNullOrWhiteSpace(request?.Reason))
+        {
+            AttendanceTelemetry.Record(activity, "CorrectAttendance", "missing_correction_reason");
+            return ApiProblemDetailsService.Problem(context, 400, "missing_correction_reason", "A mandatory reason is required for attendance correction.");
+        }
+
+        byte[]? rowVersion = null;
+        if (context.Request.Headers.TryGetValue("If-Match", out var ifMatch) && ifMatch.Count > 0)
+        {
+            var matchStr = ifMatch.ToString().Trim('"');
+            if (!string.IsNullOrEmpty(matchStr))
+            {
+                try
+                {
+                    rowVersion = Convert.FromBase64String(matchStr);
+                }
+                catch (FormatException)
+                {
+                    // Invalid base64, ignore or error. EF core will throw if not provided but concurrency enabled.
+                }
+            }
+        }
+
+        try
+        {
+            var result = await store.CorrectAttendanceAsync(
+                parsedAttendanceId,
+                request.NewOutcome,
+                request.Reason,
+                actorUserId,
+                Guid.NewGuid(),
+                DateTimeOffset.UtcNow,
+                rowVersion,
+                cancellationToken);
+
+            AttendanceTelemetry.Record(activity, "CorrectAttendance", "success");
+
+            return Results.Ok(new CorrectAttendanceResponse(
+                AttendanceOutcomeId: result.AttendanceOutcomeId,
+                TeamAssignmentId: result.TeamAssignmentId,
+                PreviousOutcome: result.PreviousOutcome,
+                NewOutcome: result.NewOutcome,
+                CorrectedAt: result.CorrectedAt,
+                Version: result.RowVersionBase64));
+        }
+        catch (KeyNotFoundException)
+        {
+            AttendanceTelemetry.Record(activity, "CorrectAttendance", "attendance_record_not_found");
+            return ApiProblemDetailsService.Problem(context, 404, "attendance_record_not_found", $"Attendance record {parsedAttendanceId} was not found.");
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("Admin"))
+        {
+            AttendanceTelemetry.Record(activity, "CorrectAttendance", "admin_required");
+            return ApiProblemDetailsService.Problem(context, 403, "admin_required", ex.Message);
+        }
+        catch (ArgumentException ex) when (ex.ParamName == "mandatoryReason")
+        {
+            AttendanceTelemetry.Record(activity, "CorrectAttendance", "missing_correction_reason");
+            return ApiProblemDetailsService.Problem(context, 400, "missing_correction_reason", ex.Message);
+        }
+        catch (ArgumentException ex)
+        {
+            AttendanceTelemetry.Record(activity, "CorrectAttendance", "invalid_outcome");
+            return ApiProblemDetailsService.Problem(context, 400, "invalid_outcome", ex.Message);
+        }
+        catch (Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException)
+        {
+            AttendanceTelemetry.Record(activity, "CorrectAttendance", "concurrency_conflict");
+            return ApiProblemDetailsService.Problem(context, 409, "concurrency_conflict", "The attendance record has been modified by another user.");
+        }
+    }
+
     private static async Task<bool> HasValidAntiforgeryAsync(HttpContext context, IAntiforgery antiforgery)
     {
         try
@@ -227,6 +355,7 @@ public sealed record AttendanceRollSheetEntryResponse(
     Guid TeamAssignmentId,
     Guid VolunteerUserId,
     string VolunteerName,
+    Guid? AttendanceOutcomeId,
     string? Outcome,
     DateTimeOffset? FinalizedAt,
     string? Version);

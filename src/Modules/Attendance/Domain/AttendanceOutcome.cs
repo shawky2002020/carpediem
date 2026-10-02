@@ -68,4 +68,21 @@ public sealed class AttendanceOutcome
         FinalizedByUserId = updatedByUserId;
         FinalizedAt = updatedAt;
     }
+
+    public void CorrectOutcome(AttendanceOutcomeValue newOutcome, Guid correctedByUserId, DateTimeOffset correctedAt)
+    {
+        if (!Enum.IsDefined(newOutcome))
+        {
+            throw new ArgumentOutOfRangeException(nameof(newOutcome), "Invalid attendance outcome value.");
+        }
+
+        if (correctedByUserId == Guid.Empty)
+        {
+            throw new ArgumentException("CorrectedByUserId cannot be empty.", nameof(correctedByUserId));
+        }
+
+        _outcome = newOutcome;
+        CorrectedByUserId = correctedByUserId;
+        CorrectedAt = correctedAt;
+    }
 }

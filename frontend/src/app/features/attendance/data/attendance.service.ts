@@ -5,6 +5,8 @@ import {
   AttendanceRollSheet,
   FinalizeAttendanceRequest,
   FinalizeAttendanceResponse,
+  CorrectAttendanceRequest,
+  CorrectAttendanceResponse
 } from './attendance.model';
 
 @Injectable({ providedIn: 'root' })
@@ -22,6 +24,22 @@ export class AttendanceService {
     return this.http.post<FinalizeAttendanceResponse>(
       `/api/events/${eventId}/attendance`,
       request
+    );
+  }
+
+  correctAttendance(
+    attendanceOutcomeId: string,
+    request: CorrectAttendanceRequest,
+    version?: string | null
+  ): Observable<CorrectAttendanceResponse> {
+    const headers: Record<string, string> = {};
+    if (version) {
+      headers['If-Match'] = `"${version}"`;
+    }
+    return this.http.post<CorrectAttendanceResponse>(
+      `/api/attendance/${attendanceOutcomeId}/correct`,
+      request,
+      { headers }
     );
   }
 }
