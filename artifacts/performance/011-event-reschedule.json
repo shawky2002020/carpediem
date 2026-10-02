@@ -1,0 +1,215 @@
+{
+    "metrics": {
+        "data_received": {
+            "count": 805116,
+            "rate": 317001.2740040222
+        },
+        "iterations": {
+            "count": 100,
+            "rate": 39.37336657127944
+        },
+        "event_reschedule_operation_errors": {
+            "count": 0,
+            "rate": 0,
+            "thresholds": {
+                "count==0": false
+            }
+        },
+        "vus_max": {
+            "min": 100,
+            "max": 100,
+            "value": 100
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 1000,
+            "thresholds": {
+                "rate==0": false
+            },
+            "value": 0
+        },
+        "http_req_waiting": {
+            "min": 1.6399,
+            "med": 28.1403,
+            "max": 2256.2566,
+            "p(90)": 837.9669400000005,
+            "p(95)": 1588.885775,
+            "avg": 200.34548590000014
+        },
+        "checks": {
+            "fails": 0,
+            "passes": 1200,
+            "value": 1
+        },
+        "event_reschedule_journey": {
+            "p(90)": 2486.4,
+            "p(95)": 2514.55,
+            "avg": 2049.84,
+            "min": 1267,
+            "med": 2201,
+            "max": 2534
+        },
+        "http_req_duration": {
+            "med": 28.49275,
+            "max": 2256.6302,
+            "p(90)": 838.0203700000004,
+            "p(95)": 1588.948,
+            "avg": 200.66307930000002,
+            "min": 1.7314
+        },
+        "http_req_blocked": {
+            "avg": 4.091439400000004,
+            "min": 0,
+            "med": 0,
+            "max": 60.2964,
+            "p(90)": 0.7289500000001657,
+            "p(95)": 43.997215
+        },
+        "http_req_connecting": {
+            "p(90)": 0,
+            "p(95)": 1.3783,
+            "avg": 0.18462300000000006,
+            "min": 0,
+            "med": 0,
+            "max": 8.1779
+        },
+        "data_sent": {
+            "rate": 174677.97212515265,
+            "count": 443645
+        },
+        "http_req_tls_handshaking": {
+            "med": 0,
+            "max": 58.4095,
+            "p(90)": 0.5523300000001256,
+            "p(95)": 41.94388499999998,
+            "avg": 3.8590320999999994,
+            "min": 0
+        },
+        "iteration_duration": {
+            "avg": 2050.0973369999997,
+            "min": 1267.0196,
+            "med": 2201.0197,
+            "max": 2534.1698,
+            "p(90)": 2486.3889200000003,
+            "p(95)": 2514.75757
+        },
+        "http_reqs": {
+            "count": 1000,
+            "rate": 393.7336657127944
+        },
+        "http_req_receiving": {
+            "max": 5.3302,
+            "p(90)": 0.54082,
+            "p(95)": 0.9978,
+            "avg": 0.15831500000000012,
+            "min": 0,
+            "med": 0
+        },
+        "vus": {
+            "value": 63,
+            "min": 63,
+            "max": 100
+        },
+        "http_req_duration{expected_response:true}": {
+            "avg": 200.66307930000002,
+            "min": 1.7314,
+            "med": 28.49275,
+            "max": 2256.6302,
+            "p(90)": 838.0203700000004,
+            "p(95)": 1588.948
+        },
+        "http_req_sending": {
+            "med": 0,
+            "max": 6.1583,
+            "p(90)": 0.5379,
+            "p(95)": 0.5913149999999998,
+            "avg": 0.15927840000000015,
+            "min": 0
+        }
+    },
+    "root_group": {
+        "checks": {
+            "antiforgery status is 200": {
+                "name": "antiforgery status is 200",
+                "path": "::antiforgery status is 200",
+                "id": "c20185627100c78e75d752b55a33f1e0",
+                "passes": 200,
+                "fails": 0
+            },
+            "login status is 200": {
+                "name": "login status is 200",
+                "path": "::login status is 200",
+                "id": "baba87e761865dc93085ee0c1fe25f4c",
+                "passes": 100,
+                "fails": 0
+            },
+            "create_draft status is 201": {
+                "id": "53a8b425ddf6cbe39630d8cb9be1a240",
+                "passes": 100,
+                "fails": 0,
+                "name": "create_draft status is 201",
+                "path": "::create_draft status is 201"
+            },
+            "read_candidates status is 200": {
+                "id": "daf3db300ec3b32fa5a699d1bbf86dd7",
+                "passes": 100,
+                "fails": 0,
+                "name": "read_candidates status is 200",
+                "path": "::read_candidates status is 200"
+            },
+            "candidate exists": {
+                "id": "86b6bb1cef796857f220a24dbb591995",
+                "passes": 100,
+                "fails": 0,
+                "name": "candidate exists",
+                "path": "::candidate exists"
+            },
+            "appoint status is 201": {
+                "name": "appoint status is 201",
+                "path": "::appoint status is 201",
+                "id": "b437d7106e260041f346a7f600da7f85",
+                "passes": 100,
+                "fails": 0
+            },
+            "record_external_acceptance status is 200": {
+                "name": "record_external_acceptance status is 200",
+                "path": "::record_external_acceptance status is 200",
+                "id": "d0a54465ec3044780e6ab4a1ff47798b",
+                "passes": 100,
+                "fails": 0
+            },
+            "get_draft_detail status is 200": {
+                "name": "get_draft_detail status is 200",
+                "path": "::get_draft_detail status is 200",
+                "id": "adcb2b4f4f2f224c8290dab470152e7e",
+                "passes": 100,
+                "fails": 0
+            },
+            "publish_event status is 200": {
+                "name": "publish_event status is 200",
+                "path": "::publish_event status is 200",
+                "id": "a39299046f5cec2c9648e19e317e7c2f",
+                "passes": 100,
+                "fails": 0
+            },
+            "reschedule_event status is 200": {
+                "id": "d5680e7650122e277d3b2a475b67e516",
+                "passes": 100,
+                "fails": 0,
+                "name": "reschedule_event status is 200",
+                "path": "::reschedule_event status is 200"
+            },
+            "rescheduled event has authoritative state": {
+                "passes": 100,
+                "fails": 0,
+                "name": "rescheduled event has authoritative state",
+                "path": "::rescheduled event has authoritative state",
+                "id": "aa18d929874d04bf3a9f1b41b04d2867"
+            }
+        },
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {}
+    }
+}

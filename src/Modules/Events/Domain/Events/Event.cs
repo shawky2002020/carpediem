@@ -70,6 +70,46 @@ public sealed class Event
         Status = EventStatus.Published;
     }
 
+    public StaffingCycle Reschedule(
+        DateTimeOffset newStartDateTime,
+        DateTimeOffset newEndDateTime,
+        Guid actorUserId,
+        DateTimeOffset rescheduledAt)
+    {
+        if (Status != EventStatus.Published)
+            throw new InvalidEventStatusForRescheduleException(Id, Status.ToString());
+        if (StartDateTime <= rescheduledAt)
+            throw new EventRescheduleWindowClosedException(Id);
+        if (actorUserId == Guid.Empty)
+            throw new ArgumentException("An acting Admin is required.", nameof(actorUserId));
+        if (rescheduledAt.Offset != TimeSpan.Zero)
+            throw new ArgumentException("Reschedule time must be UTC.", nameof(rescheduledAt));
+        if (newStartDateTime.Offset != TimeSpan.Zero)
+            throw new ArgumentException("New start time must be UTC.", nameof(newStartDateTime));
+        if (newEndDateTime.Offset != TimeSpan.Zero)
+            throw new ArgumentException("New end time must be UTC.", nameof(newEndDateTime));
+        if (newStartDateTime <= rescheduledAt)
+            throw new ArgumentException("New start time must be in the future.", nameof(newStartDateTime));
+        if (newStartDateTime >= newEndDateTime)
+            throw new ArgumentException("New end time must be after the new start time.", nameof(newEndDateTime));
+
+        StartDateTime = newStartDateTime;
+        EndDateTime = newEndDateTime;
+
+        var currentCycle = staffingCycles.Single(cycle => cycle.IsCurrent);
+        currentCycle.MarkHistorical();
+
+        var effectiveEventDate = DateOnly.FromDateTime(newStartDateTime.Date);
+        var nextCycle = StaffingCycle.CreateNext(
+            Id,
+            staffingCycles.Max(c => c.CycleNumber) + 1,
+            effectiveEventDate,
+            rescheduledAt);
+
+        staffingCycles.Add(nextCycle);
+        return nextCycle;
+    }
+
     public static Event CreateDraft(
         string? title,
         DateTimeOffset startDateTime,

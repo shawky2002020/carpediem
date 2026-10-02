@@ -1,0 +1,131 @@
+<div class="cd-reschedule-backdrop" role="presentation">
+  <div
+    class="cd-reschedule-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="reschedule-dialog-title"
+    tabindex="-1"
+  >
+    <div class="cd-reschedule-header">
+      <h2 id="reschedule-dialog-title" class="cd-reschedule-title">Reschedule Event</h2>
+      <p class="cd-reschedule-subtitle" *ngIf="eventTitle">
+        Adjusting operational schedule for: <strong>{{ eventTitle }}</strong>
+      </p>
+    </div>
+
+    <div class="cd-notice cd-notice--warning" role="note">
+      <p>
+        <strong>Staffing Cycle Notice:</strong> Rescheduling will seal the active staffing cycle and create a new clean cycle. Previous volunteer availability and roster selections will be archived.
+      </p>
+    </div>
+
+    <div
+      *ngIf="errorMessage()"
+      class="cd-alert cd-alert--error"
+      role="alert"
+      id="reschedule-error"
+    >
+      {{ errorMessage() }}
+    </div>
+
+    <div
+      *ngIf="successMessage()"
+      class="cd-alert cd-alert--success"
+      role="status"
+      id="reschedule-success"
+    >
+      {{ successMessage() }}
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submitReschedule()" class="cd-reschedule-form" novalidate>
+      <div class="cd-form-group">
+        <label for="newStartDateTime" class="cd-form-label">
+          New Start Date & Time (UTC) <span class="cd-required">*</span>
+        </label>
+        <input
+          id="newStartDateTime"
+          type="datetime-local"
+          class="cd-form-input"
+          formControlName="newStartDateTime"
+          [attr.aria-invalid]="(form.get('newStartDateTime')?.invalid && form.get('newStartDateTime')?.touched) ? 'true' : null"
+          [attr.aria-describedby]="(form.get('newStartDateTime')?.invalid && form.get('newStartDateTime')?.touched) ? 'start-time-error' : null"
+        />
+        <span
+          *ngIf="form.get('newStartDateTime')?.invalid && form.get('newStartDateTime')?.touched"
+          id="start-time-error"
+          class="cd-form-error"
+          role="alert"
+        >
+          Valid new start date and time is required.
+        </span>
+      </div>
+
+      <div class="cd-form-group">
+        <label for="newEndDateTime" class="cd-form-label">
+          New End Date & Time (UTC) <span class="cd-required">*</span>
+        </label>
+        <input
+          id="newEndDateTime"
+          type="datetime-local"
+          class="cd-form-input"
+          formControlName="newEndDateTime"
+          [attr.aria-invalid]="(form.get('newEndDateTime')?.invalid && form.get('newEndDateTime')?.touched) ? 'true' : null"
+          [attr.aria-describedby]="(form.get('newEndDateTime')?.invalid && form.get('newEndDateTime')?.touched) ? 'end-time-error' : null"
+        />
+        <span
+          *ngIf="form.get('newEndDateTime')?.invalid && form.get('newEndDateTime')?.touched"
+          id="end-time-error"
+          class="cd-form-error"
+          role="alert"
+        >
+          Valid new end date and time is required.
+        </span>
+      </div>
+
+      <div class="cd-form-group">
+        <label for="justification" class="cd-form-label">
+          Administrative Justification <span class="cd-required">*</span>
+        </label>
+        <textarea
+          id="justification"
+          class="cd-form-textarea"
+          rows="3"
+          formControlName="justification"
+          placeholder="State the reason for rescheduling (10–500 characters)..."
+          [attr.aria-invalid]="(form.get('justification')?.invalid && form.get('justification')?.touched) ? 'true' : null"
+          [attr.aria-describedby]="(form.get('justification')?.invalid && form.get('justification')?.touched) ? 'justification-error' : null"
+        ></textarea>
+        <span
+          *ngIf="form.get('justification')?.invalid && form.get('justification')?.touched"
+          id="justification-error"
+          class="cd-form-error"
+          role="alert"
+        >
+          Justification must be between 10 and 500 characters.
+        </span>
+      </div>
+
+      <div class="cd-reschedule-actions">
+        <button
+          type="button"
+          class="cd-button cd-button--secondary"
+          (click)="cancel()"
+          [disabled]="isSubmitting()"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="cd-button cd-button--primary"
+          [disabled]="isSubmitting()"
+        >
+          {{ isSubmitting() ? 'Rescheduling...' : 'Confirm Reschedule' }}
+        </button>
+      </div>
+    </form>
+
+    <div role="status" aria-live="polite" class="cd-sr-only">
+      {{ liveStatus() }}
+    </div>
+  </div>
+</div>

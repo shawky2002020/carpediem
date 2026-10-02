@@ -148,4 +148,26 @@ public sealed class AuditLog
             resourceType: "TeamAssignment",
             source: isAdminActor ? "AdminOverrideReplacement" : "ChiefLeaderReplacement",
             mandatoryReason: mandatoryReason ?? "Drafted as replacement leader");
+
+    public static AuditLog EventRescheduled(
+        Guid eventId,
+        Guid actorUserId,
+        Guid correlationId,
+        DateTimeOffset occurredAt,
+        DateTimeOffset previousStart,
+        DateTimeOffset previousEnd,
+        DateTimeOffset newStart,
+        DateTimeOffset newEnd,
+        string mandatoryReason) =>
+        Create(
+            actorUserId,
+            action: "EventRescheduled",
+            resourceId: eventId,
+            correlationId: correlationId,
+            occurredAt: occurredAt,
+            previousValue: $"{previousStart:O}..{previousEnd:O}",
+            newValue: $"{newStart:O}..{newEnd:O}",
+            resourceType: "Event",
+            source: "AdminReschedule",
+            mandatoryReason: mandatoryReason);
 }

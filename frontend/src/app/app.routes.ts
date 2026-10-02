@@ -32,6 +32,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/replacement-assignment/components/replacement-assignment.component').then(m => m.ReplacementAssignmentComponent),
   },
   {
+    path: 'events/:eventId/reschedule',
+    canActivate: [adminGuard],
+    loadComponent: () => import('./features/event-reschedule/components/reschedule-dialog/reschedule-dialog.component').then(m => m.RescheduleDialogComponent),
+  },
+  {
     path: 'my-appointments',
     canActivate: [chiefLeaderGuard],
     children: [

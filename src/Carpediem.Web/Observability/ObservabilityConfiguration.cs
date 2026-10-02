@@ -35,6 +35,7 @@ public static class ObservabilityConfiguration
                 .AddSource(DirectAssignmentTelemetry.SourceName)
                 .AddSource(LeaderSelfCancellationTelemetry.SourceName)
                 .AddSource(ReplacementAssignmentTelemetry.ActivitySourceName)
+                .AddSource(EventRescheduleTelemetry.ActivitySourceName)
                 .AddAspNetCoreInstrumentation(options =>
             {
                 options.RecordException = true;
@@ -48,6 +49,7 @@ public static class ObservabilityConfiguration
                 .AddMeter(DirectAssignmentTelemetry.SourceName)
                 .AddMeter(LeaderSelfCancellationTelemetry.SourceName)
                 .AddMeter(ReplacementAssignmentTelemetry.MeterName)
+                .AddMeter(EventRescheduleTelemetry.MeterName)
                 .AddAspNetCoreInstrumentation());
 
     }

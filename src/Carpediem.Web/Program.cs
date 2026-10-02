@@ -287,6 +287,26 @@ builder.Services.AddOpenApi(options =>
                 };
             }
         }
+        if (operation.OperationId == "RescheduleEvent")
+        {
+            operation.Parameters ??= [];
+            operation.Parameters.Add(new OpenApiParameter
+            {
+                Name = "If-Match",
+                In = ParameterLocation.Header,
+                Required = true,
+                Description = "Base64-encoded rowversion of the event aggregate for optimistic concurrency.",
+                Schema = new OpenApiSchema { Type = JsonSchemaType.String },
+            });
+            operation.Parameters.Add(new OpenApiParameter
+            {
+                Name = "X-XSRF-TOKEN",
+                In = ParameterLocation.Header,
+                Required = true,
+                Description = "Antiforgery request token paired with the session cookie.",
+                Schema = new OpenApiSchema { Type = JsonSchemaType.String },
+            });
+        }
         return Task.CompletedTask;
     });
     options.AddSchemaTransformer((schema, context, _) =>
@@ -343,6 +363,7 @@ app.MapEventTeamSelectionEndpoints();
 app.MapEventDirectAssignmentEndpoints();
 app.MapEventSelfCancellationEndpoints();
 app.MapEventReplacementAssignmentEndpoints();
+app.MapEventRescheduleEndpoints();
 
 await app.Services.SeedDevelopmentIdentityAsync(app.Environment.IsDevelopment(), app.Configuration);
 await app.RunAsync();
