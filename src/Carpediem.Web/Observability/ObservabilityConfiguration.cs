@@ -37,6 +37,7 @@ public static class ObservabilityConfiguration
                 .AddSource(ReplacementAssignmentTelemetry.ActivitySourceName)
                 .AddSource(EventRescheduleTelemetry.ActivitySourceName)
                 .AddSource(EventCompletionTelemetry.ActivitySourceName)
+                .AddSource(AttendanceTelemetry.ActivitySourceName)
                 .AddAspNetCoreInstrumentation(options =>
             {
                 options.RecordException = true;
@@ -52,6 +53,7 @@ public static class ObservabilityConfiguration
                 .AddMeter(ReplacementAssignmentTelemetry.MeterName)
                 .AddMeter(EventRescheduleTelemetry.MeterName)
                 .AddMeter(EventCompletionTelemetry.MeterName)
+                .AddMeter(AttendanceTelemetry.MeterName)
                 .AddAspNetCoreInstrumentation());
 
     }

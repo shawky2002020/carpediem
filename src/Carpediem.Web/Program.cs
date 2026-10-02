@@ -339,6 +339,18 @@ builder.Services.AddOpenApi(options =>
                 };
             }
         }
+        if (operation.OperationId == "FinalizeAttendance")
+        {
+            operation.Parameters ??= [];
+            operation.Parameters.Add(new OpenApiParameter
+            {
+                Name = "X-XSRF-TOKEN",
+                In = ParameterLocation.Header,
+                Required = true,
+                Description = "Antiforgery request token paired with the session cookie.",
+                Schema = new OpenApiSchema { Type = JsonSchemaType.String },
+            });
+        }
         return Task.CompletedTask;
     });
     options.AddSchemaTransformer((schema, context, _) =>
@@ -403,6 +415,7 @@ app.MapEventSelfCancellationEndpoints();
 app.MapEventReplacementAssignmentEndpoints();
 app.MapEventRescheduleEndpoints();
 app.MapEventCompletionEndpoints();
+app.MapAttendanceEndpoints();
 
 await app.Services.SeedDevelopmentIdentityAsync(app.Environment.IsDevelopment(), app.Configuration);
 await app.RunAsync();

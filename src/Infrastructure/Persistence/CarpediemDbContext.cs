@@ -6,6 +6,7 @@ using Carpediem.Modules.Events.Domain.ChiefLeaderAssignments;
 using Carpediem.Modules.Notifications.Domain;
 using Carpediem.Modules.Staffing.Domain.Availability;
 using Carpediem.Modules.Staffing.Domain.TeamSelection;
+using Carpediem.Modules.Attendance.Domain;
 using Carpediem.Infrastructure.Audit;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -25,6 +26,7 @@ public sealed class CarpediemDbContext(DbContextOptions<CarpediemDbContext> opti
     public DbSet<InPlatformNotification> InPlatformNotifications => Set<InPlatformNotification>();
     public DbSet<AvailabilityResponse> AvailabilityResponses => Set<AvailabilityResponse>();
     public DbSet<TeamAssignment> TeamAssignments => Set<TeamAssignment>();
+    public DbSet<AttendanceOutcome> AttendanceOutcomes => Set<AttendanceOutcome>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -152,5 +154,23 @@ public sealed class CarpediemDbContext(DbContextOptions<CarpediemDbContext> opti
             .HasForeignKey(item => item.StaffingCycleId)
             .OnDelete(DeleteBehavior.NoAction)
             .HasConstraintName("FK_TeamAssignments_StaffingCycles");
+        builder.Entity<AttendanceOutcome>()
+            .HasOne<TeamAssignment>()
+            .WithMany()
+            .HasForeignKey(item => item.TeamAssignmentId)
+            .OnDelete(DeleteBehavior.NoAction)
+            .HasConstraintName("FK_AttendanceOutcomes_TeamAssignments");
+        builder.Entity<AttendanceOutcome>()
+            .HasOne<CarpediemUser>()
+            .WithMany()
+            .HasForeignKey(item => item.FinalizedByUserId)
+            .OnDelete(DeleteBehavior.NoAction)
+            .HasConstraintName("FK_AttendanceOutcomes_FinalizedByUsers");
+        builder.Entity<AttendanceOutcome>()
+            .HasOne<CarpediemUser>()
+            .WithMany()
+            .HasForeignKey(item => item.CorrectedByUserId)
+            .OnDelete(DeleteBehavior.NoAction)
+            .HasConstraintName("FK_AttendanceOutcomes_CorrectedByUsers");
     }
 }

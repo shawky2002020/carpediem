@@ -5,6 +5,7 @@
     <ProjectReference Include="..\Modules\Events\Carpediem.Modules.Events.csproj" />
     <ProjectReference Include="..\Modules\Notifications\Carpediem.Modules.Notifications.csproj" />
     <ProjectReference Include="..\Modules\Staffing\Carpediem.Modules.Staffing.csproj" />
+    <ProjectReference Include="..\Modules\Attendance\Carpediem.Modules.Attendance.csproj" />
   </ItemGroup>
 
   <ItemGroup>

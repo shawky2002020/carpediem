@@ -42,6 +42,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/event-completion/components/complete-event-dialog/complete-event-dialog.component').then(m => m.CompleteEventDialogComponent),
   },
   {
+    path: 'events/:eventId/attendance',
+    canActivate: [chiefLeaderGuard],
+    loadComponent: () => import('./features/attendance/components/attendance-roll-sheet/attendance-roll-sheet.component').then(m => m.AttendanceRollSheetComponent),
+  },
+  {
     path: 'my-appointments',
     canActivate: [chiefLeaderGuard],
     children: [

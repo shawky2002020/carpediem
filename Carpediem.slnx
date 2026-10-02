@@ -15,6 +15,9 @@
   <Folder Name="/src/Modules/Notifications/">
     <Project Path="src/Modules/Notifications/Carpediem.Modules.Notifications.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/Attendance/">
+    <Project Path="src/Modules/Attendance/Carpediem.Modules.Attendance.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Staffing/">
     <Project Path="src/Modules/Staffing/Carpediem.Modules.Staffing.csproj" />
   </Folder>

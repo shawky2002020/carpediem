@@ -1,0 +1,244 @@
+openapi: 3.1.0
+info:
+  title: Carpediem Attendance API
+  description: Endpoints for Chief Leader on-site attendance roll call recording and roll sheet inspection (SLICE-15).
+  version: 1.0.0
+paths:
+  /api/events/{eventId}/attendance:
+    get:
+      summary: Retrieve on-site attendance roll sheet
+      description: Returns all active volunteer roster placements for the event with their current attendance outcome (or Unrecorded).
+      operationId: GetAttendanceRollSheet
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          description: Event identifier
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Attendance roll sheet successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttendanceRollSheetResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestProblem'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '403':
+          $ref: '#/components/responses/ForbiddenProblem'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
+        '409':
+          $ref: '#/components/responses/ConflictProblem'
+    post:
+      summary: Finalize on-site attendance roll call outcomes
+      description: Chief Leader records attendance outcomes (Attended or NoShow) for active roster members with immediate effect.
+      operationId: FinalizeAttendance
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          description: Event identifier
+          schema:
+            type: string
+            format: uuid
+        - name: X-XSRF-TOKEN
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FinalizeAttendanceRequest'
+      responses:
+        '200':
+          description: Attendance roll call successfully recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FinalizeAttendanceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestProblem'
+        '401':
+          $ref: '#/components/responses/UnauthorizedProblem'
+        '403':
+          $ref: '#/components/responses/ForbiddenProblem'
+        '404':
+          $ref: '#/components/responses/NotFoundProblem'
+        '409':
+          $ref: '#/components/responses/ConflictProblem'
+
+components:
+  schemas:
+    AttendanceRollSheetResponse:
+      type: object
+      required:
+        - eventId
+        - eventTitle
+        - status
+        - startDateTime
+        - endDateTime
+        - location
+        - staffingCycleId
+        - isCompleted
+        - isAllFinalized
+        - entries
+      properties:
+        eventId:
+          type: string
+          format: uuid
+        eventTitle:
+          type: string
+        status:
+          type: string
+        startDateTime:
+          type: string
+          format: date-time
+        endDateTime:
+          type: string
+          format: date-time
+        location:
+          type: string
+        staffingCycleId:
+          type: string
+          format: uuid
+        isCompleted:
+          type: boolean
+        isAllFinalized:
+          type: boolean
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/AttendanceRollSheetEntryResponse'
+
+    AttendanceRollSheetEntryResponse:
+      type: object
+      required:
+        - teamAssignmentId
+        - volunteerUserId
+        - volunteerName
+      properties:
+        teamAssignmentId:
+          type: string
+          format: uuid
+        volunteerUserId:
+          type: string
+          format: uuid
+        volunteerName:
+          type: string
+        outcome:
+          type: string
+          nullable: true
+          enum: [Attended, NoShow]
+        finalizedAt:
+          type: string
+          format: date-time
+          nullable: true
+        version:
+          type: string
+          nullable: true
+
+    FinalizeAttendanceRequest:
+      type: object
+      required:
+        - entries
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/AttendanceOutcomeSubmission'
+
+    AttendanceOutcomeSubmission:
+      type: object
+      required:
+        - teamAssignmentId
+        - outcome
+      properties:
+        teamAssignmentId:
+          type: string
+          format: uuid
+        outcome:
+          type: string
+          enum: [Attended, NoShow]
+
+    FinalizeAttendanceResponse:
+      type: object
+      required:
+        - eventId
+        - finalizedAt
+        - totalActiveAssignments
+        - attendedCount
+        - noShowCount
+        - unrecordedCount
+      properties:
+        eventId:
+          type: string
+          format: uuid
+        finalizedAt:
+          type: string
+          format: date-time
+        totalActiveAssignments:
+          type: integer
+        attendedCount:
+          type: integer
+        noShowCount:
+          type: integer
+        unrecordedCount:
+          type: integer
+
+    ApiProblemResponse:
+      type: object
+      required:
+        - type
+        - title
+        - status
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+
+  responses:
+    BadRequestProblem:
+      description: Bad request or malformed payload
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ApiProblemResponse'
+    UnauthorizedProblem:
+      description: Unauthenticated session
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ApiProblemResponse'
+    ForbiddenProblem:
+      description: Unauthorized persona
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ApiProblemResponse'
+    NotFoundProblem:
+      description: Event or resource not found
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ApiProblemResponse'
+    ConflictProblem:
+      description: Business invariant violation or status conflict
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ApiProblemResponse'

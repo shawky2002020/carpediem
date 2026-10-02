@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Modules\Events\Carpediem.Modules.Events.csproj" />
     <ProjectReference Include="..\..\src\Modules\Staffing\Carpediem.Modules.Staffing.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Attendance\Carpediem.Modules.Attendance.csproj" />
   </ItemGroup>
 
 </Project>

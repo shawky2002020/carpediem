@@ -1,0 +1,148 @@
+<div class="cd-attendance-container" role="main" aria-labelledby="attendance-page-title">
+  <!-- Header & Navigation -->
+  <header class="cd-attendance-header">
+    <div class="cd-breadcrumb">
+      <a routerLink="/" class="cd-back-link" aria-label="Back to home">
+        &larr; Back
+      </a>
+    </div>
+
+    <div class="cd-header-content">
+      <div class="cd-title-group">
+        <h1 id="attendance-page-title" class="cd-page-title">On-Site Attendance Roll Call</h1>
+        @if (rollSheet(); as sheet) {
+          <div class="cd-event-meta">
+            <span class="cd-event-title">{{ sheet.eventTitle }}</span>
+            <span class="cd-status-badge" [attr.data-status]="sheet.status">
+              {{ sheet.status }}
+            </span>
+            <span class="cd-meta-item">{{ sheet.location }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="cd-header-actions">
+        <button
+          type="button"
+          class="cd-btn cd-btn--secondary"
+          (click)="markAllAttended()"
+          [disabled]="loading() || submitting() || entries().length === 0"
+          aria-label="Mark all volunteers as attended">
+          Mark All Attended
+        </button>
+
+        <button
+          type="button"
+          class="cd-btn cd-btn--primary"
+          (click)="submit()"
+          [disabled]="loading() || submitting() || !hasChanges()"
+          aria-label="Finalize attendance roll call">
+          @if (submitting()) {
+            <span class="cd-spinner" aria-hidden="true"></span>
+            Submitting...
+          } @else {
+            Finalize Roll Call
+          }
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Live Announcements -->
+  <div class="cd-sr-only" aria-live="polite" aria-atomic="true">
+    @if (statusMessage()) {
+      {{ statusMessage() }}
+    }
+  </div>
+
+  <!-- Feedback Alerts -->
+  @if (successMessage()) {
+    <div class="cd-alert cd-alert--success" role="status" aria-live="polite">
+      <span class="cd-alert-icon" aria-hidden="true">&#x2713;</span>
+      <p class="cd-alert-text">{{ successMessage() }}</p>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="cd-alert cd-alert--error" role="alert" aria-live="assertive">
+      <span class="cd-alert-icon" aria-hidden="true">&#x26A0;</span>
+      <p class="cd-alert-text">{{ errorMessage() }}</p>
+    </div>
+  }
+
+  <!-- Summary Statistics Bar -->
+  <section class="cd-stats-grid" aria-label="Attendance statistics summary">
+    <div class="cd-stat-card">
+      <span class="cd-stat-label">Total Roster</span>
+      <span class="cd-stat-value" data-testid="stat-total">{{ totalCount() }}</span>
+    </div>
+    <div class="cd-stat-card cd-stat-card--attended">
+      <span class="cd-stat-label">Attended</span>
+      <span class="cd-stat-value" data-testid="stat-attended">{{ attendedCount() }}</span>
+    </div>
+    <div class="cd-stat-card cd-stat-card--noshow">
+      <span class="cd-stat-label">No Show</span>
+      <span class="cd-stat-value" data-testid="stat-noshow">{{ noShowCount() }}</span>
+    </div>
+    <div class="cd-stat-card cd-stat-card--unrecorded">
+      <span class="cd-stat-label">Unrecorded</span>
+      <span class="cd-stat-value" data-testid="stat-unrecorded">{{ unrecordedCount() }}</span>
+    </div>
+  </section>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="cd-loading-state" role="status" aria-live="polite">
+      <span class="cd-spinner" aria-hidden="true"></span>
+      <p>Loading attendance roll sheet...</p>
+    </div>
+  } @else if (entries().length === 0) {
+    <!-- Empty State -->
+    <div class="cd-empty-state">
+      <p class="cd-empty-title">No Active Volunteers Assigned</p>
+      <p class="cd-empty-desc">
+        There are currently no active team members assigned to this event's staffing cycle.
+      </p>
+    </div>
+  } @else {
+    <!-- Roster Roll Call List -->
+    <section class="cd-roster-section" aria-label="Volunteer roll call list">
+      <ul class="cd-roster-list" role="list">
+        @for (entry of entries(); track entry.teamAssignmentId) {
+          <li class="cd-roster-item" [attr.data-assignment-id]="entry.teamAssignmentId">
+            <div class="cd-volunteer-info">
+              <span class="cd-volunteer-name">{{ entry.volunteerName }}</span>
+              <span class="cd-current-status" [attr.data-outcome]="getEffectiveOutcome(entry.teamAssignmentId) ?? 'Unrecorded'">
+                {{ getEffectiveOutcome(entry.teamAssignmentId) ?? 'Unrecorded' }}
+              </span>
+            </div>
+
+            <div class="cd-action-group" role="group" [attr.aria-label]="'Attendance controls for ' + entry.volunteerName">
+              <button
+                type="button"
+                class="cd-toggle-btn cd-toggle-btn--attended"
+                [class.active]="getEffectiveOutcome(entry.teamAssignmentId) === 'Attended'"
+                [attr.aria-pressed]="getEffectiveOutcome(entry.teamAssignmentId) === 'Attended'"
+                (click)="setOutcome(entry.teamAssignmentId, 'Attended')"
+                [disabled]="submitting()"
+                [attr.aria-label]="'Mark ' + entry.volunteerName + ' as attended'">
+                Attended
+              </button>
+
+              <button
+                type="button"
+                class="cd-toggle-btn cd-toggle-btn--noshow"
+                [class.active]="getEffectiveOutcome(entry.teamAssignmentId) === 'NoShow'"
+                [attr.aria-pressed]="getEffectiveOutcome(entry.teamAssignmentId) === 'NoShow'"
+                (click)="setOutcome(entry.teamAssignmentId, 'NoShow')"
+                [disabled]="submitting()"
+                [attr.aria-label]="'Mark ' + entry.volunteerName + ' as no show'">
+                No Show
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+</div>

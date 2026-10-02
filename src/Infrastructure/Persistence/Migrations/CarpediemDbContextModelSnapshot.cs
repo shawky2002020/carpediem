@@ -82,6 +82,54 @@ namespace Carpediem.Infrastructure.Persistence.Migrations
                     b.ToTable("AuditLogs", "audit");
                 });
 
+            modelBuilder.Entity("Carpediem.Modules.Attendance.Domain.AttendanceOutcome", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("CorrectedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CorrectedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("FinalizedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("FinalizedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<Guid>("TeamAssignmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id")
+                        .HasName("PK_attendance_AttendanceOutcomes");
+
+                    b.HasIndex("CorrectedByUserId");
+
+                    b.HasIndex("FinalizedByUserId");
+
+                    b.HasIndex("TeamAssignmentId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_AttendanceOutcomes_Assignment");
+
+                    b.ToTable("AttendanceOutcomes", "attendance", t =>
+                        {
+                            t.HasCheckConstraint("CK_AttendanceOutcomes_Outcome", "[Outcome] IN ('Attended','NoShow')");
+                        });
+                });
+
             modelBuilder.Entity("Carpediem.Modules.Events.Domain.ChiefLeaderAssignments.ChiefLeaderAssignment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -646,6 +694,29 @@ namespace Carpediem.Infrastructure.Persistence.Migrations
                         .HasForeignKey("ActorUserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_AuditLogs_Users");
+                });
+
+            modelBuilder.Entity("Carpediem.Modules.Attendance.Domain.AttendanceOutcome", b =>
+                {
+                    b.HasOne("Carpediem.Modules.Identity.Domain.CarpediemUser", null)
+                        .WithMany()
+                        .HasForeignKey("CorrectedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_AttendanceOutcomes_CorrectedByUsers");
+
+                    b.HasOne("Carpediem.Modules.Identity.Domain.CarpediemUser", null)
+                        .WithMany()
+                        .HasForeignKey("FinalizedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_AttendanceOutcomes_FinalizedByUsers");
+
+                    b.HasOne("Carpediem.Modules.Staffing.Domain.TeamSelection.TeamAssignment", null)
+                        .WithMany()
+                        .HasForeignKey("TeamAssignmentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_AttendanceOutcomes_TeamAssignments");
                 });
 
             modelBuilder.Entity("Carpediem.Modules.Events.Domain.ChiefLeaderAssignments.ChiefLeaderAssignment", b =>

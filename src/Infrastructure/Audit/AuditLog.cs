@@ -188,4 +188,23 @@ public sealed class AuditLog
             resourceType: "Event",
             source: isManualCloseout ? "AdminManualCloseout" : "SystemLifecycleWorker",
             mandatoryReason: isManualCloseout ? "Administrative closeout triggered" : "Scheduled event window concluded");
+
+    public static AuditLog AttendanceFinalized(
+        Guid eventId,
+        Guid actorUserId,
+        Guid correlationId,
+        DateTimeOffset occurredAt,
+        int attendedCount,
+        int noShowCount) =>
+        Create(
+            actorUserId,
+            action: "AttendanceFinalized",
+            resourceId: eventId,
+            correlationId: correlationId,
+            occurredAt: occurredAt,
+            previousValue: "Unrecorded",
+            newValue: $"{{\"Attended\":{attendedCount},\"NoShow\":{noShowCount}}}",
+            resourceType: "Event",
+            source: "ChiefLeaderRollCall",
+            mandatoryReason: null);
 }

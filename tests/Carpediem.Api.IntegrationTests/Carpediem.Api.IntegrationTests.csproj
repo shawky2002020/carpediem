@@ -23,6 +23,7 @@
     <ProjectReference Include="..\..\src\Carpediem.Web\Carpediem.Web.csproj" />
     <ProjectReference Include="..\..\src\Infrastructure\Carpediem.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\Modules\Staffing\Carpediem.Modules.Staffing.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Attendance\Carpediem.Modules.Attendance.csproj" />
   </ItemGroup>
 
 </Project>
