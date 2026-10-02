@@ -1,0 +1,899 @@
+{
+    "metrics": {
+        "data_received": {
+            "count": 690073,
+            "rate": 160761.18565745384
+        },
+        "http_req_connecting": {
+            "avg": 0.3316826086956523,
+            "min": 0,
+            "med": 0,
+            "max": 9.3427,
+            "p(90)": 0.5889,
+            "p(95)": 2.5031
+        },
+        "http_req_tls_handshaking": {
+            "p(90)": 19.085140000000028,
+            "p(95)": 23.841839999999998,
+            "avg": 3.191268863955119,
+            "min": 0,
+            "med": 0,
+            "max": 37.6789
+        },
+        "http_req_receiving": {
+            "avg": 0.08410182328190738,
+            "min": 0,
+            "med": 0,
+            "max": 2.622,
+            "p(90)": 0.5173,
+            "p(95)": 0.53878
+        },
+        "checks": {
+            "passes": 1912,
+            "fails": 0,
+            "value": 1
+        },
+        "http_reqs": {
+            "count": 713,
+            "rate": 166.10231870217294
+        },
+        "vus_max": {
+            "value": 100,
+            "min": 100,
+            "max": 100
+        },
+        "iteration_duration": {
+            "p(95)": 1366.463765,
+            "avg": 947.1190459999999,
+            "min": 190.7898,
+            "med": 1009.1329499999999,
+            "max": 1388.6797,
+            "p(90)": 1352.48619
+        },
+        "iterations": {
+            "count": 100,
+            "rate": 23.2962578824927
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 713,
+            "thresholds": {
+                "rate==0": false
+            },
+            "value": 0
+        },
+        "http_req_sending": {
+            "max": 10.4536,
+            "p(90)": 0.53036,
+            "p(95)": 0.5694,
+            "avg": 0.15238246844319772,
+            "min": 0,
+            "med": 0
+        },
+        "http_req_waiting": {
+            "p(95)": 1086.29684,
+            "avg": 132.6966946704067,
+            "min": 1.0336,
+            "med": 10.4802,
+            "max": 1306.0271,
+            "p(90)": 662.9955200000002
+        },
+        "http_req_duration": {
+            "max": 1306.5363,
+            "p(90)": 663.5246000000001,
+            "p(95)": 1086.29684,
+            "avg": 132.93317896213176,
+            "min": 1.0521,
+            "med": 10.4802
+        },
+        "http_req_blocked": {
+            "max": 41.2942,
+            "p(90)": 21.210800000000003,
+            "p(95)": 28.2916,
+            "avg": 3.6550660589060318,
+            "min": 0,
+            "med": 0
+        },
+        "http_req_duration{expected_response:true}": {
+            "avg": 132.93317896213176,
+            "min": 1.0521,
+            "med": 10.4802,
+            "max": 1306.5363,
+            "p(90)": 663.5246000000001,
+            "p(95)": 1086.29684
+        },
+        "vus": {
+            "value": 39,
+            "min": 0,
+            "max": 100
+        },
+        "leader_self_cancellation_errors": {
+            "count": 0,
+            "rate": 0,
+            "thresholds": {
+                "count==0": false
+            }
+        },
+        "data_sent": {
+            "count": 377868,
+            "rate": 88029.1037354175
+        },
+        "leader_self_cancellation_journey": {
+            "min": 191,
+            "med": 1009.5,
+            "max": 1389,
+            "p(90)": 1352.1,
+            "p(95)": 1366.3,
+            "avg": 947.21
+        }
+    },
+    "setup_data": {
+        "assignments": [
+            {
+                "userName": "leader.1",
+                "version": "AAAAAAAAB9w=",
+                "assignmentId": "3e651aea-c828-4c69-8548-9e0b8351736c",
+                "userId": "7ebeaa0f-4eac-4afa-8f8a-ea5eefd5fb7c"
+            },
+            {
+                "assignmentId": "2c99b7b8-8ac1-497f-a09f-11c9ede08fa2",
+                "userId": "27f36428-47ab-47af-b09f-90fc8e753dcb",
+                "userName": "leader.10",
+                "version": "AAAAAAAAB90="
+            },
+            {
+                "version": "AAAAAAAAB94=",
+                "assignmentId": "bdae8152-ed3a-427d-be89-326b63b8bc0c",
+                "userId": "593e214a-27b9-4387-8998-cba7c33ee117",
+                "userName": "leader.100"
+            },
+            {
+                "assignmentId": "f54f0f42-8027-48b2-8418-66bf12f05e08",
+                "userId": "eb3151f3-8a75-4f0f-9778-da6145843b20",
+                "userName": "leader.11",
+                "version": "AAAAAAAAB98="
+            },
+            {
+                "version": "AAAAAAAAB+A=",
+                "assignmentId": "d5aa4382-bac2-46e1-b521-5503eeec44a4",
+                "userId": "85f62116-9d8d-4b6b-ad92-6f1778d33cb1",
+                "userName": "leader.12"
+            },
+            {
+                "assignmentId": "e2c3b48c-71b0-463e-9d18-609521fc1eb7",
+                "userId": "e83cda5f-7619-4422-95b4-01c179696dd6",
+                "userName": "leader.13",
+                "version": "AAAAAAAAB+E="
+            },
+            {
+                "userName": "leader.14",
+                "version": "AAAAAAAAB+I=",
+                "assignmentId": "5a47d54d-db11-458b-bd93-d819a2218355",
+                "userId": "f8160a1e-8a9b-46b0-823d-45cf933e5192"
+            },
+            {
+                "assignmentId": "df034bbd-b0ff-4f6e-b276-f4541dd4b015",
+                "userId": "a5ebf8cd-d89e-4e06-8be3-28dfb9da9f33",
+                "userName": "leader.15",
+                "version": "AAAAAAAAB+M="
+            },
+            {
+                "assignmentId": "9e64cb86-377b-4d9e-a03f-e092e7e05f31",
+                "userId": "57516b85-e851-4b15-ba53-ab90c61c2729",
+                "userName": "leader.16",
+                "version": "AAAAAAAAB+Q="
+            },
+            {
+                "userName": "leader.17",
+                "version": "AAAAAAAAB+U=",
+                "assignmentId": "70af1a36-21b9-4f4c-a51a-9516c02df105",
+                "userId": "40148f18-aa87-419b-80cc-cf9d425361df"
+            },
+            {
+                "assignmentId": "6469ea3b-e856-4f3f-826c-86228400f6d5",
+                "userId": "dd41603f-e69e-473f-86e3-10c885859ef2",
+                "userName": "leader.18",
+                "version": "AAAAAAAAB+Y="
+            },
+            {
+                "version": "AAAAAAAAB+c=",
+                "assignmentId": "8713009e-b489-4e25-b0e8-fcc0254dae17",
+                "userId": "8c49a04f-46e3-4636-b647-115af2c5868c",
+                "userName": "leader.19"
+            },
+            {
+                "assignmentId": "24b69fb8-09a5-44ba-b0ad-457babc6af73",
+                "userId": "38f1a871-cd48-4476-a256-1337f6ff7813",
+                "userName": "leader.2",
+                "version": "AAAAAAAAB+g="
+            },
+            {
+                "userId": "d1fb5686-2c2d-4cde-8dfc-80efefdbfa54",
+                "userName": "leader.20",
+                "version": "AAAAAAAAB+k=",
+                "assignmentId": "b1b87a46-b511-4b0e-aa5f-88d6181caab3"
+            },
+            {
+                "assignmentId": "ceb969d7-a637-45a9-b172-6d7867c380d9",
+                "userId": "3c24a07f-2c06-4318-8465-11e5e5df2985",
+                "userName": "leader.21",
+                "version": "AAAAAAAAB+o="
+            },
+            {
+                "assignmentId": "0922b082-4e2f-48b0-b385-8a2718011027",
+                "userId": "db97ec8f-aa08-425e-bac0-d197bf2f09de",
+                "userName": "leader.22",
+                "version": "AAAAAAAAB+s="
+            },
+            {
+                "assignmentId": "ee3cd26c-cf4e-4b05-bf98-a4acff4c7c23",
+                "userId": "8415287d-4fe4-486c-b52d-e96fb742eb84",
+                "userName": "leader.23",
+                "version": "AAAAAAAAB+w="
+            },
+            {
+                "assignmentId": "ac5d1426-6688-4393-a795-d6889483da34",
+                "userId": "b4df0323-aecb-4c19-af0b-40e4632052ed",
+                "userName": "leader.24",
+                "version": "AAAAAAAAB+0="
+            },
+            {
+                "assignmentId": "77f49073-d24d-4a2d-b69a-5358b1e9d257",
+                "userId": "0c46d81f-0c28-48a0-881a-86222f18d511",
+                "userName": "leader.25",
+                "version": "AAAAAAAAB+4="
+            },
+            {
+                "version": "AAAAAAAAB+8=",
+                "assignmentId": "cd27ca2b-6242-445f-9924-8e98ec94689a",
+                "userId": "7edcef42-fdd3-43d7-8226-14a60a9c0c7d",
+                "userName": "leader.26"
+            },
+            {
+                "assignmentId": "49b8e3a9-2c82-468b-b15f-fbabf7690684",
+                "userId": "e14a4691-75c4-4e73-a3bb-df8807e4935d",
+                "userName": "leader.27",
+                "version": "AAAAAAAAB/A="
+            },
+            {
+                "assignmentId": "e5bdd24e-629a-4eee-bcdb-deca6e958c05",
+                "userId": "c3c24a54-4eac-4324-8ab4-639318c7fbf2",
+                "userName": "leader.28",
+                "version": "AAAAAAAAB/I="
+            },
+            {
+                "userId": "d8de6203-dacf-4899-90a6-57d848006783",
+                "userName": "leader.29",
+                "version": "AAAAAAAAB/M=",
+                "assignmentId": "b6757766-703a-4435-8b46-04c8504910cc"
+            },
+            {
+                "assignmentId": "fcf8ee32-4dfa-45c6-847f-31bb3e26f2aa",
+                "userId": "76c55c9b-f8fa-40a7-9911-a622cf40d6ed",
+                "userName": "leader.3",
+                "version": "AAAAAAAAB/Q="
+            },
+            {
+                "userId": "04e1ed8c-9df9-4837-8d97-71ccd55d6972",
+                "userName": "leader.30",
+                "version": "AAAAAAAAB/U=",
+                "assignmentId": "a708d869-628f-4c6d-94bf-b6e2238b16ed"
+            },
+            {
+                "userName": "leader.31",
+                "version": "AAAAAAAAB/c=",
+                "assignmentId": "10f86dc7-eabc-4152-8fe1-62d7c9c30738",
+                "userId": "2951aef1-951a-4674-bef4-64ce8e6f99a5"
+            },
+            {
+                "assignmentId": "4c2056ba-ed30-4051-a2bf-dd996cf31778",
+                "userId": "4f7eea17-cfe3-46dd-8322-ec95c1d92d5a",
+                "userName": "leader.32",
+                "version": "AAAAAAAAB/k="
+            },
+            {
+                "version": "AAAAAAAAB/o=",
+                "assignmentId": "bc7efea0-f991-4548-8a73-b28b3925be4f",
+                "userId": "af2ee6dc-5d31-4d8f-a672-aba1aa849395",
+                "userName": "leader.33"
+            },
+            {
+                "userId": "7e531eae-7ee0-45b5-b896-a148a388a1a9",
+                "userName": "leader.34",
+                "version": "AAAAAAAAB/w=",
+                "assignmentId": "63bbcf47-b6e6-4c0c-90f9-34d565b5fa4c"
+            },
+            {
+                "userId": "bb2d3bca-77ed-4d4e-a116-68477c5a0e3d",
+                "userName": "leader.35",
+                "version": "AAAAAAAAB/8=",
+                "assignmentId": "2f152c8c-7c0a-4b96-bab4-456cdbf3edfa"
+            },
+            {
+                "assignmentId": "ab53e82d-f8ef-4cb4-bb38-01e838a5f8d9",
+                "userId": "72724416-e4d4-4373-986d-9d12fe2efab7",
+                "userName": "leader.36",
+                "version": "AAAAAAAACAM="
+            },
+            {
+                "assignmentId": "586ad6fa-889c-4050-88b1-f3df2569cf06",
+                "userId": "1601bd53-3735-420b-bbdc-80c463b3aa68",
+                "userName": "leader.37",
+                "version": "AAAAAAAACAQ="
+            },
+            {
+                "version": "AAAAAAAACAU=",
+                "assignmentId": "5de2aa55-4cd4-43f0-860b-d59609749e4b",
+                "userId": "15dd1b41-05b2-48e5-a49c-e68e50bd4004",
+                "userName": "leader.38"
+            },
+            {
+                "version": "AAAAAAAACAY=",
+                "assignmentId": "75e56caa-6e8b-41e1-ab13-408e27c7f7e1",
+                "userId": "1b5ea102-c487-44ad-a300-2b434cb05cf1",
+                "userName": "leader.39"
+            },
+            {
+                "assignmentId": "153f2bac-ef67-4182-9afa-a167becfcb9b",
+                "userId": "00dc4b7d-dae3-4c60-b944-e8ce2f21d35f",
+                "userName": "leader.4",
+                "version": "AAAAAAAACAc="
+            },
+            {
+                "assignmentId": "c596e7e0-369c-41c1-ab37-ab74bec3fd1f",
+                "userId": "899292d0-29ba-407c-a54a-658a508e4940",
+                "userName": "leader.40",
+                "version": "AAAAAAAACAg="
+            },
+            {
+                "assignmentId": "395223fc-c880-402e-a477-4300a051540e",
+                "userId": "fafaaa74-1abf-4545-a119-6a49a40e1ebb",
+                "userName": "leader.41",
+                "version": "AAAAAAAACAk="
+            },
+            {
+                "version": "AAAAAAAACAo=",
+                "assignmentId": "fd576f0d-73e9-4087-a2cf-c6641cd62606",
+                "userId": "b0478394-3831-4266-a24e-cdf238801415",
+                "userName": "leader.42"
+            },
+            {
+                "userName": "leader.43",
+                "version": "AAAAAAAACAs=",
+                "assignmentId": "59013353-3937-4bcf-be63-2edf52a16cad",
+                "userId": "847c7a48-ac21-45e4-b48d-73804a8584fb"
+            },
+            {
+                "userId": "8b90c000-33cd-4ded-be22-8478333f2d14",
+                "userName": "leader.44",
+                "version": "AAAAAAAACAw=",
+                "assignmentId": "0a4a80ad-6c1c-47d1-8281-922c601403c1"
+            },
+            {
+                "assignmentId": "be210a43-5db2-4f87-91b9-b64e287aa8ab",
+                "userId": "7834576b-077c-4a93-99a9-7a89c1f2b3e1",
+                "userName": "leader.45",
+                "version": "AAAAAAAACA0="
+            },
+            {
+                "assignmentId": "c6f1ba1f-9476-4724-a07a-ea127aae2a1d",
+                "userId": "0af566a3-d6fd-4281-97b1-2796fe2b943e",
+                "userName": "leader.46",
+                "version": "AAAAAAAACA4="
+            },
+            {
+                "userName": "leader.47",
+                "version": "AAAAAAAACA8=",
+                "assignmentId": "b70f908e-4c61-4966-96cf-184c05097a31",
+                "userId": "cfb76a94-8612-4dc5-a3a5-dddf83b14f16"
+            },
+            {
+                "userId": "9350ee45-d9fe-493d-938d-b3fceb0aeb27",
+                "userName": "leader.48",
+                "version": "AAAAAAAACBA=",
+                "assignmentId": "a814481e-60e3-4345-b235-4df6b8b1f3b6"
+            },
+            {
+                "assignmentId": "66648b17-e826-452a-8c25-2b925a92a7c4",
+                "userId": "37d356d1-cb81-47a1-a4be-9c0f279b923b",
+                "userName": "leader.49",
+                "version": "AAAAAAAACBE="
+            },
+            {
+                "version": "AAAAAAAACBI=",
+                "assignmentId": "ee89de12-deb9-44ab-a085-4331eefbe5d4",
+                "userId": "eca8c72b-c0d9-4066-9847-9bfb411db0b6",
+                "userName": "leader.5"
+            },
+            {
+                "assignmentId": "300388a3-7a15-449a-a54b-6a03972c9b3a",
+                "userId": "40b8ba4e-ae04-456b-b429-55d4e8362bb1",
+                "userName": "leader.50",
+                "version": "AAAAAAAACBM="
+            },
+            {
+                "version": "AAAAAAAACBQ=",
+                "assignmentId": "8d3bb5d3-3525-4e5f-bf68-70667dab6d18",
+                "userId": "dfb811dc-7fe2-439a-9945-2e7bf2e0b218",
+                "userName": "leader.51"
+            },
+            {
+                "assignmentId": "1348367a-39cd-49a3-a8c2-c1d7d3f4275d",
+                "userId": "0f70fb88-4815-4eb1-bc7d-5bccbc96b7e4",
+                "userName": "leader.52",
+                "version": "AAAAAAAACBU="
+            },
+            {
+                "version": "AAAAAAAACBY=",
+                "assignmentId": "c9f86fd7-f2f8-4ca9-bbb5-36e754e83cc8",
+                "userId": "e33ba2ab-2f81-4df6-a15e-fa20fa071242",
+                "userName": "leader.53"
+            },
+            {
+                "assignmentId": "41ee15f1-1429-489c-a0f4-4db3e409d881",
+                "userId": "3a3c57ad-8328-4652-9eb3-0b03c816de4e",
+                "userName": "leader.54",
+                "version": "AAAAAAAACBc="
+            },
+            {
+                "userId": "56c0b90c-e402-4a72-ba1b-bea01200872e",
+                "userName": "leader.55",
+                "version": "AAAAAAAACBg=",
+                "assignmentId": "6a2b1127-ad4d-416e-98d7-b0c6b9baf5f1"
+            },
+            {
+                "assignmentId": "f61effa5-91c6-4828-b750-7e5023b4b848",
+                "userId": "f017ff38-72f8-4124-a45a-e772bf12c7b6",
+                "userName": "leader.56",
+                "version": "AAAAAAAACBk="
+            },
+            {
+                "assignmentId": "70c299ef-5fc1-4b43-9d82-3c23c8885abf",
+                "userId": "955ea2bc-4d17-48e9-9719-8eb1c02fea3c",
+                "userName": "leader.57",
+                "version": "AAAAAAAACBo="
+            },
+            {
+                "assignmentId": "5cf5cf56-c827-4efe-b758-cd7663d8c40c",
+                "userId": "5e916777-5040-4250-8f81-54b06667b6e0",
+                "userName": "leader.58",
+                "version": "AAAAAAAACBs="
+            },
+            {
+                "assignmentId": "e28d7b6a-0a08-49fc-ac08-70cd5a5812a8",
+                "userId": "e2570665-8344-47d5-a449-a9dd2e70817c",
+                "userName": "leader.59",
+                "version": "AAAAAAAACBw="
+            },
+            {
+                "version": "AAAAAAAACB0=",
+                "assignmentId": "e5e5ba1e-52a8-4e21-84ce-32d23d1f22de",
+                "userId": "4a966d86-d649-40d8-985b-241defb91b7b",
+                "userName": "leader.6"
+            },
+            {
+                "userId": "c31c1921-e500-4cbc-bec9-1e5bdd5802a7",
+                "userName": "leader.60",
+                "version": "AAAAAAAACB4=",
+                "assignmentId": "d2e00c1d-0747-4873-8ea2-342132583a9d"
+            },
+            {
+                "assignmentId": "d716c7c4-abb7-4594-a6de-8d10a9ab3952",
+                "userId": "7261551f-94e5-4d68-b73b-2b3e1e367c91",
+                "userName": "leader.61",
+                "version": "AAAAAAAACB8="
+            },
+            {
+                "assignmentId": "70502b1e-5990-493b-add1-fa8b7877ec0d",
+                "userId": "deed4b9c-b994-48f4-8c4a-8d50d059f9de",
+                "userName": "leader.62",
+                "version": "AAAAAAAACCA="
+            },
+            {
+                "assignmentId": "080cfcaf-f4f2-49cd-9923-53a7b1cb5338",
+                "userId": "f8b72bb3-8601-481e-abde-6812d8ff44d8",
+                "userName": "leader.63",
+                "version": "AAAAAAAACCE="
+            },
+            {
+                "assignmentId": "0b620100-7030-4fa1-80a8-ccb4f7fca62f",
+                "userId": "c05ba6d2-c4b4-42e3-bb7c-63324f894837",
+                "userName": "leader.64",
+                "version": "AAAAAAAACCI="
+            },
+            {
+                "assignmentId": "ec8a73dc-8ce5-408e-8de1-1e212197fb28",
+                "userId": "03b90077-0a20-4530-b348-00008cf7229a",
+                "userName": "leader.65",
+                "version": "AAAAAAAACCM="
+            },
+            {
+                "assignmentId": "7f8c14da-5f99-4188-be5e-f6b27992e63a",
+                "userId": "647e02a9-03ed-4145-a177-18da5ad25b35",
+                "userName": "leader.66",
+                "version": "AAAAAAAACCQ="
+            },
+            {
+                "assignmentId": "2352572f-41ad-40a9-83bf-552a27a46731",
+                "userId": "c0e47e81-7f79-4b7a-9a85-0c0b7a8556a1",
+                "userName": "leader.67",
+                "version": "AAAAAAAACCU="
+            },
+            {
+                "assignmentId": "ca13c2a7-69db-4c25-b884-e2baa2807bef",
+                "userId": "d4f063fd-c75d-4f88-ac7c-b6fcd4b2b096",
+                "userName": "leader.68",
+                "version": "AAAAAAAACCY="
+            },
+            {
+                "assignmentId": "212e5d09-6a36-4306-bd9e-cb42e47db766",
+                "userId": "ffebc156-9f84-4f7b-a901-3476961198d9",
+                "userName": "leader.69",
+                "version": "AAAAAAAACCc="
+            },
+            {
+                "assignmentId": "606d200a-bffa-4561-bec7-89ed6e7d9367",
+                "userId": "c03099b8-c337-43dc-9466-fe0ee218bd8f",
+                "userName": "leader.7",
+                "version": "AAAAAAAACCg="
+            },
+            {
+                "assignmentId": "8f0f71ba-d4ab-4fb3-949c-22919274db2a",
+                "userId": "a4aade85-0cf8-4db5-94f7-c745c84f6e45",
+                "userName": "leader.70",
+                "version": "AAAAAAAACCk="
+            },
+            {
+                "version": "AAAAAAAACCo=",
+                "assignmentId": "51add9e2-094d-4237-b51a-37dfa50323e7",
+                "userId": "2c41a93e-62ed-4eb4-8151-32ba03674856",
+                "userName": "leader.71"
+            },
+            {
+                "userId": "3703618a-4f38-4c9d-be7e-a15312e051e2",
+                "userName": "leader.72",
+                "version": "AAAAAAAACCs=",
+                "assignmentId": "6a3edea4-d031-468f-972a-0fb649c5c3dd"
+            },
+            {
+                "version": "AAAAAAAACCw=",
+                "assignmentId": "f1b4e4f6-cd3c-47ed-8327-0915c7d6f1b9",
+                "userId": "0526469b-76c6-4b39-85f9-aad90c46167b",
+                "userName": "leader.73"
+            },
+            {
+                "userId": "78194e8a-035b-4b22-9eb2-2ff11a4e569a",
+                "userName": "leader.74",
+                "version": "AAAAAAAACC0=",
+                "assignmentId": "64ff5e3b-d02f-4f05-a49d-07fb7dc19977"
+            },
+            {
+                "assignmentId": "5f9ee9df-e88b-409f-8998-b905500e8ba6",
+                "userId": "9b3a5051-ccbb-4841-8219-5deed09983b2",
+                "userName": "leader.75",
+                "version": "AAAAAAAACC4="
+            },
+            {
+                "version": "AAAAAAAACC8=",
+                "assignmentId": "eefd9ac0-c959-47ff-ba54-a3ab9946eea8",
+                "userId": "ca6161bd-ab4a-486e-b50d-8a26f7283f60",
+                "userName": "leader.76"
+            },
+            {
+                "assignmentId": "af68b9a3-bb15-4e8b-80f6-8f149fdc0ee1",
+                "userId": "b1d5971f-96cb-4ba1-a79e-d24ecccde0bb",
+                "userName": "leader.77",
+                "version": "AAAAAAAACDA="
+            },
+            {
+                "assignmentId": "7bde9f9f-0a9f-4748-bd70-0448488a1937",
+                "userId": "57c15946-edef-4ae7-830a-7a23964b9992",
+                "userName": "leader.78",
+                "version": "AAAAAAAACDE="
+            },
+            {
+                "assignmentId": "cd0173d1-72b7-4461-a04e-76203178635e",
+                "userId": "02d7342e-1e92-4a6f-93b8-c7e400d0ea33",
+                "userName": "leader.79",
+                "version": "AAAAAAAACDI="
+            },
+            {
+                "assignmentId": "e0f6a549-2881-435f-a203-9fe874faf31a",
+                "userId": "06af9ee7-baae-4b06-a8a2-fef3769a0a26",
+                "userName": "leader.8",
+                "version": "AAAAAAAACDM="
+            },
+            {
+                "assignmentId": "7b67030a-be07-4d6b-8518-8ad663b8d08c",
+                "userId": "f8d106f8-4c0d-4379-8c24-2b84d7242a8c",
+                "userName": "leader.80",
+                "version": "AAAAAAAACDQ="
+            },
+            {
+                "version": "AAAAAAAACDU=",
+                "assignmentId": "b25974e1-f21b-4182-ac5a-06f97f032057",
+                "userId": "8b9fc898-aa6e-44b0-af42-6e59daf8d1b5",
+                "userName": "leader.81"
+            },
+            {
+                "assignmentId": "ba9fc593-d573-42c8-9ed6-491ff3b39626",
+                "userId": "596e4a27-ff74-4ae2-9ca3-d47b66f9e4e9",
+                "userName": "leader.82",
+                "version": "AAAAAAAACDY="
+            },
+            {
+                "assignmentId": "9a48d21e-5259-488a-8819-0680e6dc0f03",
+                "userId": "e37b3004-1d0d-4a8e-8959-8b90c819106d",
+                "userName": "leader.83",
+                "version": "AAAAAAAACDc="
+            },
+            {
+                "assignmentId": "8c34d469-7a63-4990-9738-565cefd803c7",
+                "userId": "5bf6359e-52c9-4791-9810-52ef9a30af65",
+                "userName": "leader.84",
+                "version": "AAAAAAAACDg="
+            },
+            {
+                "assignmentId": "450c73a1-d3a5-4b4f-8448-7c4dcfed3bf3",
+                "userId": "131c332d-9890-4459-b846-2701421e679a",
+                "userName": "leader.85",
+                "version": "AAAAAAAACDk="
+            },
+            {
+                "assignmentId": "d6915cf2-5f14-4fc2-a248-851feda977ee",
+                "userId": "d645828c-9b45-4b13-82e3-9261c7826088",
+                "userName": "leader.86",
+                "version": "AAAAAAAACDo="
+            },
+            {
+                "assignmentId": "ffd14fb6-0980-4a9a-9bd4-e0ae4fec5e6c",
+                "userId": "cef30d00-0dc3-4d57-80df-3584d33a0dfa",
+                "userName": "leader.87",
+                "version": "AAAAAAAACDs="
+            },
+            {
+                "version": "AAAAAAAACDw=",
+                "assignmentId": "92324460-a9df-45d0-b268-4c629ff09aef",
+                "userId": "e3a1d81a-5da4-4537-b0c3-47850e964054",
+                "userName": "leader.88"
+            },
+            {
+                "assignmentId": "ee4dfefe-f201-4be5-a524-9f10aa5c9383",
+                "userId": "1e63e674-d384-45cc-a502-f69791f10e7c",
+                "userName": "leader.89",
+                "version": "AAAAAAAACD0="
+            },
+            {
+                "userName": "leader.9",
+                "version": "AAAAAAAACD4=",
+                "assignmentId": "0991b348-1a87-49e6-b074-9009fe3dfa0b",
+                "userId": "af9b9891-011f-4eb4-9877-c8f2e0ca4d25"
+            },
+            {
+                "userName": "leader.90",
+                "version": "AAAAAAAACD8=",
+                "assignmentId": "5c291e64-5f90-41ef-9f8e-5d23be14fdae",
+                "userId": "7c9f17be-4e82-44a5-b3d4-11c0ae2b3b1a"
+            },
+            {
+                "assignmentId": "a2a8012b-ff43-4ef5-9e29-59bd3ca0fc78",
+                "userId": "b0e6a414-d8ac-4d13-ba73-df560d323639",
+                "userName": "leader.91",
+                "version": "AAAAAAAACEA="
+            },
+            {
+                "assignmentId": "3e3fbfa1-e94b-4cc2-8246-f79f6b2c4555",
+                "userId": "92c2fdbb-23c6-48e4-a9c0-7b10be11946b",
+                "userName": "leader.92",
+                "version": "AAAAAAAACEE="
+            },
+            {
+                "userName": "leader.93",
+                "version": "AAAAAAAACEI=",
+                "assignmentId": "96671686-8935-4c4c-b044-72346d8b1c5d",
+                "userId": "9c517673-fcf4-462d-8ac7-d412761a6e5c"
+            },
+            {
+                "assignmentId": "8385a2f7-4cd6-4296-abd5-1491f14bb5ea",
+                "userId": "dc845334-0fac-4548-a28c-ab0cc3aaa393",
+                "userName": "leader.94",
+                "version": "AAAAAAAACEM="
+            },
+            {
+                "assignmentId": "1853f55a-cfb7-42d7-95e3-a43d5e7e6096",
+                "userId": "17e9643d-88a8-4227-baa0-1a43188c33f1",
+                "userName": "leader.95",
+                "version": "AAAAAAAACEQ="
+            },
+            {
+                "userId": "c8806161-1661-4925-b8df-e278d7883f33",
+                "userName": "leader.96",
+                "version": "AAAAAAAACEU=",
+                "assignmentId": "655923ac-e855-49db-8a95-0860a81c133b"
+            },
+            {
+                "assignmentId": "25c317e3-9a3c-459c-905d-6ea7d408e945",
+                "userId": "805eba01-c0da-45a2-bbbb-126ded6374b0",
+                "userName": "leader.97",
+                "version": "AAAAAAAACEY="
+            },
+            {
+                "assignmentId": "7e155931-02de-478a-b32c-b3d5c18e08e7",
+                "userId": "d4022233-d6bd-467b-93e6-d1cce490465e",
+                "userName": "leader.98",
+                "version": "AAAAAAAACEc="
+            },
+            {
+                "userName": "leader.99",
+                "version": "AAAAAAAACEg=",
+                "assignmentId": "5d3f7270-680a-4b3e-b021-9b4b7987b1e2",
+                "userId": "4526a989-f28c-4a52-b138-4fffbdab719b"
+            }
+        ],
+        "eventId": "225ea356-30be-4f6c-960e-9132fea18a23"
+    },
+    "root_group": {
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {
+            "setup": {
+                "path": "::setup",
+                "id": "5c0f8025f7e0b6654089e5b00e950f1a",
+                "groups": {},
+                "checks": {
+                        "antiforgery status is 200": {
+                            "passes": 4,
+                            "fails": 0,
+                            "name": "antiforgery status is 200",
+                            "path": "::setup::antiforgery status is 200",
+                            "id": "e31047222094314774f0d1b0530bd1c0"
+                        },
+                        "antiforgery token present": {
+                            "path": "::setup::antiforgery token present",
+                            "id": "526ed8e4098b71b521ed190d67227743",
+                            "passes": 4,
+                            "fails": 0,
+                            "name": "antiforgery token present"
+                        },
+                        "login status is 200": {
+                            "passes": 2,
+                            "fails": 0,
+                            "name": "login status is 200",
+                            "path": "::setup::login status is 200",
+                            "id": "bb27b460b057923f4a083e3603c038b9"
+                        },
+                        "session active": {
+                            "name": "session active",
+                            "path": "::setup::session active",
+                            "id": "fdb2d7de4fe6219c621cbace87134b55",
+                            "passes": 2,
+                            "fails": 0
+                        }
+                    },
+                "name": "setup"
+            }
+        },
+        "checks": {
+            "antiforgery status is 200": {
+                "fails": 0,
+                "name": "antiforgery status is 200",
+                "path": "::antiforgery status is 200",
+                "id": "c20185627100c78e75d752b55a33f1e0",
+                "passes": 200
+            },
+            "antiforgery token present": {
+                "id": "43a3e483ea2e1315a65bee4aec00c58d",
+                "passes": 200,
+                "fails": 0,
+                "name": "antiforgery token present",
+                "path": "::antiforgery token present"
+            },
+            "login status is 200": {
+                "name": "login status is 200",
+                "path": "::login status is 200",
+                "id": "baba87e761865dc93085ee0c1fe25f4c",
+                "passes": 100,
+                "fails": 0
+            },
+            "session active": {
+                "passes": 100,
+                "fails": 0,
+                "name": "session active",
+                "path": "::session active",
+                "id": "174933ba01228c1ddcddf0a1ffeee613"
+            },
+            "get_my_assignment status is 200": {
+                "name": "get_my_assignment status is 200",
+                "path": "::get_my_assignment status is 200",
+                "id": "a3bd2f52cec02b97db44a409fc20904e",
+                "passes": 100,
+                "fails": 0
+            },
+            "my-assignment active": {
+                "name": "my-assignment active",
+                "path": "::my-assignment active",
+                "id": "79662a3416dfda040f002392f321669c",
+                "passes": 100,
+                "fails": 0
+            },
+            "my-assignment id match": {
+                "fails": 0,
+                "name": "my-assignment id match",
+                "path": "::my-assignment id match",
+                "id": "316e14e624d849375a3ec183083eee94",
+                "passes": 100
+            },
+            "my-assignment window open": {
+                "path": "::my-assignment window open",
+                "id": "776cd615e997d8b1423636772ca2ad75",
+                "passes": 100,
+                "fails": 0,
+                "name": "my-assignment window open"
+            },
+            "cancel_assignment status is 200": {
+                "path": "::cancel_assignment status is 200",
+                "id": "8e6c43bd9a7acfef121299cf8d86430a",
+                "passes": 100,
+                "fails": 0,
+                "name": "cancel_assignment status is 200"
+            },
+            "cancelled status": {
+                "name": "cancelled status",
+                "path": "::cancelled status",
+                "id": "3db65f2a863a7d05a6f0049f86f4cc1f",
+                "passes": 100,
+                "fails": 0
+            },
+            "cancelled id match": {
+                "fails": 0,
+                "name": "cancelled id match",
+                "path": "::cancelled id match",
+                "id": "22e152da8be8ca66139d2fec61fdc4b7",
+                "passes": 100
+            },
+            "cancelled reason match": {
+                "name": "cancelled reason match",
+                "path": "::cancelled reason match",
+                "id": "d52696d38ea845edcd013c4e9b0b7ba9",
+                "passes": 100,
+                "fails": 0
+            },
+            "cancelled timestamp present": {
+                "fails": 0,
+                "name": "cancelled timestamp present",
+                "path": "::cancelled timestamp present",
+                "id": "da0d79c98d185d3724892755e2f6142e",
+                "passes": 100
+            },
+            "replay_cancel_assignment status is 200": {
+                "name": "replay_cancel_assignment status is 200",
+                "path": "::replay_cancel_assignment status is 200",
+                "id": "890454bb3eb225feaeca82d2922aceb6",
+                "passes": 100,
+                "fails": 0
+            },
+            "replay has idempotent header": {
+                "name": "replay has idempotent header",
+                "path": "::replay has idempotent header",
+                "id": "3212a9365866cd56ac7e68d0522bd7bb",
+                "passes": 100,
+                "fails": 0
+            },
+            "replay status cancelled": {
+                "name": "replay status cancelled",
+                "path": "::replay status cancelled",
+                "id": "12c5c81cc3aa8e1a30ecfab8e170c64f",
+                "passes": 100,
+                "fails": 0
+            },
+            "replay reason match": {
+                "path": "::replay reason match",
+                "id": "f73a8b47a55a7b9db1273370ac90fe77",
+                "passes": 100,
+                "fails": 0,
+                "name": "replay reason match"
+            }
+        }
+    }
+}

@@ -7,6 +7,7 @@ public sealed class InPlatformNotification
     public const string EventPublishedType = "EventPublished";
     public const string VolunteerSelectedType = "VolunteerSelected";
     public const string DirectLeaderAssignedType = "DirectLeaderAssigned";
+    public const string TeamMemberCancelledType = "TeamMemberCancelled";
 
     private InPlatformNotification() { }
 
@@ -109,6 +110,28 @@ public sealed class InPlatformNotification
             RecipientUserId = recipientUserId,
             EventId = eventId,
             NotificationType = DirectLeaderAssignedType,
+            CreatedAt = createdAt,
+            ContextPayload = contextPayload,
+        };
+    }
+
+    public static InPlatformNotification TeamMemberCancelled(
+        Guid recipientUserId,
+        Guid eventId,
+        DateTimeOffset createdAt,
+        string contextPayload)
+    {
+        if (recipientUserId == Guid.Empty) throw new ArgumentException("A recipient is required.", nameof(recipientUserId));
+        if (eventId == Guid.Empty) throw new ArgumentException("An Event is required.", nameof(eventId));
+        if (createdAt.Offset != TimeSpan.Zero) throw new ArgumentException("Creation time must be UTC.", nameof(createdAt));
+        if (contextPayload.Length > 500) throw new ArgumentException("Notification context is too long.", nameof(contextPayload));
+
+        return new InPlatformNotification
+        {
+            Id = Guid.NewGuid(),
+            RecipientUserId = recipientUserId,
+            EventId = eventId,
+            NotificationType = TeamMemberCancelledType,
             CreatedAt = createdAt,
             ContextPayload = contextPayload,
         };

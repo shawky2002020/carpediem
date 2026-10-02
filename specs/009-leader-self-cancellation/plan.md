@@ -1,0 +1,39 @@
+# Implementation Plan: SLICE-10 — Leader Self-Cancellation with Mandatory Justification
+
+## 1. Architecture Overview
+- **Domain**:
+  - Add `Cancel(string justification, DateTimeOffset cancelledAtUtc, DateTimeOffset eventStartUtc)` to `TeamAssignment`.
+  - Enforce status transition from `Active` to `Cancelled`, event start temporal boundary, non-empty justification length ($\le 500$), and UTC timestamps.
+  - Unit tests in `Carpediem.Domain.Tests`.
+- **Application**:
+  - `ISelfCancellationStore` interface in `src/Modules/Staffing/Application/SelfCancellation/`.
+  - `SelfCancellationResult` and `VolunteerAssignmentContextResult` models.
+  - Notification writer contract `ITeamMemberCancelledNotificationWriter`.
+- **Infrastructure**:
+  - `EfSelfCancellationStore` implementing `ISelfCancellationStore`.
+  - Single atomic transaction:
+    - Update `staffing.TeamAssignments` (`Status = Cancelled`, `CancelledAt`, `CancellationReason`).
+    - Alert active Chief Leader and active Admins via `notifications.InPlatformNotifications`.
+    - Append `audit.AuditLogs` entry (`Action = 'VolunteerSelfCancelled'`).
+  - Idempotent replay detection: return 200 OK with `Idempotent-Replay: true` if already cancelled with same reason.
+  - Optimistic concurrency check via `RowVersion` against optional `If-Match`.
+  - Register services in `ServiceCollectionExtensions.cs`.
+- **Web API**:
+  - `EventSelfCancellationEndpoints.cs` mapping:
+    - `GET /api/events/{eventId}/my-assignment`
+    - `POST /api/events/{eventId}/assignments/{assignmentId}/cancel`
+  - Enforce `RequireLeader` policy with resource-based ownership verification (`OwnResourceRequirement` or `Admin`).
+  - Antiforgery validation on mutation.
+  - Structured telemetry via `LeaderSelfCancellationTelemetry.cs`.
+- **Frontend**:
+  - Model definitions: `MyAssignmentResponse`, `CancelAssignmentRequest`, `CancelledAssignmentResponse`.
+  - Service: methods in `volunteer-assignment.service.ts` (or `team-selection.service.ts`).
+  - Component: `volunteer-assignment.component.ts` (at `/events/:eventId/my-assignment`) and cancellation action in `team-selection.component.ts`.
+  - Accessible controlled confirmation modal (`role="dialog"`, `aria-modal="true"`, focus trap, Esc key dismiss, character counter, polite screen reader announcement).
+  - Mobile-first responsive styling meeting 4.00 kB SCSS budget.
+- **Testing & Verification**:
+  - Domain tests in `Carpediem.Domain.Tests`.
+  - SQL Server 2025 container integration tests (`tests/Carpediem.Api.IntegrationTests/Staffing/EventSelfCancellationTests.cs`).
+  - Angular unit tests (`volunteer-assignment.component.spec.ts` / service spec).
+  - Playwright E2E and WCAG 2.2 AA accessibility tests (`tests/e2e/leader-self-cancellation.spec.ts`).
+  - k6 100-VU concurrent workload (`tests/performance/leader-self-cancellation.k6.js` and `run-leader-self-cancellation.ps1`).

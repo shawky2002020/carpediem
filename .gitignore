@@ -21,6 +21,7 @@ yarn-error.log*
 coverage/
 .angular/
 tests/e2e/test-results/
+test-results/
 tests/e2e/playwright-report/
 
 # Python & Virtual Environments

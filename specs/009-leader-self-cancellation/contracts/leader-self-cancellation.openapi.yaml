@@ -1,0 +1,288 @@
+openapi: 3.1.0
+info:
+  title: Carpediem - Leader Self-Cancellation API
+  version: 1.0.0
+  description: Endpoints for Volunteer Leader self-cancellation and Administrative assignment cancellation with mandatory justification.
+
+paths:
+  /api/events/{eventId}/my-assignment:
+    get:
+      summary: Get the current user's assignment context for an event
+      description: Retrieves the authenticated volunteer leader's assignment details for the specified published event.
+      operationId: GetMyAssignmentContext
+      tags:
+        - Self Cancellation
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          description: Event unique identifier
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Assignment details successfully retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyAssignmentResponse'
+        '400':
+          description: Malformed event ID
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ApiProblemResponse'
+        '401':
+          description: Unauthenticated session
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ApiProblemResponse'
+        '404':
+          description: Event or assignment not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ApiProblemResponse'
+        '409':
+          description: Event is not published
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ApiProblemResponse'
+
+  /api/events/{eventId}/assignments/{assignmentId}/cancel:
+    post:
+      summary: Cancel an active team assignment with mandatory justification
+      description: Allows an assigned volunteer leader to self-cancel, or an administrator to cancel with override authority.
+      operationId: CancelAssignment
+      tags:
+        - Self Cancellation
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          description: Event unique identifier
+          schema:
+            type: string
+            format: uuid
+        - name: assignmentId
+          in: path
+          required: true
+          description: Assignment unique identifier
+          schema:
+            type: string
+            format: uuid
+        - name: If-Match
+          in: header
+          required: false
+          description: Base64-encoded rowversion of the existing assignment record for optimistic concurrency.
+          schema:
+            type: string
+        - name: X-XSRF-TOKEN
+          in: header
+          required: true
+          description: Antiforgery token paired with the session cookie.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelAssignmentRequest'
+      responses:
+        '200':
+          description: Assignment successfully cancelled or idempotent replay
+          headers:
+            Idempotent-Replay:
+              description: Indicates whether this response is an idempotent replay of an already cancelled assignment.
+              schema:
+                type: boolean
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelledAssignmentResponse'
+        '400':
+          description: Invalid justification or malformed parameters
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ApiProblemResponse'
+        '401':
+          description: Unauthenticated session
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ApiProblemResponse'
+        '403':
+          description: Unauthorized caller (not assignment owner and not admin)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ApiProblemResponse'
+        '404':
+          description: Event or assignment not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ApiProblemResponse'
+        '409':
+          description: Lifecycle conflict (event not published, event already started, or concurrency conflict)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ApiProblemResponse'
+        '412':
+          description: Precondition failed (concurrency version mismatch)
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ApiProblemResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ApiProblemResponse'
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: Carpediem.Session
+
+  schemas:
+    CancelAssignmentRequest:
+      type: object
+      required:
+        - justification
+      properties:
+        justification:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Mandatory free-text explanation for the cancellation.
+
+    MyAssignmentResponse:
+      type: object
+      required:
+        - assignmentId
+        - eventId
+        - staffingCycleId
+        - userId
+        - userName
+        - eventTitle
+        - startDateTime
+        - endDateTime
+        - location
+        - status
+        - assignedAt
+        - isWindowOpen
+        - version
+      properties:
+        assignmentId:
+          type: string
+          format: uuid
+        eventId:
+          type: string
+          format: uuid
+        staffingCycleId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        userName:
+          type: string
+        eventTitle:
+          type: string
+        startDateTime:
+          type: string
+          format: date-time
+        endDateTime:
+          type: string
+          format: date-time
+        location:
+          type: string
+        status:
+          type: string
+          enum: [Active, Cancelled]
+        assignedAt:
+          type: string
+          format: date-time
+        cancelledAt:
+          type: string
+          format: date-time
+          nullable: true
+        cancellationReason:
+          type: string
+          nullable: true
+        isWindowOpen:
+          type: boolean
+        version:
+          type: string
+
+    CancelledAssignmentResponse:
+      type: object
+      required:
+        - id
+        - eventId
+        - staffingCycleId
+        - userId
+        - status
+        - assignedAt
+        - assignedByUserId
+        - cancellationReason
+        - cancelledAt
+        - version
+      properties:
+        id:
+          type: string
+          format: uuid
+        eventId:
+          type: string
+          format: uuid
+        staffingCycleId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [Cancelled]
+        assignedAt:
+          type: string
+          format: date-time
+        assignedByUserId:
+          type: string
+          format: uuid
+        cancellationReason:
+          type: string
+        cancelledAt:
+          type: string
+          format: date-time
+        version:
+          type: string
+
+    ApiProblemResponse:
+      type: object
+      required:
+        - status
+        - title
+      properties:
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        code:
+          type: string

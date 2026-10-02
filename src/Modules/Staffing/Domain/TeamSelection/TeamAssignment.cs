@@ -110,4 +110,35 @@ public sealed class TeamAssignment
             AssignedByUserId = assignedByUserId
         };
     }
+
+    public void Cancel(
+        string justification,
+        DateTimeOffset cancelledAtUtc,
+        DateTimeOffset eventStartUtc)
+    {
+        if (cancelledAtUtc.Offset != TimeSpan.Zero)
+            throw new ArgumentException("CancelledAt must be UTC.", nameof(cancelledAtUtc));
+        if (eventStartUtc.Offset != TimeSpan.Zero)
+            throw new ArgumentException("EventStart must be UTC.", nameof(eventStartUtc));
+
+        if (string.IsNullOrWhiteSpace(justification))
+            throw new ArgumentException("A non-empty justification is required for cancellation.", nameof(justification));
+
+        var trimmed = justification.Trim();
+        if (trimmed.Length > 500)
+            throw new ArgumentException("Cancellation justification cannot exceed 500 characters.", nameof(justification));
+
+        if (Status == TeamAssignmentStatus.Cancelled)
+            throw new AssignmentAlreadyCancelledException(Id);
+
+        if (Status != TeamAssignmentStatus.Active)
+            throw new InvalidOperationException($"Team assignment '{Id}' cannot be cancelled because its status is '{Status}'.");
+
+        if (eventStartUtc <= cancelledAtUtc)
+            throw new CancellationWindowClosedException(EventId);
+
+        Status = TeamAssignmentStatus.Cancelled;
+        CancellationReason = trimmed;
+        CancelledAt = cancelledAtUtc;
+    }
 }

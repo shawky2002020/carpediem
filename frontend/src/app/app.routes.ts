@@ -17,6 +17,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/availability/components/availability-declaration/availability-declaration.component').then(m => m.AvailabilityDeclarationComponent),
   },
   {
+    path: 'events/:eventId/my-assignment',
+    canActivate: [leaderGuard],
+    loadComponent: () => import('./features/volunteer-assignment/components/volunteer-assignment.component').then(m => m.VolunteerAssignmentComponent),
+  },
+  {
     path: 'events/:eventId/team-selection',
     canActivate: [chiefLeaderGuard],
     loadComponent: () => import('./features/team-selection/components/team-selection.component').then(m => m.TeamSelectionComponent),

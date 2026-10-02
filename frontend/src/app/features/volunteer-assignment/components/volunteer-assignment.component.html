@@ -1,0 +1,171 @@
+<div class="assignment-container">
+  <header class="assignment-header">
+    <p class="eyebrow">Volunteer Operations</p>
+    <h1 id="assignment-title">My Event Assignment</h1>
+    @if (assignment(); as assign) {
+      <div class="event-summary-card">
+        <h2 class="event-title">{{ assign.eventTitle }}</h2>
+        <div class="event-meta">
+          <p class="meta-item meta-text">
+            <strong>Schedule:</strong>
+            <time [attr.datetime]="assign.startDateTime">{{ formatDate(assign.startDateTime) }}</time>
+            –
+            <time [attr.datetime]="assign.endDateTime">{{ formatDate(assign.endDateTime) }}</time>
+          </p>
+          <p class="meta-item meta-text">
+            <strong>Location:</strong> {{ assign.location }}
+          </p>
+        </div>
+      </div>
+    }
+  </header>
+
+  <div class="live-region" role="status" aria-live="polite" aria-atomic="true">
+    @if (loading()) { Loading assignment details… }
+    @else if (submitting()) { Processing assignment cancellation… }
+    @else if (statusMessage()) { {{ statusMessage() }} }
+  </div>
+
+  @if (problem(); as error) {
+    <section class="alert-box error" role="alert">
+      <h2>{{ error.title }}</h2>
+      @if (error.code === 'unauthorized_assignment_owner') {
+        <p>You are not authorized to cancel this assignment.</p>
+      } @else if (error.code === 'window_closed') {
+        <p>Cancellation is closed because the event has already started.</p>
+      } @else if (error.code === 'invalid_event_status') {
+        <p>Cancellation is permitted only for published events.</p>
+      } @else if (error.code === 'invalid_justification') {
+        <p>A valid, non-empty justification reason is required to cancel.</p>
+      } @else if (error.code === 'concurrency_conflict') {
+        <p>The assignment was updated by another process. Please review the updated status.</p>
+      } @else {
+        <p>{{ error.detail || 'An unexpected error occurred while processing your request.' }}</p>
+      }
+      <button type="button" class="btn-retry" (click)="load()">Refresh details</button>
+    </section>
+  }
+
+  @if (!loading() && assignment(); as assign) {
+    <!-- Status Card -->
+    <section class="status-section" aria-labelledby="status-heading">
+      <div class="status-card">
+        <div class="status-header">
+          <h2 id="status-heading">Placement Status</h2>
+          @if (isActive()) {
+            <span class="status-badge status-badge-active" role="status">Active</span>
+          } @else if (isCancelled()) {
+            <span class="status-badge status-badge-cancelled" role="status">Cancelled</span>
+          }
+        </div>
+
+        <div class="status-details">
+          <p class="meta-text">
+            <strong>Assigned On:</strong> {{ formatDate(assign.assignedAt) }}
+          </p>
+
+          @if (isCancelled()) {
+            <div class="cancellation-info">
+              <p class="meta-text">
+                <strong>Cancelled On:</strong> {{ formatDate(assign.cancelledAt) }}
+              </p>
+              <div class="reason-box">
+                <span class="reason-label"><strong>Cancellation Reason:</strong></span>
+                <p class="reason-text">{{ assign.cancellationReason }}</p>
+              </div>
+            </div>
+          }
+        </div>
+
+        @if (isActive()) {
+          @if (!assign.isWindowOpen) {
+            <div class="alert-box warning window-closed-note" role="note">
+              <h3>Cancellation Window Closed</h3>
+              <p>This event has already started. Self-cancellation is no longer available.</p>
+            </div>
+          } @else {
+            <div class="actions-row">
+              <button
+                type="button"
+                class="btn-action btn-cancel-trigger"
+                (click)="openCancelModal()"
+                [disabled]="submitting()">
+                Cancel Assignment
+              </button>
+            </div>
+          }
+        }
+      </div>
+    </section>
+
+    <!-- Controlled Cancellation Modal -->
+    @if (modalOpen()) {
+      <div class="modal-backdrop" (click)="closeCancelModal()">
+        <div
+          class="modal-dialog"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="cancel-modal-title"
+          (click)="$event.stopPropagation()">
+          <header class="modal-header">
+            <h2 id="cancel-modal-title">Cancel Event Assignment</h2>
+          </header>
+
+          <div class="modal-body">
+            <p class="modal-notice">
+              Cancelling your assignment immediately removes you from the active team roster and alerts the Chief Leader and Operations Administrators so they can draft a replacement.
+            </p>
+
+            <div class="form-group">
+              <label for="cancellation-reason">
+                Justification Reason <span class="required" aria-hidden="true">*</span>
+              </label>
+              <textarea
+                id="cancellation-reason"
+                #reasonInput
+                [value]="justification()"
+                (input)="onJustificationChange($event)"
+                maxlength="500"
+                rows="4"
+                placeholder="Explain why you are unable to fulfill this assignment (e.g. academic exam conflict, health emergency)..."
+                aria-required="true"
+                [attr.aria-describedby]="validationError() ? 'reason-error char-count' : 'char-count'"></textarea>
+
+              <div class="textarea-footer">
+                @if (validationError(); as errorMsg) {
+                  <p id="reason-error" class="field-error" role="alert">{{ errorMsg }}</p>
+                } @else {
+                  <span></span>
+                }
+                <span id="char-count" class="char-count" aria-live="off">
+                  {{ charCount() }} / 500 characters
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <footer class="modal-footer">
+            <button
+              type="button"
+              class="btn-modal btn-dismiss"
+              [disabled]="submitting()"
+              (click)="closeCancelModal()">
+              Keep Assignment
+            </button>
+            <button
+              type="button"
+              class="btn-modal btn-confirm-cancel"
+              [disabled]="submitting() || charCount() === 0"
+              (click)="confirmCancellation()">
+              @if (submitting()) {
+                Cancelling…
+              } @else {
+                Confirm Cancellation
+              }
+            </button>
+          </footer>
+        </div>
+      </div>
+    }
+  }
+</div>

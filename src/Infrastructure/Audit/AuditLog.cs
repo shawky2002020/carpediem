@@ -109,4 +109,23 @@ public sealed class AuditLog
             newValue: "Active",
             resourceType: "TeamAssignment",
             source: isAdminActor ? "AdminDirectDraft" : "ChiefLeaderDirectDraft");
+
+    public static AuditLog VolunteerSelfCancelled(
+        Guid teamAssignmentId,
+        Guid actorUserId,
+        Guid correlationId,
+        DateTimeOffset occurredAt,
+        string mandatoryReason,
+        bool isAdminActor) =>
+        Create(
+            actorUserId,
+            action: "VolunteerSelfCancelled",
+            resourceId: teamAssignmentId,
+            correlationId: correlationId,
+            occurredAt: occurredAt,
+            previousValue: "Active",
+            newValue: "Cancelled",
+            resourceType: "TeamAssignment",
+            source: isAdminActor ? "AdminOverrideCancellation" : "VolunteerSelfCancellation",
+            mandatoryReason: mandatoryReason);
 }

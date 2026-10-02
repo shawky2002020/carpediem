@@ -33,6 +33,7 @@ public static class ObservabilityConfiguration
                 .AddSource(EventAvailabilityTelemetry.SourceName)
                 .AddSource(TeamSelectionTelemetry.SourceName)
                 .AddSource(DirectAssignmentTelemetry.SourceName)
+                .AddSource(LeaderSelfCancellationTelemetry.SourceName)
                 .AddAspNetCoreInstrumentation(options =>
             {
                 options.RecordException = true;
@@ -44,6 +45,7 @@ public static class ObservabilityConfiguration
                 .AddMeter(EventAvailabilityTelemetry.SourceName)
                 .AddMeter(TeamSelectionTelemetry.SourceName)
                 .AddMeter(DirectAssignmentTelemetry.SourceName)
+                .AddMeter(LeaderSelfCancellationTelemetry.SourceName)
                 .AddAspNetCoreInstrumentation());
 
     }
