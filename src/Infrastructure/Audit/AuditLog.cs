@@ -17,7 +17,7 @@ public sealed class AuditLog
     public string? NewValue { get; private set; }
 
     internal static AuditLog Create(
-        Guid actorUserId,
+        Guid? actorUserId,
         string action,
         Guid resourceId,
         Guid correlationId,
@@ -170,4 +170,22 @@ public sealed class AuditLog
             resourceType: "Event",
             source: "AdminReschedule",
             mandatoryReason: mandatoryReason);
+
+    public static AuditLog EventCompleted(
+        Guid eventId,
+        Guid? actorUserId,
+        Guid correlationId,
+        DateTimeOffset occurredAt,
+        bool isManualCloseout) =>
+        Create(
+            actorUserId,
+            action: "EventCompleted",
+            resourceId: eventId,
+            correlationId: correlationId,
+            occurredAt: occurredAt,
+            previousValue: "Published",
+            newValue: "Completed",
+            resourceType: "Event",
+            source: isManualCloseout ? "AdminManualCloseout" : "SystemLifecycleWorker",
+            mandatoryReason: isManualCloseout ? "Administrative closeout triggered" : "Scheduled event window concluded");
 }

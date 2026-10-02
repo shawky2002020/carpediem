@@ -1,0 +1,72 @@
+<div class="cd-completion-backdrop" role="presentation">
+  <div
+    class="cd-completion-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="completion-dialog-title"
+    aria-describedby="completion-dialog-desc"
+    tabindex="-1"
+  >
+    <div class="cd-completion-header">
+      <h2 id="completion-dialog-title" class="cd-completion-title">Complete Event</h2>
+      <p class="cd-completion-subtitle" *ngIf="eventTitle">
+        Administrative closeout for: <strong>{{ eventTitle }}</strong>
+      </p>
+    </div>
+
+    <div class="cd-notice cd-notice--info" role="note" id="completion-dialog-desc">
+      <p>
+        <strong>Administrative Closeout Notice:</strong> Completing this event transitions its lifecycle status to <em>Completed</em>.
+      </p>
+      <p class="cd-notice-detail">
+        Active team assignments will remain active. Volunteer attendance recording operates independently and can be recorded subsequently.
+      </p>
+    </div>
+
+    <div
+      *ngIf="errorMessage()"
+      class="cd-alert cd-alert--error"
+      role="alert"
+      id="completion-error"
+    >
+      {{ errorMessage() }}
+    </div>
+
+    <div
+      *ngIf="successMessage()"
+      class="cd-alert cd-alert--success"
+      role="status"
+      id="completion-success"
+    >
+      {{ successMessage() }}
+    </div>
+
+    <div class="cd-completion-summary" *ngIf="endDateTime">
+      <span class="cd-summary-label">Scheduled End Time:</span>
+      <span class="cd-summary-value">{{ endDateTime }}</span>
+    </div>
+
+    <div class="cd-completion-actions">
+      <button
+        type="button"
+        class="cd-button cd-button--secondary"
+        (click)="cancel()"
+        [disabled]="isSubmitting()"
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="cd-button cd-button--primary"
+        (click)="submitCompletion()"
+        [disabled]="isSubmitting()"
+      >
+        {{ isSubmitting() ? 'Completing Event...' : 'Confirm Closeout' }}
+      </button>
+    </div>
+
+    <div role="status" aria-live="polite" class="cd-sr-only">
+      {{ liveStatus() }}
+    </div>
+  </div>
+</div>

@@ -110,6 +110,17 @@ public sealed class Event
         return nextCycle;
     }
 
+    public void Complete(DateTimeOffset completedAt, Guid? actorUserId = null)
+    {
+        if (Status != EventStatus.Published)
+            throw new InvalidEventStatusForCompletionException(Id, Status.ToString());
+
+        if (completedAt.Offset != TimeSpan.Zero)
+            throw new ArgumentException("Completion time must be UTC.", nameof(completedAt));
+
+        Status = EventStatus.Completed;
+    }
+
     public static Event CreateDraft(
         string? title,
         DateTimeOffset startDateTime,

@@ -1,0 +1,146 @@
+openapi: 3.1.0
+info:
+  title: Carpediem Event Completion API
+  version: 1.0.0
+  description: API endpoints for event scheduled completion and administrative closeout.
+paths:
+  /api/events/{eventId}/complete:
+    post:
+      summary: Close out published event to Completed status
+      description: Platform Administrator manual closeout transitioning a Published event to terminal Completed status.
+      operationId: CompleteEvent
+      tags:
+        - Events
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          description: Unique identifier of the published event to complete.
+          schema:
+            type: string
+            format: uuid
+        - name: If-Match
+          in: header
+          required: true
+          description: Base64-encoded rowversion of the event aggregate for optimistic concurrency.
+          schema:
+            type: string
+        - name: X-XSRF-TOKEN
+          in: header
+          required: true
+          description: Antiforgery request token paired with the session cookie.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Event successfully closed out to Completed status or idempotent replay.
+          headers:
+            ETag:
+              description: Current base64-encoded rowversion of the completed event.
+              schema:
+                type: string
+            Idempotent-Replay:
+              description: Present and set to 'true' when replaying closeout on an already completed event.
+              schema:
+                type: boolean
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompleteEventResponse'
+        '400':
+          description: Invalid request parameter format.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: User session is missing or unauthenticated.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '403':
+          description: Authenticated user is not a Platform Administrator.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '409':
+          description: Conflict due to invalid event status (Draft or Cancelled).
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '412':
+          description: Optimistic concurrency token mismatch.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+
+components:
+  schemas:
+    CompleteEventResponse:
+      type: object
+      required:
+        - eventId
+        - title
+        - status
+        - startDateTime
+        - endDateTime
+        - location
+        - completedAt
+        - version
+      properties:
+        eventId:
+          type: string
+          format: uuid
+          description: Unique identifier of the completed event.
+        title:
+          type: string
+          description: Official title of the event.
+        status:
+          type: string
+          enum: [Completed]
+          description: Persisted lifecycle status of the completed event.
+        startDateTime:
+          type: string
+          format: date-time
+          description: UTC start timestamp of the event.
+        endDateTime:
+          type: string
+          format: date-time
+          description: UTC scheduled end timestamp of the event.
+        location:
+          type: string
+          description: Venue or physical location.
+        notes:
+          type: string
+          nullable: true
+          description: Operational notes.
+        completedAt:
+          type: string
+          format: date-time
+          description: Timestamp when event was marked Completed.
+        version:
+          type: string
+          description: Opaque base64-encoded rowversion token.
+
+    ProblemDetails:
+      type: object
+      required:
+        - type
+        - title
+        - status
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string

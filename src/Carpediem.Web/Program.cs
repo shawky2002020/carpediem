@@ -7,6 +7,7 @@ using Carpediem.Web.Endpoints;
 using Carpediem.Web.Errors;
 using Carpediem.Web.Observability;
 using Carpediem.Web.Security;
+using Carpediem.Web.Workers;
 using Serilog;
 using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.AspNetCore.Authorization;
@@ -307,6 +308,37 @@ builder.Services.AddOpenApi(options =>
                 Schema = new OpenApiSchema { Type = JsonSchemaType.String },
             });
         }
+        if (operation.OperationId == "CompleteEvent")
+        {
+            operation.Parameters ??= [];
+            operation.Parameters.Add(new OpenApiParameter
+            {
+                Name = "If-Match",
+                In = ParameterLocation.Header,
+                Required = true,
+                Description = "Base64-encoded rowversion of the event aggregate for optimistic concurrency.",
+                Schema = new OpenApiSchema { Type = JsonSchemaType.String },
+            });
+            operation.Parameters.Add(new OpenApiParameter
+            {
+                Name = "X-XSRF-TOKEN",
+                In = ParameterLocation.Header,
+                Required = true,
+                Description = "Antiforgery request token paired with the session cookie.",
+                Schema = new OpenApiSchema { Type = JsonSchemaType.String },
+            });
+            if (operation.Responses?.TryGetValue("200", out var replayResponse) == true &&
+                replayResponse is OpenApiResponse concreteReplayResponse)
+            {
+                concreteReplayResponse.Headers ??= new Dictionary<string, IOpenApiHeader>();
+                concreteReplayResponse.Headers["Idempotent-Replay"] = new OpenApiHeader
+                {
+                    Description = "True when the response replays the committed completed event.",
+                    Required = false,
+                    Schema = new OpenApiSchema { Type = JsonSchemaType.Boolean },
+                };
+            }
+        }
         return Task.CompletedTask;
     });
     options.AddSchemaTransformer((schema, context, _) =>
@@ -327,6 +359,12 @@ builder.Services.AddCarpediemPersistence(builder.Configuration);
 builder.Services.AddCarpediemAuthorization();
 builder.Services.AddEventsModule();
 builder.Services.AddStaffingModule();
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.Configure<EventLifecycleWorkerOptions>(builder.Configuration.GetSection(EventLifecycleWorkerOptions.SectionName));
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    builder.Services.AddHostedService<EventLifecycleBackgroundWorker>();
+}
 
 var app = builder.Build();
 
@@ -364,6 +402,7 @@ app.MapEventDirectAssignmentEndpoints();
 app.MapEventSelfCancellationEndpoints();
 app.MapEventReplacementAssignmentEndpoints();
 app.MapEventRescheduleEndpoints();
+app.MapEventCompletionEndpoints();
 
 await app.Services.SeedDevelopmentIdentityAsync(app.Environment.IsDevelopment(), app.Configuration);
 await app.RunAsync();
