@@ -40,6 +40,10 @@
             }
             <p>Attendance: {{ entry.attendanceOutcome ?? 'No attendance recorded' }}</p>
             @if (entry.selfCancelled) { <p>Volunteer self-cancellation recorded</p> }
+            @if (isOwn() && entry.isCurrentCycle && entry.assignmentStatus === 'Active') {
+              <a [routerLink]="['/events', entry.eventId, 'feedback']">Event feedback</a>
+              <a [routerLink]="['/events', entry.eventId, 'incidents']">Incidents</a>
+            }
           </li>
         }
       </ol>

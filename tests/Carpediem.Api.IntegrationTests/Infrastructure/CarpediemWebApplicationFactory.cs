@@ -13,6 +13,7 @@ namespace Carpediem.Api.IntegrationTests.Infrastructure;
 
 public sealed class CarpediemWebApplicationFactory(string connectionString) : WebApplicationFactory<Program>
 {
+    public IReadOnlyDictionary<string, string?>? AdditionalConfiguration { get; set; }
     public Guid? ActorUserId { get; set; }
     public string? ActorRole { get; set; }
     public Action<IServiceCollection>? ConfigureServicesForTest { get; set; }
@@ -25,8 +26,13 @@ public sealed class CarpediemWebApplicationFactory(string connectionString) : We
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
-        builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(
-            new Dictionary<string, string?> { ["ConnectionStrings:Carpediem"] = connectionString }));
+        builder.ConfigureAppConfiguration((_, configuration) =>
+        {
+            var settings = new Dictionary<string, string?> { ["ConnectionStrings:Carpediem"] = connectionString };
+            if (AdditionalConfiguration is not null)
+                foreach (var pair in AdditionalConfiguration) settings[pair.Key] = pair.Value;
+            configuration.AddInMemoryCollection(settings);
+        });
 
         builder.ConfigureServices(services =>
         {

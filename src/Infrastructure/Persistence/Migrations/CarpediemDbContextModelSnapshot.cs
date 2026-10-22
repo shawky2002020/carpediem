@@ -82,6 +82,110 @@ namespace Carpediem.Infrastructure.Persistence.Migrations
                     b.ToTable("AuditLogs", "audit");
                 });
 
+            modelBuilder.Entity("Carpediem.Infrastructure.Engagement.EventFeedback", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("nvarchar(16)");
+
+                    b.Property<Guid?>("LeaderUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RaterUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("SubmittedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LeaderUserId");
+
+                    b.HasIndex("RaterUserId");
+
+                    b.HasIndex("EventId", "RaterUserId", "Kind", "LeaderUserId")
+                        .IsUnique();
+
+                    b.ToTable("EventFeedback", "engagement", t =>
+                        {
+                            t.HasCheckConstraint("CK_EventFeedback_Kind", "[Kind] IN ('Event','Leader')");
+
+                            t.HasCheckConstraint("CK_EventFeedback_Rating", "[Rating] BETWEEN 1 AND 5");
+
+                            t.HasCheckConstraint("CK_EventFeedback_Subject", "([Kind] = 'Event' AND [LeaderUserId] IS NULL) OR ([Kind] = 'Leader' AND [LeaderUserId] IS NOT NULL)");
+                        });
+                });
+
+            modelBuilder.Entity("Carpediem.Infrastructure.Engagement.IncidentReport", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("ReportedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("ReporterUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ReviewNote")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTimeOffset?>("ReviewedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("ReviewedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReporterUserId");
+
+                    b.HasIndex("ReviewedAt");
+
+                    b.HasIndex("ReviewedByUserId");
+
+                    b.HasIndex("EventId", "ReportedAt");
+
+                    b.ToTable("IncidentReports", "engagement");
+                });
+
             modelBuilder.Entity("Carpediem.Modules.Attendance.Domain.AttendanceOutcome", b =>
                 {
                     b.Property<Guid>("Id")
@@ -694,6 +798,46 @@ namespace Carpediem.Infrastructure.Persistence.Migrations
                         .HasForeignKey("ActorUserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .HasConstraintName("FK_AuditLogs_Users");
+                });
+
+            modelBuilder.Entity("Carpediem.Infrastructure.Engagement.EventFeedback", b =>
+                {
+                    b.HasOne("Carpediem.Modules.Events.Domain.Events.Event", null)
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Carpediem.Modules.Identity.Domain.CarpediemUser", null)
+                        .WithMany()
+                        .HasForeignKey("LeaderUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Carpediem.Modules.Identity.Domain.CarpediemUser", null)
+                        .WithMany()
+                        .HasForeignKey("RaterUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Carpediem.Infrastructure.Engagement.IncidentReport", b =>
+                {
+                    b.HasOne("Carpediem.Modules.Events.Domain.Events.Event", null)
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Carpediem.Modules.Identity.Domain.CarpediemUser", null)
+                        .WithMany()
+                        .HasForeignKey("ReporterUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Carpediem.Modules.Identity.Domain.CarpediemUser", null)
+                        .WithMany()
+                        .HasForeignKey("ReviewedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
                 });
 
             modelBuilder.Entity("Carpediem.Modules.Attendance.Domain.AttendanceOutcome", b =>

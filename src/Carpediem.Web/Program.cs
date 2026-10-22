@@ -12,11 +12,27 @@ using Serilog;
 using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.HttpOverrides;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddCarpediemObservability();
 builder.Services.AddProblemDetails();
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("public-registration", context => RateLimitPartition.GetFixedWindowLimiter(
+        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 5,
+            Window = TimeSpan.FromHours(1),
+            QueueLimit = 0,
+            AutoReplenishment = true,
+        }));
+});
 builder.Services.Configure<RouteHandlerOptions>(options => options.ThrowOnBadRequest = true);
 builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, AuthorizationProblemResultHandler>();
 builder.Services.AddOpenApi(options =>
@@ -399,6 +415,19 @@ if (!builder.Environment.IsEnvironment("Testing"))
 }
 
 var app = builder.Build();
+var trustedProxyNetworks = app.Configuration.GetSection("ReverseProxy:TrustedNetworks")
+    .GetChildren().Select(child => child.Value).Where(value => !string.IsNullOrWhiteSpace(value))
+    .Select(value => System.Net.IPNetwork.Parse(value!)).ToArray();
+if (app.Environment.IsProduction() && trustedProxyNetworks.Length == 0)
+    throw new InvalidOperationException("Production requires ReverseProxy:TrustedNetworks for trusted client IP rate limiting.");
+var trustedForwardedHeaders = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor,
+    ForwardLimit = 2,
+};
+trustedForwardedHeaders.KnownProxies.Clear();
+trustedForwardedHeaders.KnownIPNetworks.Clear();
+foreach (var network in trustedProxyNetworks) trustedForwardedHeaders.KnownIPNetworks.Add(network);
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.Use(async (context, next) =>
@@ -422,7 +451,10 @@ app.Use(async (context, next) =>
     }
     await next();
 });
+if (trustedProxyNetworks.Length > 0) app.UseForwardedHeaders(trustedForwardedHeaders);
 app.UseHttpsRedirection();
+app.UseRouting();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
@@ -448,6 +480,9 @@ app.MapAttendanceEndpoints();
 app.MapLeaderHistoryEndpoints();
 app.MapOperationalDashboardEndpoints();
 app.MapEventCancellationEndpoints();
+app.MapAccountEndpoints();
+app.MapFeedbackEndpoints();
+app.MapIncidentEndpoints();
 app.MapNotificationEndpoints();
 
 await app.Services.SeedDevelopmentIdentityAsync(app.Environment.IsDevelopment(), app.Configuration);

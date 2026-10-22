@@ -5,6 +5,7 @@ using Carpediem.Modules.Identity.Domain;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace Carpediem.Api.IntegrationTests.Infrastructure;
 
@@ -23,13 +24,17 @@ public sealed class DraftApiTestHarness : IAsyncDisposable
     public HttpClient Client { get; }
     public Guid ActorUserId { get; }
     public string AntiforgeryToken { get; }
+    public string DefaultDraftDate { get; } = DateTime.UtcNow.AddDays(14)
+        .ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
     public static async Task<DraftApiTestHarness> StartAsync(SqlServerFixture sqlServer,
         string role = CarpediemRoles.Admin,
-        Action<IServiceCollection>? configureServices = null)
+        Action<IServiceCollection>? configureServices = null,
+        IReadOnlyDictionary<string, string?>? additionalConfiguration = null)
     {
         var factory = new CarpediemWebApplicationFactory(sqlServer.ConnectionString);
         factory.ConfigureServicesForTest = configureServices;
+        factory.AdditionalConfiguration = additionalConfiguration;
         var actorId = Guid.NewGuid();
         factory.ActorUserId = actorId;
         factory.ActorRole = role;
@@ -93,8 +98,8 @@ public sealed class DraftApiTestHarness : IAsyncDisposable
         var response = await CreateAsync(Guid.NewGuid(), new
         {
             title = "Beach cleanup",
-            start = new { localDateTime = "2026-10-10T14:30" },
-            end = new { localDateTime = "2026-10-10T16:30" },
+            start = new { localDateTime = $"{DefaultDraftDate}T14:30" },
+            end = new { localDateTime = $"{DefaultDraftDate}T16:30" },
             location = "North shore",
         });
         response.EnsureSuccessStatusCode();

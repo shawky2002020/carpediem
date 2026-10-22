@@ -11,6 +11,12 @@ import { authenticatedGuard } from './core/auth/authenticated.guard';
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'sign-in', component: SignInComponent },
+  { path: 'register', loadComponent: () => import('./features/accounts/register.component').then(m => m.RegisterComponent) },
+  { path: 'admin/accounts', canActivate: [adminGuard], loadComponent: () => import('./features/accounts/account-admin.component').then(m => m.AccountAdminComponent) },
+  { path: 'admin/feedback', canActivate: [adminGuard], loadComponent: () => import('./features/engagement/feedback-admin.component').then(m => m.FeedbackAdminComponent) },
+  { path: 'admin/incidents', canActivate: [adminGuard], loadComponent: () => import('./features/engagement/incident-admin.component').then(m => m.IncidentAdminComponent) },
+  { path: 'events/:eventId/feedback', canActivate: [authenticatedGuard], loadComponent: () => import('./features/engagement/event-feedback.component').then(m => m.EventFeedbackComponent) },
+  { path: 'events/:eventId/incidents', canActivate: [authenticatedGuard], loadComponent: () => import('./features/engagement/event-incidents.component').then(m => m.EventIncidentsComponent) },
   { path: 'access-denied', component: AccessDeniedComponent },
   {
     path: 'dashboard',

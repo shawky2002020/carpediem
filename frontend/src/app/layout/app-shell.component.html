@@ -5,6 +5,8 @@
     <nav aria-label="Primary navigation">
       @if (session.isAdmin() || session.isChiefLeader()) { <a routerLink="/dashboard">Dashboard</a> }
       @if (session.isAdmin()) { <a routerLink="/draft-events">Draft Events</a> }
+      @if (session.isAdmin()) { <a routerLink="/admin/accounts">Accounts</a> }
+      @if (session.isAdmin()) { <a routerLink="/admin/feedback">Feedback</a><a routerLink="/admin/incidents">Incidents</a> }
       @if (session.isChiefLeader()) { <a routerLink="/my-appointments">My appointments</a> }
       @if (session.isLeader()) { <a routerLink="/profile">My profile</a> }
       @if (session.isAuthenticated()) {
@@ -13,6 +15,7 @@
         </a>
       }
       @if (!session.isAuthenticated()) { <a routerLink="/sign-in">Sign in</a> }
+      @if (!session.isAuthenticated()) { <a routerLink="/register">Register</a> }
       @if (session.isAuthenticated()) { <span class="identity">{{ session.session()?.userName }}</span> }
     </nav>
   </div>

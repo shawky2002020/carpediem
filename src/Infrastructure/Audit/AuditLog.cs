@@ -233,4 +233,27 @@ public sealed class AuditLog
             resourceType: "AttendanceOutcome",
             source: "AdminOverride",
             mandatoryReason: mandatoryReason);
+
+    public static AuditLog AccountChanged(
+        Guid userId, Guid adminId, Guid correlationId, DateTimeOffset occurredAt,
+        string action, string? previousValue, string? newValue) =>
+        Create(adminId, action, userId, correlationId, occurredAt,
+            previousValue, newValue, "User", "AdminAccountManagement");
+
+    public static AuditLog IncidentReviewed(Guid incidentId, Guid adminId, DateTimeOffset occurredAt) =>
+        Create(adminId, "IncidentReviewed", incidentId, Guid.NewGuid(), occurredAt,
+            "Pending", "Reviewed", "IncidentReport", "AdminReview");
+
+    public static AuditLog AccountRegistrationRequested(Guid userId, DateTimeOffset occurredAt) =>
+        Create(null, "AccountRegistrationRequested", userId, Guid.NewGuid(), occurredAt,
+            null, "PendingApproval", "User", "PublicRegistration");
+
+    public static AuditLog FeedbackSubmitted(Guid feedbackId, Guid actorId, DateTimeOffset occurredAt,
+        string kind, int rating) =>
+        Create(actorId, "FeedbackSubmitted", feedbackId, Guid.NewGuid(), occurredAt,
+            null, $"{kind}:{rating}", "EventFeedback", "PostEventRating");
+
+    public static AuditLog IncidentReported(Guid incidentId, Guid actorId, DateTimeOffset occurredAt) =>
+        Create(actorId, "IncidentReported", incidentId, Guid.NewGuid(), occurredAt,
+            null, "PendingReview", "IncidentReport", "EventReport");
 }

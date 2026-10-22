@@ -1,5 +1,7 @@
 # Carpediem V1 Vertical Feature Slices
 
+> **Implementation update (2026-10-22):** The decision gates described below for SLICE-13 and SLICE-20–22 were resolved in [CHANGE-003](../decisions/CHANGE-003-v1-remaining-slice-policy.md). See [V1_IMPLEMENTATION_STATUS.md](V1_IMPLEMENTATION_STATUS.md) for delivered behavior.
+
 > [!IMPORTANT]
 > **Governance Status**: Authoritative Feature Slicing Specification  
 > **Precedence**: Aligned strictly with [ARCHITECTURE_LOCK.md](file:///c:/dev/web/Carpediem/docs/architecture/ARCHITECTURE_LOCK.md), [LIFECYCLE_SPECIFICATION.md](file:///c:/dev/web/Carpediem/docs/requirements/LIFECYCLE_SPECIFICATION.md), [CHANGE-001](file:///c:/dev/web/Carpediem/docs/decisions/CHANGE-001-chief-leader-dual-role-participation.md), and [CHANGE-002](file:///c:/dev/web/Carpediem/docs/decisions/CHANGE-002-draft-event-minimum-fields.md).  

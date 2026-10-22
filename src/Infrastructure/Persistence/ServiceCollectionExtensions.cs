@@ -96,6 +96,8 @@ public static class ServiceCollectionExtensions
                 return Task.CompletedTask;
             };
         });
+        services.Configure<SecurityStampValidatorOptions>(options =>
+            options.ValidationInterval = TimeSpan.Zero);
 
         return services;
     }

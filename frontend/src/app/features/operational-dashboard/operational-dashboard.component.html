@@ -36,6 +36,12 @@
           @if (session.isAdmin() && (event.status === 'Draft' || event.status === 'Published')) {
             <a [routerLink]="['/events', event.eventId, 'cancel']">Cancel event</a>
           }
+          @if (event.status === 'Completed' && session.isChiefLeader()) {
+            <a [routerLink]="['/events', event.eventId, 'feedback']">Rate Leaders</a>
+          }
+          @if (event.status === 'Published' || event.status === 'Completed') {
+            <a [routerLink]="['/events', event.eventId, 'incidents']">Incidents</a>
+          }
         </li>
       }
     </ul>

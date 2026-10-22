@@ -8,6 +8,7 @@ using Carpediem.Modules.Staffing.Domain.Availability;
 using Carpediem.Modules.Staffing.Domain.TeamSelection;
 using Carpediem.Modules.Attendance.Domain;
 using Carpediem.Infrastructure.Audit;
+using Carpediem.Infrastructure.Engagement;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +28,8 @@ public sealed class CarpediemDbContext(DbContextOptions<CarpediemDbContext> opti
     public DbSet<AvailabilityResponse> AvailabilityResponses => Set<AvailabilityResponse>();
     public DbSet<TeamAssignment> TeamAssignments => Set<TeamAssignment>();
     public DbSet<AttendanceOutcome> AttendanceOutcomes => Set<AttendanceOutcome>();
+    public DbSet<EventFeedback> EventFeedback => Set<EventFeedback>();
+    public DbSet<IncidentReport> IncidentReports => Set<IncidentReport>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
