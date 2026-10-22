@@ -12,6 +12,7 @@ using Carpediem.Modules.Staffing.Application.SelfCancellation;
 using Carpediem.Modules.Staffing.Application.ReplacementAssignment;
 using Carpediem.Modules.Notifications.Application;
 using Carpediem.Modules.Attendance.Application;
+using Carpediem.Modules.Events.Application.Dashboard;
 using Carpediem.Modules.Identity.Application;
 using Carpediem.Infrastructure.Notifications;
 using Microsoft.AspNetCore.Identity;
@@ -59,6 +60,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAttendanceStore, EfAttendanceStore>();
         services.AddScoped<ILeaderHistoryStore, EfLeaderHistoryStore>();
         services.AddScoped<INotificationInboxStore, EfNotificationInboxStore>();
+        services.AddScoped<IOperationalDashboardStore, EfOperationalDashboardStore>();
 
         services
             .AddIdentityCore<CarpediemUser>(options =>

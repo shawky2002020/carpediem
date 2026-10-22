@@ -13,6 +13,11 @@ export const routes: Routes = [
   { path: 'sign-in', component: SignInComponent },
   { path: 'access-denied', component: AccessDeniedComponent },
   {
+    path: 'dashboard',
+    canActivate: [chiefLeaderGuard],
+    loadComponent: () => import('./features/operational-dashboard/operational-dashboard.component').then(m => m.OperationalDashboardComponent),
+  },
+  {
     path: 'notifications',
     canActivate: [authenticatedGuard],
     loadComponent: () => import('./features/notifications/notification-inbox.component').then(m => m.NotificationInboxComponent),

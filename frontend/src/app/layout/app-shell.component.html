@@ -3,6 +3,7 @@
   <div class="cd-container header-inner">
     <a class="brand" routerLink="/" aria-label="Carpediem home">Carpediem</a>
     <nav aria-label="Primary navigation">
+      @if (session.isAdmin() || session.isChiefLeader()) { <a routerLink="/dashboard">Dashboard</a> }
       @if (session.isAdmin()) { <a routerLink="/draft-events">Draft Events</a> }
       @if (session.isChiefLeader()) { <a routerLink="/my-appointments">My appointments</a> }
       @if (session.isLeader()) { <a routerLink="/profile">My profile</a> }
