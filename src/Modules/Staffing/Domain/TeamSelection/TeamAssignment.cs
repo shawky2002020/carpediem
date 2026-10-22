@@ -185,4 +185,17 @@ public sealed class TeamAssignment
         CancellationReason = trimmed;
         CancelledAt = cancelledAtUtc;
     }
+
+    public void CancelForEvent(string reason, DateTimeOffset cancelledAtUtc)
+    {
+        if (Status != TeamAssignmentStatus.Active)
+            throw new InvalidOperationException("Only an active assignment can be cancelled with its Event.");
+        if (string.IsNullOrWhiteSpace(reason) || reason.Trim().Length > 500)
+            throw new ArgumentException("A cancellation reason of up to 500 characters is required.", nameof(reason));
+        if (cancelledAtUtc.Offset != TimeSpan.Zero)
+            throw new ArgumentException("Cancellation time must be UTC.", nameof(cancelledAtUtc));
+        Status = TeamAssignmentStatus.Cancelled;
+        CancellationReason = reason.Trim();
+        CancelledAt = cancelledAtUtc;
+    }
 }

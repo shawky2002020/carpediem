@@ -33,6 +33,9 @@
           @if (event.pendingAttendance) {
             <a [routerLink]="['/events', event.eventId, 'attendance']">Open roll sheet</a>
           }
+          @if (session.isAdmin() && (event.status === 'Draft' || event.status === 'Published')) {
+            <a [routerLink]="['/events', event.eventId, 'cancel']">Cancel event</a>
+          }
         </li>
       }
     </ul>

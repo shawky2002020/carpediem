@@ -447,6 +447,7 @@ app.MapEventCompletionEndpoints();
 app.MapAttendanceEndpoints();
 app.MapLeaderHistoryEndpoints();
 app.MapOperationalDashboardEndpoints();
+app.MapEventCancellationEndpoints();
 app.MapNotificationEndpoints();
 
 await app.Services.SeedDevelopmentIdentityAsync(app.Environment.IsDevelopment(), app.Configuration);

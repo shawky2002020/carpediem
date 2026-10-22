@@ -19,6 +19,7 @@ export class NotificationInboxComponent {
       case 'TeamMemberCancelled': return 'Team member cancelled';
       case 'ReplacementLeaderAssigned': return 'You were selected as a replacement';
       case 'EventRescheduled': return 'Event rescheduled';
+      case 'EventCancelled': return 'Event cancelled';
       default: return 'Notification';
     }
   }
@@ -40,6 +41,10 @@ export class NotificationInboxComponent {
     if (item.notificationType === 'EventRescheduled') {
       const newStart = typeof payload['newStart'] === 'string' ? this.date(payload['newStart']) : null;
       return `${eventTitle} has a new schedule${newStart ? ` starting ${newStart}` : ''}${justification ? `. Reason: ${justification}` : '.'}`;
+    }
+    if (item.notificationType === 'EventCancelled') {
+      const reason = typeof payload['reason'] === 'string' ? payload['reason'] : null;
+      return `${eventTitle} was cancelled${reason ? `. Reason: ${reason}` : '.'}`;
     }
     return `Event: ${eventTitle}`;
   }

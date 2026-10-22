@@ -4,6 +4,7 @@ import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { toApiProblem } from '../../core/http/api.interceptor';
 import { OperationalDashboardService, OperationalEvent } from './operational-dashboard.service';
+import { SessionService } from '../../core/auth/session.service';
 
 @Component({
   selector: 'app-operational-dashboard',
@@ -13,6 +14,7 @@ import { OperationalDashboardService, OperationalEvent } from './operational-das
 })
 export class OperationalDashboardComponent implements OnInit {
   private readonly service = inject(OperationalDashboardService);
+  readonly session = inject(SessionService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private timer?: ReturnType<typeof setInterval>;

@@ -189,6 +189,12 @@ public sealed class AuditLog
             source: isManualCloseout ? "AdminManualCloseout" : "SystemLifecycleWorker",
             mandatoryReason: isManualCloseout ? "Administrative closeout triggered" : "Scheduled event window concluded");
 
+    public static AuditLog EventCancelled(
+        Guid eventId, Guid actorUserId, Guid correlationId, DateTimeOffset occurredAt,
+        string previousStatus, string mandatoryReason) =>
+        Create(actorUserId, "EventCancelled", eventId, correlationId, occurredAt,
+            previousStatus, "Cancelled", "Event", "AdminCancellation", mandatoryReason);
+
     public static AuditLog AttendanceFinalized(
         Guid eventId,
         Guid actorUserId,

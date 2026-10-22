@@ -121,6 +121,15 @@ public sealed class Event
         Status = EventStatus.Completed;
     }
 
+    public void Cancel(Guid actorUserId, DateTimeOffset cancelledAt)
+    {
+        if (actorUserId == Guid.Empty) throw new ArgumentException("An acting Admin is required.", nameof(actorUserId));
+        if (cancelledAt.Offset != TimeSpan.Zero) throw new ArgumentException("Cancellation time must be UTC.", nameof(cancelledAt));
+        if (Status is not (EventStatus.Draft or EventStatus.Published))
+            throw new InvalidOperationException("Only Draft or Published Events can be cancelled.");
+        Status = EventStatus.Cancelled;
+    }
+
     public static Event CreateDraft(
         string? title,
         DateTimeOffset startDateTime,

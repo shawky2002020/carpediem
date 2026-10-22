@@ -10,6 +10,7 @@ public sealed class InPlatformNotification
     public const string TeamMemberCancelledType = "TeamMemberCancelled";
     public const string ReplacementLeaderAssignedType = "ReplacementLeaderAssigned";
     public const string EventRescheduledType = "EventRescheduled";
+    public const string EventCancelledType = "EventCancelled";
 
     private InPlatformNotification() { }
 
@@ -189,5 +190,13 @@ public sealed class InPlatformNotification
             CreatedAt = createdAt,
             ContextPayload = contextPayload,
         };
+    }
+
+    public static InPlatformNotification EventCancelled(
+        Guid recipientUserId, Guid eventId, DateTimeOffset createdAt, string contextPayload)
+    {
+        var notification = ChiefLeaderAppointment(recipientUserId, eventId, createdAt, contextPayload);
+        notification.NotificationType = EventCancelledType;
+        return notification;
     }
 }

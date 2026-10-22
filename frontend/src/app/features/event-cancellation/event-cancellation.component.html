@@ -1,0 +1,24 @@
+<section class="cancel-event cd-reading" aria-labelledby="cancel-title">
+  <p class="eyebrow">Event operations</p>
+  <h1 id="cancel-title">Cancel event</h1>
+  @if (loading()) { <p role="status">Loading Event…</p> }
+  @if (error(); as message) { <p role="alert">{{ message }}</p> }
+  @if (context(); as event) {
+    <p><strong>{{ event.title }}</strong> · {{ event.status }}</p>
+    @if (event.status === 'Draft' || event.status === 'Published') {
+      <p>Cancellation will end this Event. Current roster assignments will be preserved as cancelled history. Published Event team members and the Chief Leader will be notified.</p>
+      <form (submit)="$event.preventDefault(); submit()">
+        <label for="cancellation-reason">Reason for cancellation</label>
+        <textarea id="cancellation-reason" rows="5" required minlength="10" maxlength="500"
+          [value]="reason()" (input)="reason.set($any($event.target).value)"></textarea>
+        <div class="actions">
+          <button type="submit" [disabled]="saving()">{{ saving() ? 'Cancelling…' : 'Cancel event' }}</button>
+          <a routerLink="/dashboard">Keep event</a>
+        </div>
+      </form>
+    } @else {
+      <p>This Event is already closed.</p>
+      <a routerLink="/dashboard">Back to dashboard</a>
+    }
+  }
+</section>

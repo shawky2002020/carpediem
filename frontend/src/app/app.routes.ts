@@ -18,6 +18,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/operational-dashboard/operational-dashboard.component').then(m => m.OperationalDashboardComponent),
   },
   {
+    path: 'events/:eventId/cancel',
+    canActivate: [adminGuard],
+    loadComponent: () => import('./features/event-cancellation/event-cancellation.component').then(m => m.EventCancellationComponent),
+  },
+  {
     path: 'notifications',
     canActivate: [authenticatedGuard],
     loadComponent: () => import('./features/notifications/notification-inbox.component').then(m => m.NotificationInboxComponent),
