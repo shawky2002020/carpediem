@@ -413,6 +413,15 @@ app.Use(async (context, next) =>
 });
 app.UseSerilogRequestLogging(options =>
     options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms");
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.StartsWithSegments("/api/profile/me") ||
+        context.Request.Path.StartsWithSegments("/api/leaders"))
+    {
+        context.Response.Headers.CacheControl = "no-store";
+    }
+    await next();
+});
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -436,6 +445,7 @@ app.MapEventReplacementAssignmentEndpoints();
 app.MapEventRescheduleEndpoints();
 app.MapEventCompletionEndpoints();
 app.MapAttendanceEndpoints();
+app.MapLeaderHistoryEndpoints();
 app.MapNotificationEndpoints();
 
 await app.Services.SeedDevelopmentIdentityAsync(app.Environment.IsDevelopment(), app.Configuration);

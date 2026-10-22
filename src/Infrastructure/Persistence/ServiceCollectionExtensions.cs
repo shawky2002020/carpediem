@@ -12,6 +12,7 @@ using Carpediem.Modules.Staffing.Application.SelfCancellation;
 using Carpediem.Modules.Staffing.Application.ReplacementAssignment;
 using Carpediem.Modules.Notifications.Application;
 using Carpediem.Modules.Attendance.Application;
+using Carpediem.Modules.Identity.Application;
 using Carpediem.Infrastructure.Notifications;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -56,6 +57,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IEventRescheduledNotificationWriter, EfEventRescheduledNotificationWriter>();
         services.AddScoped<Carpediem.Modules.Events.Application.Completion.IEventCompletionStore, EfEventCompletionStore>();
         services.AddScoped<IAttendanceStore, EfAttendanceStore>();
+        services.AddScoped<ILeaderHistoryStore, EfLeaderHistoryStore>();
         services.AddScoped<INotificationInboxStore, EfNotificationInboxStore>();
 
         services

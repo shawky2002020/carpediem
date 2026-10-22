@@ -73,6 +73,7 @@
             <li class="list-item team-item">
               <div class="item-info member-info">
                 <span class="member-name">{{ member.userName }}</span>
+                <a [routerLink]="['/events', effectiveEventId(), 'leaders', member.userId, 'history']">View history</a>
                 <span class="member-timestamp meta-text">Selected: {{ formatDate(member.assignedAt) }}</span>
               </div>
               <span class="status-badge status-badge-active" role="status">Active</span>
@@ -99,6 +100,7 @@
             <li class="list-item candidate-item">
               <div class="item-info candidate-info">
                 <span class="candidate-name">{{ candidate.userName }}</span>
+                <a [routerLink]="['/events', effectiveEventId(), 'leaders', candidate.userId, 'history']">View history</a>
                 <span class="candidate-timestamp meta-text">Available since: {{ formatDate(candidate.declaredAt) }}</span>
               </div>
               <button
@@ -137,6 +139,7 @@
               <div class="item-info candidate-info">
                 <div class="candidate-name-row">
                   <span class="candidate-name">{{ candidate.userName }}</span>
+                  <a [routerLink]="['/events', effectiveEventId(), 'leaders', candidate.userId, 'history']">View history</a>
                   @if (candidate.availabilityStatus === 'NotAvailable') {
                     <span class="status-badge danger status-badge-unavailable badge-unavailable">Not Available</span>
                   } @else {

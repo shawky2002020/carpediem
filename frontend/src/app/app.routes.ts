@@ -18,6 +18,16 @@ export const routes: Routes = [
     loadComponent: () => import('./features/notifications/notification-inbox.component').then(m => m.NotificationInboxComponent),
   },
   {
+    path: 'profile',
+    canActivate: [leaderGuard],
+    loadComponent: () => import('./features/leader-history/leader-history.component').then(m => m.LeaderHistoryComponent),
+  },
+  {
+    path: 'events/:eventId/leaders/:leaderId/history',
+    canActivate: [chiefLeaderGuard],
+    loadComponent: () => import('./features/leader-history/leader-history.component').then(m => m.LeaderHistoryComponent),
+  },
+  {
     path: 'events/:eventId/availability',
     canActivate: [leaderGuard],
     loadComponent: () => import('./features/availability/components/availability-declaration/availability-declaration.component').then(m => m.AvailabilityDeclarationComponent),

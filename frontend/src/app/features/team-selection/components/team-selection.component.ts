@@ -1,5 +1,5 @@
 import { Component, computed, inject, Input, OnInit, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { ApiProblem, toApiProblem } from '../../../core/http/api.interceptor';
 import {
@@ -12,7 +12,7 @@ import { TeamSelectionService } from '../data/team-selection.service';
 
 @Component({
   selector: 'app-team-selection',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './team-selection.component.html',
   styleUrl: './team-selection.component.scss',
 })

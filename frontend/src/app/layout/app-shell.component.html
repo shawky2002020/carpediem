@@ -5,6 +5,7 @@
     <nav aria-label="Primary navigation">
       @if (session.isAdmin()) { <a routerLink="/draft-events">Draft Events</a> }
       @if (session.isChiefLeader()) { <a routerLink="/my-appointments">My appointments</a> }
+      @if (session.isLeader()) { <a routerLink="/profile">My profile</a> }
       @if (session.isAuthenticated()) {
         <a routerLink="/notifications" class="notification-link" [attr.aria-label]="notifications.unreadCount() ? 'Notifications, ' + notifications.unreadCount() + ' unread' : 'Notifications'">
           Notifications @if (notifications.unreadCount() > 0) { <span class="notification-badge" aria-hidden="true">{{ notifications.unreadCount() }}</span> }

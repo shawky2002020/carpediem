@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import {
   ActiveTeamMember,
@@ -81,6 +81,7 @@ describe('TeamSelectionComponent', () => {
     await TestBed.configureTestingModule({
       imports: [TeamSelectionComponent],
       providers: [
+        provideRouter([]),
         { provide: TeamSelectionService, useValue: teamSelectionServiceMock },
         {
           provide: ActivatedRoute,
@@ -114,6 +115,9 @@ describe('TeamSelectionComponent', () => {
 
     const candidate = fixture.nativeElement.querySelector('.candidate-item .candidate-name');
     expect(candidate?.textContent?.trim()).toBe('ahmed_leader');
+    const historyLinks = fixture.nativeElement.querySelectorAll('a[href$="/history"]');
+    expect(historyLinks.length).toBe(4);
+    expect(historyLinks[0]?.getAttribute('href')).toBe(`/events/${mockEventId}/leaders/${defaultMockContext.activeTeam[0].userId}/history`);
 
     const directItems = fixture.nativeElement.querySelectorAll('.direct-candidates-list .candidate-item');
     expect(directItems.length).toBe(2);
