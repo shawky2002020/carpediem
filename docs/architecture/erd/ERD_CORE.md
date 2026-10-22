@@ -140,13 +140,17 @@ erDiagram
 
 ---
 
-## 4. Diagram 3: Cross-Cutting Audit & Notifications ERD
+## 4. Diagram 3: Cross-Cutting Audit, Notifications & Engagement ERD
 
 ```mermaid
 erDiagram
     User ||--o{ InPlatformNotification : "receives"
     Event ||--o{ InPlatformNotification : "contextual link"
     User ||--o{ AuditLog : "initiates (ActorUserId)"
+    Event ||--o{ EventFeedback : "receives rating"
+    User ||--o{ EventFeedback : "submits (RaterUserId)"
+    Event ||--o{ IncidentReport : "scopes incident"
+    User ||--o{ IncidentReport : "reports (ReporterUserId)"
 
     InPlatformNotification {
         uuid Id PK
@@ -170,6 +174,31 @@ erDiagram
         varchar Source "Direct | AdminExternal | SystemWorker"
         nvarchar PreviousValue "JSON of modified fields"
         nvarchar NewValue "JSON of modified fields"
+    }
+
+    EventFeedback {
+        uuid Id PK
+        uuid EventId FK
+        uuid RaterUserId FK
+        uuid LeaderUserId FK "Nullable: set when Kind = Leader"
+        nvarchar Kind "Event | Leader"
+        int Rating "1..5"
+        nvarchar Comment "Nullable, max 500"
+        datetimeoffset SubmittedAt
+    }
+
+    IncidentReport {
+        uuid Id PK
+        uuid EventId FK
+        uuid ReporterUserId FK
+        nvarchar Title "Max 200"
+        nvarchar Description "Max 4000"
+        datetimeoffset OccurredAt
+        datetimeoffset ReportedAt
+        datetimeoffset ReviewedAt "Nullable: NULL = open"
+        uuid ReviewedByUserId FK "Nullable"
+        nvarchar ReviewNote "Nullable, max 1000"
+        rowversion RowVersion
     }
 ```
 

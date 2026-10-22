@@ -4,7 +4,7 @@ export default defineConfig({
   testDir: '.',
   fullyParallel: true,
   webServer: {
-    command: '"C:\\Users\\shawk\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe" node_modules/@angular/cli/bin/ng.js serve --host 127.0.0.1 --port 4200',
+    command: 'node node_modules/@angular/cli/bin/ng.js serve --host 127.0.0.1 --port 4200',
     cwd: '../../frontend',
     url: 'http://127.0.0.1:4200',
     reuseExistingServer: true,

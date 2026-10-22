@@ -1,6 +1,10 @@
 services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2025-latest
+    networks:
+      default:
+        aliases:
+          - carpediem-db
     environment:
       ACCEPT_EULA: "Y"
       MSSQL_SA_PASSWORD: "${CARPEDIEM_SQL_PASSWORD}"
@@ -15,6 +19,56 @@ services:
       timeout: 5s
       retries: 12
       start_period: 30s
+
+  carpediem-migrator:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    profiles: ["stack"]
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      CARPEDIEM_SQL_PASSWORD: "${CARPEDIEM_SQL_PASSWORD}"
+    volumes:
+      - ./deploy/migrations/v1-idempotent.sql:/migrations/v1-idempotent.sql:ro
+    entrypoint:
+      - /bin/bash
+      - -lc
+      - |
+        /opt/mssql-tools18/bin/sqlcmd -S carpediem-db -U sa -P "$$CARPEDIEM_SQL_PASSWORD" -C -Q "IF DB_ID(N'Carpediem') IS NULL CREATE DATABASE [Carpediem];" &&
+        /opt/mssql-tools18/bin/sqlcmd -S carpediem-db -U sa -P "$$CARPEDIEM_SQL_PASSWORD" -C -d Carpediem -i /migrations/v1-idempotent.sql
+
+  carpediem-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    profiles: ["stack"]
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      carpediem-migrator:
+        condition: service_completed_successfully
+    environment:
+      ASPNETCORE_ENVIRONMENT: "${ASPNETCORE_ENVIRONMENT:-Development}"
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__Carpediem: "Server=carpediem-db,1433;Database=Carpediem;User Id=sa;Password=${CARPEDIEM_SQL_PASSWORD};Encrypt=True;TrustServerCertificate=True"
+      DevelopmentSeed__Password: "${DevelopmentSeed__Password:-}"
+      ReverseProxy__TrustedNetworks__0: "10.0.0.0/8"
+      ReverseProxy__TrustedNetworks__1: "172.16.0.0/12"
+      ReverseProxy__TrustedNetworks__2: "192.168.0.0/16"
+      ReverseProxy__TrustedNetworks__3: "127.0.0.0/8"
+    expose:
+      - "8080"
+
+  carpediem-proxy:
+    build:
+      context: .
+      dockerfile: deploy/proxy.Dockerfile
+    profiles: ["stack"]
+    depends_on:
+      - carpediem-api
+    ports:
+      - "8080:80"
+      - "8443:443"
 
 volumes:
   carpediem-sql-data:

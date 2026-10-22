@@ -36,8 +36,7 @@ Database tables are partitioned into dedicated SQL Server schemas representing d
 | **`leader`** | Domain Schema | `LeaderProfiles` | LeaderProfiles Module Commands | LeaderProfiles, Staffing, Dashboard |
 | **`notifications`**| Domain Schema | `Notifications` | Notifications Module Commands | Notifications Module |
 | **`audit`** | Infrastructure Schema | Cross-Cutting / Audit | Audited Domain Transactions (EF Guard) | Operations Admin Reports & DBAs |
-| **`feedback`** | Domain Schema | `Feedback` | *DEFERRED TO FEATURE SPEC* | *DEFERRED TO FEATURE SPEC* |
-| **`incidents`** | Domain Schema | `Incidents` | *DEFERRED TO FEATURE SPEC* | *DEFERRED TO FEATURE SPEC* |
+| **`engagement`** | Domain Schema | `Engagement` (Feedback & Incidents) | Feedback & Incident Endpoints (`CHANGE-003`) | Admin Review & Event-Scoped Chief/Leader Views |
 
 ---
 
@@ -295,6 +294,47 @@ Immutable, append-only operational audit trail capturing critical actions and ma
 | `NewValue` | `nvarchar(max)` | YES | | | Structured JSON of modified new fields. |
 
 *Design Rule*: Normal application workflows never edit or delete historical audit records. Revoking `UPDATE` and `DELETE` permissions at the database login level is documented as a deployment/security hardening candidate consistent with ADR-005.
+
+---
+
+### 2.8 Schema: `engagement` (Ratified per [CHANGE-003](../decisions/CHANGE-003-v1-remaining-slice-policy.md))
+
+#### Table: `engagement.EventFeedback` (`SLICE-21`)
+Post-completion 1–5 ratings submitted by the active Chief Leader for assigned Leaders (`Kind = 'Leader'`) or by assigned Leaders for the Event (`Kind = 'Event'`).
+
+| Column Name | SQL Server Type | Nullable | Default | Constraints & Indexes | Description |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `Id` | `uniqueidentifier` | NO | | `PK_EventFeedback` (Clustered) | Feedback record GUID. |
+| `EventId` | `uniqueidentifier` | NO | | `FK_EventFeedback_Events_EventId` | Target Completed Event. `ON DELETE NO ACTION`. |
+| `RaterUserId` | `uniqueidentifier` | NO | | `FK_EventFeedback_Users_RaterUserId` | Submitting Chief Leader or Leader. `ON DELETE NO ACTION`. |
+| `LeaderUserId` | `uniqueidentifier` | YES | | `FK_EventFeedback_Users_LeaderUserId` | Rated Leader when `Kind = 'Leader'`; `NULL` when `Kind = 'Event'`. `ON DELETE NO ACTION`. |
+| `Kind` | `nvarchar(16)` | NO | | `CK_EventFeedback_Kind`, `CK_EventFeedback_Subject` | `'Event'` or `'Leader'`. |
+| `Rating` | `int` | NO | | `CK_EventFeedback_Rating` (`BETWEEN 1 AND 5`) | Numeric 1–5 rating. |
+| `Comment` | `nvarchar(500)` | YES | | | Optional post-event comment (max 500 chars). |
+| `SubmittedAt` | `datetimeoffset` | NO | | | UTC submission timestamp. |
+
+*Table Constraints & Indexes*:
+* `CK_EventFeedback_Rating`: `[Rating] BETWEEN 1 AND 5`.
+* `CK_EventFeedback_Kind`: `[Kind] IN ('Event','Leader')`.
+* `CK_EventFeedback_Subject`: `([Kind] = 'Event' AND [LeaderUserId] IS NULL) OR ([Kind] = 'Leader' AND [LeaderUserId] IS NOT NULL)`.
+* `IX_EventFeedback_EventId_RaterUserId_Kind_LeaderUserId`: Unfiltered unique index preventing duplicate ratings per `(EventId, RaterUserId, Kind, LeaderUserId)`.
+
+#### Table: `engagement.IncidentReports` (`SLICE-22`)
+Event-scoped incident log with Admin review tracking.
+
+| Column Name | SQL Server Type | Nullable | Default | Constraints & Indexes | Description |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `Id` | `uniqueidentifier` | NO | | `PK_IncidentReports` (Clustered) | Incident report GUID. |
+| `EventId` | `uniqueidentifier` | NO | | `FK_IncidentReports_Events_EventId`, Index | Associated Event. `ON DELETE NO ACTION`. |
+| `ReporterUserId` | `uniqueidentifier` | NO | | `FK_IncidentReports_Users_ReporterUserId` | Submitting participant/Admin. `ON DELETE NO ACTION`. |
+| `Title` | `nvarchar(200)` | NO | | | Short incident title (1–200 chars). |
+| `Description` | `nvarchar(4000)` | NO | | | Factual incident narrative (1–4000 chars). |
+| `OccurredAt` | `datetimeoffset` | NO | | | UTC occurrence timestamp (`<= ReportedAt`). |
+| `ReportedAt` | `datetimeoffset` | NO | | Index `(EventId, ReportedAt)` | UTC submission timestamp. |
+| `ReviewedAt` | `datetimeoffset` | YES | | Index `(ReviewedAt)` | UTC Admin review timestamp (`NULL` = open). |
+| `ReviewedByUserId` | `uniqueidentifier` | YES | | `FK_IncidentReports_Users_ReviewedByUserId` | Reviewing Admin GUID. `ON DELETE NO ACTION`. |
+| `ReviewNote` | `nvarchar(1000)` | YES | | | Optional Admin review note (max 1000 chars). |
+| `RowVersion` | `rowversion` | NO | | Concurrency Token | Optimistic concurrency token. |
 
 ---
 

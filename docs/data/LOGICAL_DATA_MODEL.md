@@ -37,8 +37,8 @@ Carpediem is an internal event-staffing platform serving volunteer Leaders, Chie
 | **`attendance`**| **`AttendanceOutcome`** | Domain Entity | Attendance | Dimension C: Factual physical service outcome (`Attended`, `NoShow`) |
 | **`notifications`**| **`InPlatformNotification`**| Domain Entity | Notifications | In-platform alerting, read state, contextual reference (ADR-006) |
 | **`audit`** | **`AuditLog`** | Cross-Cutting Entity | Audit Persistence | Append-only immutable audit trail and mandatory justification notes (ADR-005) |
-| **`feedback`** | *LeaderEvaluation* | Domain Entity | Feedback | **DEFERRED TO FEEDBACK FEATURE SPEC** |
-| **`incidents`** | *IncidentReport* | Domain Entity | Incidents | **DEFERRED TO INCIDENTS FEATURE SPEC** |
+| **`engagement`** | **`EventFeedback`** | Domain Entity | Engagement (`SLICE-21`) | Post-event 1–5 ratings (`Chief Leader -> Leader`, `Leader -> Event`) with optional comment |
+| **`engagement`** | **`IncidentReport`** | Domain Entity | Engagement (`SLICE-22`) | Event-scoped incident log with Admin review and optional review note |
 
 ---
 
@@ -291,13 +291,17 @@ Carpediem is an internal event-staffing platform serving volunteer Leaders, Chie
 
 ---
 
-### 3.8 Deferred Feature Schemas
+### 3.8 Engagement Schema (Ratified per [CHANGE-003](../decisions/CHANGE-003-v1-remaining-slice-policy.md))
 
-#### `feedback.LeaderEvaluation` $\rightarrow$ **DEFERRED TO FEEDBACK FEATURE SPEC**
-* Rubric fields, rating scales, visibility permissions, and edit semantics are unresolved. Formally deferred.
+#### `engagement.EventFeedback` (`SLICE-21`)
+* **Purpose**: Captures post-event 1–5 ratings submitted after an Event reaches `Completed` status.
+* **Key Attributes**: `Id`, `EventId`, `RaterUserId`, `LeaderUserId` (nullable when `Kind = 'Event'`), `Kind` (`'Event'` | `'Leader'`), `Rating` (`1..5`), `Comment` (optional, max 500 chars), `SubmittedAt`.
+* **Invariants**: Active Chief Leader rates active assigned Leaders on the current staffing cycle (`Kind = 'Leader'`); active assigned Leaders rate the Event (`Kind = 'Event'`). Unique per `(EventId, RaterUserId, Kind, LeaderUserId)`. Visible to Admins.
 
-#### `incidents.IncidentReport` $\rightarrow$ **DEFERRED TO INCIDENTS FEATURE SPEC**
-* Fields, categories, severity levels, addendum vs edit semantics, and role-based visibility are unresolved. Formally deferred.
+#### `engagement.IncidentReport` (`SLICE-22`)
+* **Purpose**: Captures basic event incident reports and Admin review state.
+* **Key Attributes**: `Id`, `EventId`, `ReporterUserId`, `Title` (1–200 chars), `Description` (1–4000 chars), `OccurredAt` (UTC `<= ReportedAt`), `ReportedAt`, `ReviewedAt` (nullable), `ReviewedByUserId` (nullable), `ReviewNote` (optional, max 1000 chars), `RowVersion`.
+* **Invariants**: Reporters see their own reports; active Chief Leaders see reports for Events they lead; Admins see all reports and mark them reviewed once with an optional note.
 
 ---
 

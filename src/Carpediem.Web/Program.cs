@@ -422,7 +422,7 @@ if (app.Environment.IsProduction() && trustedProxyNetworks.Length == 0)
     throw new InvalidOperationException("Production requires ReverseProxy:TrustedNetworks for trusted client IP rate limiting.");
 var trustedForwardedHeaders = new ForwardedHeadersOptions
 {
-    ForwardedHeaders = ForwardedHeaders.XForwardedFor,
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
     ForwardLimit = 2,
 };
 trustedForwardedHeaders.KnownProxies.Clear();
@@ -464,7 +464,14 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.MapHealthChecks("/healthz");
+app.MapHealthChecks("/healthz", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = _ => false,
+});
+app.MapHealthChecks("/api/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = registration => registration.Tags.Contains("ready"),
+});
 app.MapSessionEndpoints();
 app.MapDraftEventsEndpoints();
 app.MapChiefLeaderAppointmentEndpoints();

@@ -19,6 +19,8 @@ public sealed class AccountManagementTests(SqlServerFixture sqlServer)
     public async Task RegistrationRequiresApprovalAndAdminCanChangeAccess()
     {
         await using var harness = await DraftApiTestHarness.StartAsync(sqlServer);
+        var healthResponse = await harness.Client.GetAsync("/api/health");
+        Assert.Equal(HttpStatusCode.OK, healthResponse.StatusCode);
         harness.Factory.ActorUserId = null;
         var anonymousToken = (await harness.Client.GetFromJsonAsync<AntiforgeryBody>("/api/session/antiforgery"))!.RequestToken;
         var registration = await SendAsync(harness, HttpMethod.Post, "/api/accounts/register",
@@ -92,6 +94,8 @@ public sealed class AccountManagementTests(SqlServerFixture sqlServer)
     public async Task PublicRegistrationIsRateLimited()
     {
         await using var harness = await DraftApiTestHarness.StartAsync(sqlServer);
+        var healthResponse = await harness.Client.GetAsync("/api/health");
+        Assert.Equal(HttpStatusCode.OK, healthResponse.StatusCode);
         harness.Factory.ActorUserId = null;
         var token = (await harness.Client.GetFromJsonAsync<AntiforgeryBody>("/api/session/antiforgery"))!.RequestToken;
         for (var index = 0; index < 5; index++)

@@ -138,11 +138,16 @@ Carpediem establishes a clear separation of invariant enforcement:
 
 ---
 
-## 4. Deferred Invariants Catalog
+## 4. Ratified Engagement & Account Invariants ([CHANGE-003](../decisions/CHANGE-003-v1-remaining-slice-policy.md))
 
-The following areas are explicitly **DEFERRED TO FEATURE SPECIFICATIONS**:
-1. **Leader Profile Fields**: Required personal contact details, emergency contacts, shirt sizes, dietary constraints, certifications.
-2. **Feedback Rubric & Visibility**: Post-event evaluation rubric, numeric rating scales, whether feedback is visible to volunteer Leaders or restricted to leadership.
-3. **Incident Reporting**: Incident categories, severity levels, addendum vs edit semantics, and role-based visibility rules.
-4. **Account Onboarding**: Invitation tokens, self-registration vs admin pre-provisioning, and activation expiration rules beyond standard ASP.NET Core Identity.
-5. **Data Retention & Archiving**: Minimum retention duration before cold storage or historical purging.
+| Target Entity | Invariant Name | Classification | Mechanism | Description / Rule |
+| :--- | :--- | :--- | :--- | :--- |
+| `identity.Users` | Pending Registration Approval (`SLICE-20`) | `APPLICATION ENFORCED` | Domain Command + Login Check | Publicly registered Leaders start with `IsActive = 0` and `Leader` role; login is blocked until an Admin approves the account (`IsActive = 1`). |
+| `engagement.EventFeedback` | `CK_EventFeedback_Rating` (`SLICE-21`) | `BOTH` | CHECK Constraint + Domain | `[Rating] BETWEEN 1 AND 5`. |
+| `engagement.EventFeedback` | `CK_EventFeedback_Kind` & `Subject` | `BOTH` | CHECK Constraint + Domain | `Kind IN ('Event', 'Leader')`; `LeaderUserId IS NULL` when `Kind = 'Event'` and `NOT NULL` when `Kind = 'Leader'`. |
+| `engagement.EventFeedback` | `IX_EventFeedback_EventId_RaterUserId_Kind_LeaderUserId` | `DB ENFORCEABLE` | Unfiltered Unique Index | At most one rating per rater, event, kind, and target subject (including `NULL` `LeaderUserId` for Event ratings). |
+| `engagement.IncidentReports` | Temporal & Review Invariant (`SLICE-22`) | `APPLICATION ENFORCED` | Domain Aggregate + RowVersion | `OccurredAt <= ReportedAt` (UTC); incident reports can be marked reviewed once by an Admin (`ReviewedAt`, `ReviewedByUserId`, optional `ReviewNote`) and are audited in `audit.AuditLogs`. |
+
+### Remaining Post-V1 Deferrals
+1. **Extended Leader Profile Fields**: Personal contact details, emergency contacts, shirt sizes, dietary constraints, certifications.
+2. **Data Retention & Archiving**: Minimum retention duration before cold storage or historical purging.

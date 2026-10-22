@@ -49,5 +49,18 @@ public sealed class SessionBootstrapTests
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    [Fact]
+    public async Task HealthzLivenessPassesWhileReadinessReportsUnavailableDatabase()
+    {
+        await using var factory = new CarpediemWebApplicationFactory(UnusedConnectionString);
+        using var client = factory.CreateHttpsClient();
+
+        var liveness = await client.GetAsync(new Uri("/healthz", UriKind.Relative));
+        var readiness = await client.GetAsync(new Uri("/api/health", UriKind.Relative));
+
+        Assert.Equal(HttpStatusCode.OK, liveness.StatusCode);
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, readiness.StatusCode);
+    }
+
     private sealed record AntiforgeryBody(string RequestToken);
 }
