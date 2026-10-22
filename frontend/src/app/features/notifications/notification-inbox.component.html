@@ -1,0 +1,39 @@
+<section class="inbox cd-reading" aria-labelledby="inbox-title">
+  <div class="inbox-heading">
+    <div>
+      <h1 id="inbox-title">Notifications</h1>
+      <p>{{ inbox.unreadCount() }} unread</p>
+    </div>
+    @if (inbox.unreadCount() > 0) {
+      <button type="button" (click)="inbox.markAllRead()" [disabled]="inbox.savingAll()">Mark all as read</button>
+    }
+  </div>
+  @if (inbox.error()) {
+    <div role="alert" class="inbox-error">
+      Notifications could not be refreshed. <button type="button" (click)="inbox.refreshAll()">Try again</button>
+    </div>
+  }
+  @if (inbox.loading() && inbox.items().length === 0) {
+    <p role="status">Loading notifications…</p>
+  } @else if (inbox.items().length === 0 && !inbox.error()) {
+    <p>You have no notifications yet.</p>
+  } @else {
+    <ol class="notification-list">
+      @for (item of inbox.items(); track item.id) {
+        <li [class.unread]="!item.readAt">
+          <div class="notification-heading">
+            <h2>{{ title(item) }}</h2>
+            @if (!item.readAt) { <span class="unread-label">Unread</span> }
+          </div>
+          <p>{{ details(item) }}</p>
+          <div class="notification-meta">
+            <time [attr.datetime]="item.createdAt">{{ date(item.createdAt) }}</time>
+            @if (!item.readAt) {
+              <button type="button" (click)="inbox.markRead(item.id)" [disabled]="inbox.savingId() === item.id">Mark as read</button>
+            }
+          </div>
+        </li>
+      }
+    </ol>
+  }
+</section>

@@ -436,6 +436,7 @@ app.MapEventReplacementAssignmentEndpoints();
 app.MapEventRescheduleEndpoints();
 app.MapEventCompletionEndpoints();
 app.MapAttendanceEndpoints();
+app.MapNotificationEndpoints();
 
 await app.Services.SeedDevelopmentIdentityAsync(app.Environment.IsDevelopment(), app.Configuration);
 await app.RunAsync();

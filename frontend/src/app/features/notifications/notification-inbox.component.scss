@@ -1,0 +1,14 @@
+.inbox { max-inline-size: 48rem; }
+.inbox-heading, .notification-heading, .notification-meta { display: flex; align-items: center; justify-content: space-between; gap: var(--cd-space-3); }
+.inbox-heading { flex-wrap: wrap; margin-block-end: var(--cd-space-6); }
+.inbox-heading h1 { margin-block-end: 0; }
+.inbox-heading p { color: var(--cd-text-secondary); }
+.notification-list { list-style: none; padding: 0; display: grid; gap: var(--cd-space-3); }
+.notification-list li { border: 1px solid var(--cd-border-default); border-radius: var(--cd-radius-control); padding: var(--cd-space-4); }
+.notification-list li.unread { border-inline-start: .3rem solid var(--cd-action-primary); }
+.notification-heading h2 { font-size: var(--cd-font-size-lg); margin: 0; }
+.notification-list p { margin-block: var(--cd-space-3); }
+.notification-meta { flex-wrap: wrap; color: var(--cd-text-secondary); }
+.unread-label { font-weight: var(--cd-weight-bold); }
+.inbox-error { margin-block: var(--cd-space-4); color: var(--cd-status-danger-fg); }
+button { min-block-size: var(--cd-touch-target-min); }

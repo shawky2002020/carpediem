@@ -56,6 +56,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IEventRescheduledNotificationWriter, EfEventRescheduledNotificationWriter>();
         services.AddScoped<Carpediem.Modules.Events.Application.Completion.IEventCompletionStore, EfEventCompletionStore>();
         services.AddScoped<IAttendanceStore, EfAttendanceStore>();
+        services.AddScoped<INotificationInboxStore, EfNotificationInboxStore>();
 
         services
             .AddIdentityCore<CarpediemUser>(options =>

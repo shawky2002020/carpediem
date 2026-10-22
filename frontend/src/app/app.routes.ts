@@ -6,11 +6,17 @@ import { HomeComponent } from './pages/home.component';
 import { SignInComponent } from './pages/sign-in.component';
 import { AccessDeniedComponent } from './pages/access-denied.component';
 import { pendingChangesGuard } from './core/routing/pending-changes.guard';
+import { authenticatedGuard } from './core/auth/authenticated.guard';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'sign-in', component: SignInComponent },
   { path: 'access-denied', component: AccessDeniedComponent },
+  {
+    path: 'notifications',
+    canActivate: [authenticatedGuard],
+    loadComponent: () => import('./features/notifications/notification-inbox.component').then(m => m.NotificationInboxComponent),
+  },
   {
     path: 'events/:eventId/availability',
     canActivate: [leaderGuard],

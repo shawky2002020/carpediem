@@ -21,6 +21,14 @@ public sealed class InPlatformNotification
     public DateTimeOffset? ReadAt { get; private set; }
     public string? ContextPayload { get; private set; }
 
+    public void MarkRead(DateTimeOffset readAt)
+    {
+        if (ReadAt is not null) return;
+        if (readAt.Offset != TimeSpan.Zero || readAt < CreatedAt)
+            throw new ArgumentException("Read time must be UTC and no earlier than creation.", nameof(readAt));
+        ReadAt = readAt;
+    }
+
     public static InPlatformNotification ChiefLeaderAppointment(
         Guid recipientUserId,
         Guid eventId,
