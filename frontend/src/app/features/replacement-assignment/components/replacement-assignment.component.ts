@@ -8,11 +8,12 @@ import {
   ReplacementCandidateItem,
 } from '../data/replacement-assignment.model';
 import { ReplacementAssignmentService } from '../data/replacement-assignment.service';
+import { OperationalSpineComponent } from '../../../shared/components/operational-spine/operational-spine.component';
 
 @Component({
   selector: 'app-replacement-assignment',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, OperationalSpineComponent],
   templateUrl: './replacement-assignment.component.html',
   styleUrls: ['./replacement-assignment.component.scss'],
 })
@@ -113,11 +114,25 @@ export class ReplacementAssignmentComponent implements OnInit {
 
           const remainingCandidates = curr.candidates.filter(c => c.userId !== candidate.userId);
 
+          let remainingCancelled = curr.cancelledAssignments;
+          if (this.selectedReplacedAssignmentId()) {
+            remainingCancelled = curr.cancelledAssignments.filter(
+              c => c.assignmentId !== this.selectedReplacedAssignmentId()
+            );
+          }
+
           this.context.set({
             ...curr,
             activeTeam: newActiveTeam,
             candidates: remainingCandidates,
+            cancelledAssignments: remainingCancelled,
           });
+
+          if (remainingCancelled.length > 0) {
+            this.selectedReplacedAssignmentId.set(remainingCancelled[0].assignmentId);
+          } else {
+            this.selectedReplacedAssignmentId.set(null);
+          }
         },
         error: error => {
           this.problem.set(toApiProblem(error, 'Replacement assignment could not be completed.'));
@@ -128,10 +143,11 @@ export class ReplacementAssignmentComponent implements OnInit {
   formatDate(isoDate: string | null | undefined): string {
     if (!isoDate) return '—';
     try {
-      return new Intl.DateTimeFormat('en-US', {
+      return new Intl.DateTimeFormat('en-GB', {
         dateStyle: 'medium',
         timeStyle: 'short',
-      }).format(new Date(isoDate));
+        timeZone: 'Africa/Cairo',
+      }).format(new Date(isoDate)) + ' Cairo';
     } catch {
       return isoDate;
     }

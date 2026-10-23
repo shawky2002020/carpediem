@@ -1,5 +1,6 @@
 import { Component, computed, inject, Input, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs';
 import { ApiProblem, toApiProblem } from '../../../core/http/api.interceptor';
 import {
@@ -9,10 +10,11 @@ import {
   TeamSelectionContext,
 } from '../data/team-selection.model';
 import { TeamSelectionService } from '../data/team-selection.service';
+import { OperationalSpineComponent } from '../../../shared/components/operational-spine/operational-spine.component';
 
 @Component({
   selector: 'app-team-selection',
-  imports: [RouterLink],
+  imports: [CommonModule, RouterLink, OperationalSpineComponent],
   templateUrl: './team-selection.component.html',
   styleUrl: './team-selection.component.scss',
 })
@@ -32,6 +34,7 @@ export class TeamSelectionComponent implements OnInit {
   readonly submittingId = signal<string | null>(null);
   readonly statusMessage = signal<string | null>(null);
   readonly problem = signal<ApiProblem | null>(null);
+  readonly candidateSearch = signal('');
 
   readonly isWindowOpen = computed(() => this.context()?.isWindowOpen ?? false);
   readonly availableCandidates = computed(() => this.context()?.availableCandidates ?? []);
@@ -39,6 +42,13 @@ export class TeamSelectionComponent implements OnInit {
   readonly activeTeamCount = computed(() => this.activeTeam().length);
   readonly availableCandidatesCount = computed(() => this.availableCandidates().length);
   readonly directCandidatesCount = computed(() => this.directCandidates().length);
+
+  readonly filteredAvailableCandidates = computed(() => {
+    const query = this.candidateSearch().toLowerCase().trim();
+    const list = this.availableCandidates();
+    if (!query) return list;
+    return list.filter(c => c.userName.toLowerCase().includes(query));
+  });
 
   ngOnInit(): void {
     this.load();
@@ -58,7 +68,7 @@ export class TeamSelectionComponent implements OnInit {
           this.context.set(data);
         },
         error: error => {
-          this.problem.set(toApiProblem(error, 'Team selection context could not be loaded.'));
+          this.problem.set(toApiProblem(error, 'Could not load team selection context.'));
         },
       });
 
@@ -67,16 +77,17 @@ export class TeamSelectionComponent implements OnInit {
         next: data => {
           this.directCandidates.set(data.candidates);
         },
-        error: () => {
-          // Gracefully maintain direct candidate state
+        error: error => {
+          if (!this.problem()) {
+            this.problem.set(toApiProblem(error, 'Could not load direct assignment candidates.'));
+          }
         },
       });
   }
 
   selectVolunteer(candidate: AvailableCandidate): void {
     const id = this.effectiveEventId();
-    const current = this.context();
-    if (!id || !current || !this.isWindowOpen() || this.submittingId() !== null) return;
+    if (!id || !this.isWindowOpen()) return;
 
     this.submittingId.set(candidate.userId);
     this.problem.set(null);
@@ -86,30 +97,12 @@ export class TeamSelectionComponent implements OnInit {
       .pipe(finalize(() => this.submittingId.set(null)))
       .subscribe({
         next: response => {
-          const updatedAvailable = current.availableCandidates.filter(
-            c => c.userId !== candidate.userId,
-          );
-          const newTeamMember: ActiveTeamMember = {
-            assignmentId: response.id,
-            userId: response.userId,
-            userName: candidate.userName,
-            assignedAt: response.assignedAt,
-            version: response.version,
-          };
-          const updatedActive = [...current.activeTeam, newTeamMember];
-
-          this.context.set({
-            ...current,
-            availableCandidates: updatedAvailable,
-            activeTeam: updatedActive,
-          });
-
-          this.statusMessage.set(`Volunteer ${candidate.userName} added to active team roster.`);
+          this.applySelection(response, candidate.userName);
         },
         error: error => {
-          const apiProblem = toApiProblem(error, 'Volunteer could not be selected.');
+          const apiProblem = toApiProblem(error, 'Could not assign volunteer.');
           this.problem.set(apiProblem);
-          if (error.status === 409) {
+          if (apiProblem.status === 409) {
             this.load(true);
           }
         },
@@ -118,8 +111,7 @@ export class TeamSelectionComponent implements OnInit {
 
   directAssignLeader(candidate: DirectAssignmentCandidate): void {
     const id = this.effectiveEventId();
-    const current = this.context();
-    if (!id || !current || !this.isWindowOpen() || this.submittingId() !== null) return;
+    if (!id || !this.isWindowOpen()) return;
 
     this.submittingId.set(candidate.userId);
     this.problem.set(null);
@@ -129,29 +121,12 @@ export class TeamSelectionComponent implements OnInit {
       .pipe(finalize(() => this.submittingId.set(null)))
       .subscribe({
         next: response => {
-          this.directCandidates.update(list =>
-            list.filter(c => c.userId !== candidate.userId),
-          );
-          const newTeamMember: ActiveTeamMember = {
-            assignmentId: response.id,
-            userId: response.userId,
-            userName: candidate.userName,
-            assignedAt: response.assignedAt,
-            version: response.version,
-          };
-          const updatedActive = [...current.activeTeam, newTeamMember];
-
-          this.context.set({
-            ...current,
-            activeTeam: updatedActive,
-          });
-
-          this.statusMessage.set(`Leader ${candidate.userName} directly assigned to active team roster.`);
+          this.applyDirectAssignment(response, candidate.userName);
         },
         error: error => {
-          const apiProblem = toApiProblem(error, 'Leader could not be directly assigned.');
+          const apiProblem = toApiProblem(error, 'Could not directly assign leader.');
           this.problem.set(apiProblem);
-          if (error.status === 409) {
+          if (apiProblem.status === 409) {
             this.load(true);
           }
         },
@@ -160,10 +135,62 @@ export class TeamSelectionComponent implements OnInit {
 
   formatDate(value: string | null | undefined): string {
     if (!value) return '';
-    return new Intl.DateTimeFormat('en', {
-      timeZone: 'Africa/Cairo',
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    }).format(new Date(value)) + ' Cairo';
+    try {
+      return new Intl.DateTimeFormat('en-GB', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+        timeZone: 'Africa/Cairo',
+      }).format(new Date(value)) + ' Cairo';
+    } catch {
+      return value;
+    }
+  }
+
+  private applySelection(response: { id: string; userId: string; assignedAt: string; version: string }, userName: string): void {
+    const current = this.context();
+    if (!current) return;
+
+    const newMember: ActiveTeamMember = {
+      assignmentId: response.id,
+      userId: response.userId,
+      userName,
+      assignedAt: response.assignedAt,
+      version: response.version,
+    };
+
+    const updatedCandidates = current.availableCandidates.filter(c => c.userId !== response.userId);
+    const updatedTeam = [...current.activeTeam, newMember];
+
+    this.context.set({
+      ...current,
+      availableCandidates: updatedCandidates,
+      activeTeam: updatedTeam,
+    });
+
+    this.statusMessage.set(`Volunteer ${userName} added to active team roster.`);
+  }
+
+  private applyDirectAssignment(response: { id: string; userId: string; assignedAt: string; version: string }, userName: string): void {
+    const current = this.context();
+    if (!current) return;
+
+    const newMember: ActiveTeamMember = {
+      assignmentId: response.id,
+      userId: response.userId,
+      userName,
+      assignedAt: response.assignedAt,
+      version: response.version,
+    };
+
+    const updatedDirect = this.directCandidates().filter(c => c.userId !== response.userId);
+    const updatedTeam = [...current.activeTeam, newMember];
+
+    this.directCandidates.set(updatedDirect);
+    this.context.set({
+      ...current,
+      activeTeam: updatedTeam,
+    });
+
+    this.statusMessage.set(`Leader ${userName} directly assigned to active team roster.`);
   }
 }

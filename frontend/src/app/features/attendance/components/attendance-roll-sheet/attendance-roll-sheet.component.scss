@@ -1,42 +1,198 @@
-.cd-attendance-container { max-width: 960px; margin: 0 auto; padding: var(--cd-space-4) var(--cd-space-2); display: flex; flex-direction: column; gap: var(--cd-space-4); }
-.cd-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
-.cd-breadcrumb a { display: inline-flex; align-items: center; min-height: 44px; color: var(--cd-text-secondary); text-decoration: none; font-size: .875rem; font-weight: 600; }
-.cd-attendance-header { border-bottom: 1px solid var(--cd-border-default); padding-bottom: 1rem; }
-.cd-header-content { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; }
-.cd-page-title { font-size: 1.5rem; margin: 0 0 .5rem; }
-.cd-event-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; font-size: .875rem; color: var(--cd-text-secondary); }
-.cd-event-title { font-weight: 600; color: var(--cd-text-primary); }
-.cd-status-badge, .cd-current-status { padding: .15rem .6rem; border-radius: var(--cd-radius-pill); font-size: .75rem; font-weight: 600; width: fit-content; }
-.cd-status-badge { background: var(--cd-status-info-bg); color: var(--cd-status-info-fg); &[data-status='Completed'] { background: var(--cd-status-success-bg); color: var(--cd-status-success-fg); } }
-.cd-header-actions, .cd-action-group { display: flex; flex-wrap: wrap; gap: .5rem; }
-.cd-btn, .cd-toggle-btn { font-size: .875rem; }
-.cd-btn--primary { background: var(--cd-action-primary); border-color: var(--cd-action-primary); color: var(--cd-text-inverse); }
-.cd-alert { padding: .75rem 1rem; border-radius: var(--cd-radius-control); font-size: .875rem; display: flex; gap: .5rem; p { margin: 0; } }
-.cd-alert--success { background: var(--cd-status-success-bg); color: var(--cd-status-success-fg); }
-.cd-alert--error { background: var(--cd-status-danger-bg); color: var(--cd-status-danger-fg); }
-.cd-stats-grid { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
-.cd-stat-card, .cd-roster-item, .cd-loading-state, .cd-empty-state { padding: .875rem 1rem; background: var(--cd-bg-surface); border: 1px solid var(--cd-border-default); border-radius: var(--cd-radius-panel); }
-.cd-stat-card { display: flex; flex-direction: column; gap: .25rem; }
-.cd-stat-label { font-size: .75rem; color: var(--cd-text-secondary); text-transform: uppercase; font-weight: 600; }
-.cd-stat-value { font-size: 1.5rem; font-weight: 700; }
-.cd-stat-card--attended .cd-stat-value { color: var(--cd-status-success-fg); }
-.cd-stat-card--noshow .cd-stat-value { color: var(--cd-status-danger-fg); }
-.cd-stat-card--unrecorded .cd-stat-value { color: var(--cd-status-warning-fg); }
-.cd-roster-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .75rem; }
-.cd-roster-item { display: flex; flex-wrap: wrap; gap: .75rem; justify-content: space-between; align-items: center; }
-.cd-volunteer-info { display: flex; flex-direction: column; gap: .25rem; }
-.cd-volunteer-name { font-weight: 600; }
-.cd-current-status[data-outcome='Attended'] { background: var(--cd-status-success-bg); color: var(--cd-status-success-fg); }
-.cd-current-status[data-outcome='NoShow'] { background: var(--cd-status-danger-bg); color: var(--cd-status-danger-fg); }
-.cd-current-status[data-outcome='Unrecorded'] { background: var(--cd-status-warning-bg); color: var(--cd-status-warning-fg); }
-.cd-toggle-btn { flex: 1 1 auto; }
-.cd-toggle-btn--attended.active { background: var(--cd-status-success-fg); color: var(--cd-text-inverse); }
-.cd-toggle-btn--noshow.active { background: var(--cd-status-danger-fg); color: var(--cd-text-inverse); }
-.cd-loading-state, .cd-empty-state { text-align: center; color: var(--cd-text-secondary); }
-.cd-empty-title { font-size: 1.125rem; font-weight: 600; margin: 0 0 .5rem; color: var(--cd-text-primary); }
-.cd-empty-desc { font-size: .875rem; margin: 0; }
-.cd-correction-form { display: flex; flex-direction: column; gap: .5rem; width: 100%; }
-.cd-correction-fields, .cd-correction-actions { display: flex; flex-wrap: wrap; gap: .5rem; width: 100%; }
-.cd-finalized-text { color: var(--cd-status-success-fg); font-weight: 600; display: flex; align-items: center; padding-right: 1rem; }
-.cd-select, .cd-input { width: auto; font-size: .875rem; }
+.cd-attendance-container {
+  max-inline-size: var(--cd-content-max, 76rem);
+  margin-inline: auto;
+  padding: var(--cd-space-3) var(--cd-space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--cd-space-3);
+  box-sizing: border-box;
+  max-inline-size: 100%;
+}
+
+.cd-breadcrumb a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--cd-text-secondary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  &:hover { color: var(--cd-action-primary); }
+}
+
+.cd-attendance-header {
+  border-block-end: 1px solid var(--cd-border-default);
+  padding-block-end: var(--cd-space-2);
+}
+
+.cd-header-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cd-space-3);
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.cd-page-title {
+  font-family: var(--cd-font-display);
+  font-size: clamp(1.35rem, 3.5vw, 1.85rem);
+  margin: 0 0 var(--cd-space-1);
+}
+
+.cd-event-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cd-space-2);
+  font-size: var(--cd-font-size-sm);
+  color: var(--cd-text-secondary);
+}
+
+.cd-event-title {
+  font-weight: 600;
+  color: var(--cd-text-primary);
+}
+
+.cd-header-actions,
+.cd-action-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cd-space-2);
+  align-items: center;
+}
+
+.cd-roster-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--cd-space-2);
+}
+
+.cd-roster-item {
+  padding: var(--cd-space-3);
+  background: var(--cd-bg-surface);
+  border: 2px solid var(--cd-border-default);
+  border-radius: var(--cd-radius-panel);
+  display: flex;
+  flex-direction: column;
+  gap: var(--cd-space-2);
+
+  &--attended {
+    border-color: color-mix(in srgb, var(--cd-signal-success) 40%, var(--cd-border-default));
+    border-inline-start: 5px solid var(--cd-signal-success);
+  }
+
+  &--noshow {
+    border-color: color-mix(in srgb, var(--cd-signal-danger) 40%, var(--cd-border-default));
+    border-inline-start: 5px solid var(--cd-signal-danger);
+  }
+}
+
+.cd-volunteer-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cd-space-2);
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cd-volunteer-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.cd-volunteer-name {
+  font-size: var(--cd-font-size-md);
+  font-weight: 600;
+}
+
+.cd-toggle-btn {
+  min-block-size: 56px;
+  min-inline-size: 7rem;
+  padding: var(--cd-space-2) var(--cd-space-3);
+  border-radius: var(--cd-radius-control);
+  font-size: var(--cd-font-size-sm);
+  font-weight: var(--cd-weight-bold);
+  border: 2px solid var(--cd-border-strong);
+  background: var(--cd-bg-surface);
+  cursor: pointer;
+
+  &--attended.active {
+    background: var(--cd-signal-success);
+    border-color: var(--cd-signal-success);
+    color: var(--cd-text-inverse);
+  }
+
+  &--noshow.active {
+    background: var(--cd-signal-danger);
+    border-color: var(--cd-signal-danger);
+    color: var(--cd-text-inverse);
+  }
+}
+
+.cd-substitute-drawer {
+  padding: var(--cd-space-2) var(--cd-space-3);
+  background: var(--cd-signal-warning-bg);
+  border: 1px dashed var(--cd-signal-warning);
+  border-radius: var(--cd-radius-control);
+}
+
+.substitute-drawer-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--cd-space-2);
+}
+
+.substitute-icon {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  color: var(--cd-signal-warning);
+  svg { inline-size: 100%; block-size: 100%; }
+}
+
+.substitute-prompt {
+  margin: 0;
+  font-size: var(--cd-font-size-xs);
+  flex: 1 1 12rem;
+}
+
+.cd-correction-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  inline-size: 100%;
+}
+
+.cd-correction-fields,
+.cd-correction-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.cd-finalized-text {
+  color: var(--cd-signal-success);
+  font-weight: 600;
+  padding-inline-end: 0.5rem;
+}
+
+.cd-select,
+.cd-input {
+  inline-size: auto;
+  font-size: 0.875rem;
+}
+
 .cd-input { flex-grow: 1; }
+
+@media (max-width: 35rem) {
+  .cd-volunteer-row { flex-direction: column; align-items: stretch; }
+  .cd-action-group {
+    inline-size: 100%;
+    flex-wrap: wrap;
+    .cd-toggle-btn { flex: 1 1 0; min-inline-size: 0; }
+  }
+}

@@ -7,7 +7,7 @@
 [![Database](https://img.shields.io/badge/SQL%20Server-2025-cc292b.svg?logo=microsoftsqlserver&logoColor=white)](https://www.microsoft.com/sql-server)
 [![Architecture](https://img.shields.io/badge/Architecture-Modular%20Monolith-blue.svg)](#7-architecture)
 [![Accessibility](https://img.shields.io/badge/WCAG-2.2%20AA%20Compliant-brightgreen.svg)](#phase-2--uiux-refinements)
-[![Tests](https://img.shields.io/badge/Tests-379%20Passing-success.svg)](#9-testing)
+[![Tests](https://img.shields.io/badge/Tests-789%20Passing-success.svg)](#9-testing)
 
 ---
 
@@ -27,7 +27,7 @@ Carpediem solves this by consolidating the entire staffing lifecycle into a unif
 3. **Leaders (Volunteers)**: Field staff and specialists who declare shift availability, receive assignment notices, execute shifts, and review their participation.
 
 ### Current Implementation Status
-All core **V1 Slices (1 through 22)** are fully implemented and verified locally. The platform features 183 SQL integration tests, 96 domain logic tests, 100 Angular component/service tests, and comprehensive Playwright browser verification with zero axe-core accessibility violations.
+All core **V1 Slices (1 through 22)** are fully implemented and verified locally. The platform features 183 SQL integration tests, 96 domain logic tests, 100 Angular component/service tests, and 410 Playwright cross-browser/accessibility tests across 5 viewports (total **789 / 789 passing tests**) with zero axe-core accessibility violations, zero horizontal overflows down to 320px, and zero SCSS bundle budget warnings.
 
 ---
 
@@ -317,7 +317,7 @@ Runs full Playwright browser tests and automated Axe-core WCAG 2.2 AA accessibil
 cd tests/e2e
 npx playwright test
 ```
-*Result: 0 accessibility violations, 0 horizontal layout overflows across mobile & desktop viewports*
+*Result: 410 / 410 Passing across 5 device viewports (desktop, mobile-320, mobile-360, mobile-390, mobile-430), 0 accessibility violations, 0 horizontal layout overflows down to 320px*
 
 ---
 

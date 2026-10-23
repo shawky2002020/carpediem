@@ -2,38 +2,70 @@
   <div class="inbox-heading">
     <div>
       <h1 id="inbox-title">Notifications</h1>
-      <p>{{ inbox.unreadCount() }} unread</p>
+      <p class="unread-summary cd-tabular">{{ inbox.unreadCount() }} unread</p>
     </div>
     @if (inbox.unreadCount() > 0) {
-      <button type="button" (click)="inbox.markAllRead()" [disabled]="inbox.savingAll()">Mark all as read</button>
+      <button type="button" class="cd-btn cd-btn--secondary cd-btn--sm" (click)="inbox.markAllRead()" [disabled]="inbox.savingAll()">
+        Mark all as read
+      </button>
     }
   </div>
+
   @if (inbox.error()) {
-    <div role="alert" class="inbox-error">
-      Notifications could not be refreshed. <button type="button" (click)="inbox.refreshAll()">Try again</button>
+    <div role="alert" class="inbox-error cd-callout cd-callout--danger">
+      <span class="error-msg">Notifications could not be refreshed.</span>
+      <button type="button" class="cd-btn cd-btn--secondary cd-btn--sm" (click)="inbox.refreshAll()">Try again</button>
     </div>
   }
+
   @if (inbox.loading() && inbox.items().length === 0) {
-    <p role="status">Loading notifications…</p>
+    <p role="status" class="loading-state">Loading notifications…</p>
   } @else if (inbox.items().length === 0 && !inbox.error()) {
-    <p>You have no notifications yet.</p>
+    <p class="empty-state">You have no notifications yet.</p>
   } @else {
-    <ol class="notification-list">
-      @for (item of inbox.items(); track item.id) {
-        <li [class.unread]="!item.readAt">
-          <div class="notification-heading">
-            <h2>{{ title(item) }}</h2>
-            @if (!item.readAt) { <span class="unread-label">Unread</span> }
-          </div>
-          <p>{{ details(item) }}</p>
-          <div class="notification-meta">
-            <time [attr.datetime]="item.createdAt">{{ date(item.createdAt) }}</time>
-            @if (!item.readAt) {
-              <button type="button" (click)="inbox.markRead(item.id)" [disabled]="inbox.savingId() === item.id">Mark as read</button>
+    <!-- Chronologically Grouped Notification Feeds -->
+    <div class="grouped-notifications">
+      @for (group of groupedNotifications(); track group.label) {
+        <section class="notification-group" [attr.aria-label]="group.label + ' notifications'">
+          <h2 class="group-heading">{{ group.label }}</h2>
+          <ol class="notification-list">
+            @for (item of group.items; track item.id) {
+              <li class="notification-card" [class.unread]="!item.readAt">
+                <div class="notification-heading">
+                  <h3>{{ title(item) }}</h3>
+                  @if (!item.readAt) {
+                    <span class="unread-label cd-badge cd-badge--info">Unread</span>
+                  }
+                </div>
+
+                <p class="notification-detail">{{ details(item) }}</p>
+
+                <div class="notification-meta">
+                  <time [attr.datetime]="item.createdAt">{{ date(item.createdAt) }}</time>
+
+                  <div class="notification-actions">
+                    @if (getContextualAction(item); as action) {
+                      <a class="context-link cd-btn cd-btn--primary cd-btn--sm" [routerLink]="action.link">
+                        {{ action.label }}
+                      </a>
+                    }
+
+                    @if (!item.readAt) {
+                      <button
+                        type="button"
+                        class="cd-btn cd-btn--secondary cd-btn--sm"
+                        (click)="inbox.markRead(item.id)"
+                        [disabled]="inbox.savingId() === item.id">
+                        Mark as read
+                      </button>
+                    }
+                  </div>
+                </div>
+              </li>
             }
-          </div>
-        </li>
+          </ol>
+        </section>
       }
-    </ol>
+    </div>
   }
 </section>

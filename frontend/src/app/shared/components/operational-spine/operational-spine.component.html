@@ -1,0 +1,78 @@
+<header class="cd-operational-spine" aria-label="Event operational overview">
+  <div class="spine-top">
+    <div class="spine-identity">
+      <div class="spine-title-row">
+        <h1 class="spine-title">{{ title() }}</h1>
+        @if (countdownText()) {
+          <span class="countdown-badge cd-badge" [class.cd-badge--success]="isLiveNow()" [class.cd-badge--info]="!isLiveNow() && countdownText() !== 'Concluded'" [class.cd-badge--neutral]="countdownText() === 'Concluded'">
+            @if (isLiveNow()) { <span class="cd-pulse-dot" aria-hidden="true"></span> }
+            {{ countdownText() }}
+          </span>
+        }
+      </div>
+
+      <div class="spine-meta">
+        @if (venue()) {
+          <span class="meta-item meta-venue">
+            <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+            {{ venue() }}
+          </span>
+        }
+        @if (formattedCairoDate()) {
+          <span class="meta-item meta-time">
+            <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            {{ formattedCairoDate() }}
+          </span>
+        }
+        @if (chiefLeaderName()) {
+          <span class="meta-item meta-chief">
+            <span class="chief-label">Chief Leader:</span>
+            <strong>{{ chiefLeaderName() }}</strong>
+          </span>
+        }
+      </div>
+    </div>
+
+    @if (fulfillmentPercent() !== null) {
+      <div class="spine-vitals" aria-label="Roster fulfillment status">
+        <div class="vitals-header">
+          <span class="vitals-label">Roster Fulfillment</span>
+          <span class="vitals-metric cd-tabular">{{ fulfillmentCurrent() }}/{{ fulfillmentTarget() }} ({{ fulfillmentPercent() }}%)</span>
+        </div>
+        <div class="vitals-bar-track" role="progressbar" [attr.aria-valuenow]="fulfillmentPercent()" aria-valuemin="0" aria-valuemax="100" aria-label="Roster fulfillment progress">
+          <div class="vitals-bar-fill" [style.inline-size.%]="fulfillmentPercent()"></div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Five-stage visual lifecycle breadcrumb -->
+  <nav class="lifecycle-track" aria-label="Event lifecycle stage progress" tabindex="0">
+    <ol class="lifecycle-steps">
+      @for (st of stages; track st.id; let idx = $index) {
+        <li class="lifecycle-step"
+            [class.completed]="idx < currentStageIndex()"
+            [class.active]="idx === currentStageIndex()"
+            [class.upcoming]="idx > currentStageIndex()"
+            [attr.aria-current]="idx === currentStageIndex() ? 'step' : null">
+          <span class="step-indicator" aria-hidden="true">
+            @if (idx < currentStageIndex()) {
+              <svg viewBox="0 0 16 16" fill="currentColor" class="step-check">
+                <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
+              </svg>
+            } @else {
+              <span class="step-num">{{ idx + 1 }}</span>
+            }
+          </span>
+          <span class="step-label">{{ st.label }}</span>
+        </li>
+      }
+    </ol>
+  </nav>
+</header>

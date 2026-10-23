@@ -5,7 +5,7 @@
 h1 { margin-block: var(--cd-space-2); font: var(--cd-weight-bold) clamp(1.8rem, 6vw, 2.8rem)/var(--cd-line-tight) var(--cd-font-display); }
 .page-heading p:last-child, #candidate-help, .current-appointment p:last-child { color: var(--cd-text-secondary); }
 .status-space { min-block-size: 1.75rem; color: var(--cd-status-success-fg); }
-fieldset { min-inline-size: 0; margin: 0; padding: 0; border: 0; }
+fieldset { min-inline-size: 0; margin: 0; padding: 0; border: 0; background: transparent; }
 legend { font-size: var(--cd-font-size-lg); font-weight: var(--cd-weight-bold); }
 .candidate-list { display: grid; gap: var(--cd-space-3); margin-block: var(--cd-space-4) var(--cd-space-5); }
 .candidate-option { display: grid; grid-template-columns: 1.5rem 1fr; align-items: center; gap: var(--cd-space-3); min-block-size: 3.5rem; padding: var(--cd-space-4); border: 2px solid var(--cd-border-default); border-radius: var(--cd-radius-control); background: var(--cd-bg-surface); cursor: pointer; }
@@ -18,15 +18,13 @@ legend { font-size: var(--cd-font-size-lg); font-weight: var(--cd-weight-bold); 
 .secondary, .message button { border: 1px solid var(--cd-border-strong); background: var(--cd-bg-surface); color: var(--cd-text-primary); }
 .message, .current-appointment, .declined-history { margin-block: var(--cd-space-4); padding: var(--cd-space-5); border: 1px solid var(--cd-border-default); border-radius: var(--cd-radius-panel); background: var(--cd-bg-surface); }
 .message.error { border-inline-start: 4px solid var(--cd-status-danger-fg); background: var(--cd-status-danger-bg); }
-.message h2, .current-appointment h2 { margin-block-start: 0; }
+.message h2, .current-appointment h2, .declined-history h2 { margin-block-start: 0; }
 .status-label { inline-size: fit-content; margin: 0; padding: .2rem .65rem; border-radius: var(--cd-radius-pill); background: var(--cd-status-warning-bg); color: var(--cd-status-warning-fg); font-size: var(--cd-font-size-sm); font-weight: var(--cd-weight-bold); }
 .status-label.active { background: var(--cd-status-success-bg); color: var(--cd-status-success-fg); }
 .external-form { display: grid; gap: var(--cd-space-3); margin-block-start: var(--cd-space-5); padding-block-start: var(--cd-space-4); border-block-start: 1px solid var(--cd-border-default); }
 .external-form textarea { box-sizing: border-box; inline-size: 100%; min-block-size: 7rem; padding: var(--cd-space-3); border: 1px solid var(--cd-border-strong); border-radius: var(--cd-radius-control); background: var(--cd-bg-surface); color: var(--cd-text-primary); font: inherit; resize: vertical; }
-.external-form textarea:focus-visible { outline: 3px solid var(--cd-focus-ring); outline-offset: 2px; }
 .field-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--cd-space-2); color: var(--cd-text-secondary); font-size: var(--cd-font-size-sm); }
 .field-error { color: var(--cd-status-danger-fg); font-weight: var(--cd-weight-semibold); }
-.declined-history h2 { margin-block-start: 0; }
 .declined-history ul { display: grid; gap: var(--cd-space-3); margin: 0; padding: 0; list-style: none; }
 .declined-history li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--cd-space-3); align-items: center; }
 .declined-label { color: var(--cd-status-danger-fg); font-weight: var(--cd-weight-semibold); }

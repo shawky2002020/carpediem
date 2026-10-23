@@ -8,7 +8,7 @@ h1 { margin-block: var(--cd-space-2); font: var(--cd-weight-bold) clamp(1.8rem, 
 .alert-box h2, .status-header h2 { margin: 0; }
 .alert-box p { margin: var(--cd-space-2) 0 0; }
 .alert-box.error { border-inline-start: 4px solid var(--cd-status-danger-fg); background: var(--cd-status-danger-bg); color: var(--cd-status-danger-fg); }
-.alert-box.notice { border-inline-start: 4px solid #2563eb; background: #eff6ff; color: var(--cd-text-primary); }
+.alert-box.notice { border-inline-start: 4px solid var(--cd-status-info-fg); background: var(--cd-status-info-bg); color: var(--cd-text-primary); }
 .alert-box.warning { border-inline-start: 4px solid var(--cd-status-warning-fg); background: var(--cd-status-warning-bg); color: var(--cd-text-primary); }
 .btn-retry, .action-buttons button { min-block-size: var(--cd-touch-target-min); border-radius: var(--cd-radius-control); font-weight: var(--cd-weight-semibold); cursor: pointer; }
 .btn-retry { margin-block-start: var(--cd-space-3); padding-inline: var(--cd-space-4); border: 1px solid var(--cd-border-strong); background: var(--cd-bg-surface); color: var(--cd-text-primary); }
@@ -21,10 +21,10 @@ h1 { margin-block: var(--cd-space-2); font: var(--cd-weight-bold) clamp(1.8rem, 
 .action-buttons { display: flex; flex-wrap: wrap; gap: var(--cd-space-3); margin-block-start: var(--cd-space-4); }
 .action-buttons button { flex: 1 1 auto; padding: var(--cd-space-3) var(--cd-space-5); font-size: var(--cd-font-size-base); }
 .btn-available { border: 2px solid var(--cd-action-primary); background: var(--cd-action-primary); color: var(--cd-text-inverse); }
-.btn-available:hover:not(:disabled) { background: var(--cd-action-primary-hover, #065f46); }
+.btn-available:hover:not(:disabled) { background: var(--cd-action-primary-hover); }
 .btn-available.active { box-shadow: 0 0 0 3px var(--cd-focus-ring); }
 .btn-not-available { border: 2px solid var(--cd-border-strong); background: var(--cd-bg-surface); color: var(--cd-text-primary); }
-.btn-not-available:hover:not(:disabled) { background: var(--cd-bg-muted, #f3f4f6); }
+.btn-not-available:hover:not(:disabled) { background: var(--cd-bg-subtle); }
 .btn-not-available.active { border-color: var(--cd-status-danger-fg); color: var(--cd-status-danger-fg); box-shadow: 0 0 0 3px var(--cd-focus-ring); }
 button:disabled { opacity: 0.5; cursor: not-allowed; }
 button:focus-visible { outline: 3px solid var(--cd-focus-ring); outline-offset: 3px; }

@@ -1,13 +1,59 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { NotificationInboxItem, NotificationInboxService } from './notification-inbox.service';
+
+export interface NotificationGroup {
+  label: string;
+  items: NotificationInboxItem[];
+}
 
 @Component({
   selector: 'app-notification-inbox',
+  imports: [CommonModule, RouterLink],
   templateUrl: './notification-inbox.component.html',
   styleUrl: './notification-inbox.component.scss',
 })
 export class NotificationInboxComponent {
   protected readonly inbox = inject(NotificationInboxService);
+
+  readonly groupedNotifications = computed<NotificationGroup[]>(() => {
+    const items = this.inbox.items();
+    if (items.length === 0) return [];
+
+    const now = Date.now();
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    const sevenDaysMs = 7 * oneDayMs;
+
+    const todayItems: NotificationInboxItem[] = [];
+    const thisWeekItems: NotificationInboxItem[] = [];
+    const olderItems: NotificationInboxItem[] = [];
+
+    for (const item of items) {
+      const created = new Date(item.createdAt).getTime();
+      const diff = now - created;
+
+      if (diff <= oneDayMs) {
+        todayItems.push(item);
+      } else if (diff <= sevenDaysMs) {
+        thisWeekItems.push(item);
+      } else {
+        olderItems.push(item);
+      }
+    }
+
+    const groups: NotificationGroup[] = [];
+    if (todayItems.length > 0) groups.push({ label: 'Today', items: todayItems });
+    if (thisWeekItems.length > 0) groups.push({ label: 'This Week', items: thisWeekItems });
+    if (olderItems.length > 0) groups.push({ label: 'Older', items: olderItems });
+
+    // Fallback if timestamps are far in the future or weird
+    if (groups.length === 0 && items.length > 0) {
+      groups.push({ label: 'Recent Notifications', items });
+    }
+
+    return groups;
+  });
 
   protected title(item: NotificationInboxItem): string {
     switch (item.notificationType) {
@@ -54,5 +100,24 @@ export class NotificationInboxComponent {
     return Number.isNaN(parsed.getTime()) ? value : new Intl.DateTimeFormat('en', {
       timeZone: 'Africa/Cairo', dateStyle: 'medium', timeStyle: 'short',
     }).format(parsed) + ' Cairo';
+  }
+
+  protected getContextualAction(item: NotificationInboxItem): { label: string; link: string[] } | null {
+    if (!item.eventId && item.notificationType !== 'ChiefLeaderAppointment') return null;
+
+    switch (item.notificationType) {
+      case 'VolunteerSelected':
+      case 'DirectLeaderAssigned':
+      case 'ReplacementLeaderAssigned':
+        return item.eventId ? { label: 'View Shift Details', link: ['/events', item.eventId, 'my-assignment'] } : null;
+      case 'EventRescheduled':
+        return item.eventId ? { label: 'Update Availability', link: ['/events', item.eventId, 'availability'] } : null;
+      case 'ChiefLeaderAppointment':
+        return { label: 'View Appointment', link: item.eventId ? ['/my-appointments', item.eventId] : ['/my-appointments'] };
+      case 'EventPublished':
+        return item.eventId ? { label: 'Declare Availability', link: ['/events', item.eventId, 'availability'] } : null;
+      default:
+        return null;
+    }
   }
 }

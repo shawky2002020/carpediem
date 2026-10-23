@@ -11,11 +11,12 @@ import {
 import { AttendanceService } from '../../data/attendance.service';
 import { SessionService } from '../../../../core/auth/session.service';
 import { FormsModule } from '@angular/forms';
+import { OperationalSpineComponent } from '../../../../shared/components/operational-spine/operational-spine.component';
 
 @Component({
   selector: 'app-attendance-roll-sheet',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, OperationalSpineComponent],
   templateUrl: './attendance-roll-sheet.component.html',
   styleUrl: './attendance-roll-sheet.component.scss',
 })
@@ -38,6 +39,7 @@ export class AttendanceRollSheetComponent implements OnInit {
   readonly errorMessage = signal<string | null>(null);
   readonly successMessage = signal<string | null>(null);
   readonly statusMessage = signal<string | null>(null);
+  readonly outdoorMode = signal(true);
 
   // Correction state
   readonly correctingOutcomeId = signal<string | null>(null);
@@ -99,90 +101,74 @@ export class AttendanceRollSheetComponent implements OnInit {
     this.loading.set(true);
     this.errorMessage.set(null);
 
-    this.service
-      .getRollSheet(id)
+    this.service.getRollSheet(id)
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: data => {
-          this.rollSheet.set(data);
-          // Initialize state with current outcomes
-          const initialMap = new Map<string, AttendanceOutcomeType>();
-          for (const entry of data.entries) {
-            if (entry.outcome) {
-              initialMap.set(entry.teamAssignmentId, entry.outcome);
-            }
-          }
-          this.outcomesState.set(initialMap);
+        next: sheet => {
+          this.rollSheet.set(sheet);
+          this.outcomesState.set(new Map());
         },
         error: err => {
-          const detail = err.error?.detail ?? err.message ?? 'Failed to load attendance roll sheet.';
-          this.errorMessage.set(detail);
-        },
+          this.errorMessage.set(err.error?.detail ?? 'Failed to load attendance roll sheet.');
+        }
       });
   }
 
-  getEffectiveOutcome(assignmentId: string): AttendanceOutcomeType | null {
-    const state = this.outcomesState();
-    if (state.has(assignmentId)) {
-      return state.get(assignmentId) ?? null;
+  setOutcome(teamAssignmentId: string, outcome: AttendanceOutcomeType): void {
+    const map = new Map(this.outcomesState());
+    map.set(teamAssignmentId, outcome);
+    this.outcomesState.set(map);
+
+    const entry = this.entries().find(e => e.teamAssignmentId === teamAssignmentId);
+    if (entry) {
+      this.statusMessage.set(`Marked ${entry.volunteerName} as ${outcome === 'Attended' ? 'Attended' : 'No Show'}.`);
     }
-    const entry = this.entries().find(e => e.teamAssignmentId === assignmentId);
+  }
+
+  getEffectiveOutcome(teamAssignmentId: string): AttendanceOutcomeType | null {
+    if (this.outcomesState().has(teamAssignmentId)) {
+      return this.outcomesState().get(teamAssignmentId) ?? null;
+    }
+    const entry = this.entries().find(e => e.teamAssignmentId === teamAssignmentId);
     return entry?.outcome ?? null;
   }
 
-  setOutcome(assignmentId: string, outcome: AttendanceOutcomeType): void {
-    const updated = new Map(this.outcomesState());
-    updated.set(assignmentId, outcome);
-    this.outcomesState.set(updated);
-    this.successMessage.set(null);
-  }
-
   markAllAttended(): void {
-    const updated = new Map(this.outcomesState());
+    const map = new Map(this.outcomesState());
     for (const entry of this.entries()) {
-      updated.set(entry.teamAssignmentId, 'Attended');
+      if (!entry.finalizedAt) {
+        map.set(entry.teamAssignmentId, 'Attended');
+      }
     }
-    this.outcomesState.set(updated);
-    this.successMessage.set(null);
+    this.outcomesState.set(map);
+    this.statusMessage.set('Marked all unfinalized volunteers as Attended.');
   }
 
   submit(): void {
     const id = this.effectiveEventId();
-    if (!id) return;
-
-    const state = this.outcomesState();
-    const entriesToSubmit = Array.from(state.entries()).map(([teamAssignmentId, outcome]) => ({
-      teamAssignmentId,
-      outcome,
-    }));
-
-    if (entriesToSubmit.length === 0) {
-      this.errorMessage.set('Please mark at least one volunteer attendance outcome before submitting.');
-      return;
-    }
+    if (!id || this.submitting() || !this.hasChanges()) return;
 
     this.submitting.set(true);
     this.errorMessage.set(null);
     this.successMessage.set(null);
 
-    const request: FinalizeAttendanceRequest = {
-      entries: entriesToSubmit,
-    };
+    const submissions = Array.from(this.outcomesState().entries()).map(([teamAssignmentId, outcome]) => ({
+      teamAssignmentId,
+      outcome
+    }));
 
-    this.service
-      .finalizeAttendance(id, request)
+    const request: FinalizeAttendanceRequest = { entries: submissions };
+
+    this.service.finalizeAttendance(id, request)
       .pipe(finalize(() => this.submitting.set(false)))
       .subscribe({
-        next: response => {
-          this.successMessage.set(
-            `Attendance finalized successfully! (${response.attendedCount} Attended, ${response.noShowCount} No Show)`
-          );
+        next: () => {
+          this.successMessage.set('Attendance finalized successfully!');
           this.load();
         },
         error: err => {
-          const detail = err.error?.detail ?? err.message ?? 'Failed to finalize attendance.';
-          this.errorMessage.set(detail);
-        },
+          this.errorMessage.set(err.error?.detail ?? 'Failed to finalize attendance roll call.');
+        }
       });
   }
 
@@ -190,8 +176,6 @@ export class AttendanceRollSheetComponent implements OnInit {
     this.correctingOutcomeId.set(teamAssignmentId);
     this.correctionOutcome.set(currentOutcome === 'Attended' ? 'NoShow' : 'Attended');
     this.correctionReason.set('');
-    this.errorMessage.set(null);
-    this.successMessage.set(null);
   }
 
   cancelCorrection(): void {
@@ -203,7 +187,8 @@ export class AttendanceRollSheetComponent implements OnInit {
     const entry = this.entries().find(e => e.teamAssignmentId === teamAssignmentId);
     if (!entry || !entry.attendanceOutcomeId) return;
 
-    if (!this.correctionReason().trim()) {
+    const reason = this.correctionReason().trim();
+    if (!reason) {
       this.errorMessage.set('Please provide a mandatory reason for the correction.');
       return;
     }
@@ -214,22 +199,20 @@ export class AttendanceRollSheetComponent implements OnInit {
 
     const request: CorrectAttendanceRequest = {
       newOutcome: this.correctionOutcome(),
-      reason: this.correctionReason().trim(),
+      reason
     };
 
-    this.service
-      .correctAttendance(entry.attendanceOutcomeId, request, entry.version)
+    this.service.correctAttendance(entry.attendanceOutcomeId, request)
       .pipe(finalize(() => this.correctionSubmitting.set(false)))
       .subscribe({
         next: () => {
           this.successMessage.set('Attendance corrected successfully.');
-          this.correctingOutcomeId.set(null);
+          this.cancelCorrection();
           this.load();
         },
         error: err => {
-          const detail = err.error?.detail ?? err.message ?? 'Failed to correct attendance.';
-          this.errorMessage.set(detail);
-        },
+          this.errorMessage.set(err.error?.detail ?? 'Failed to correct attendance record.');
+        }
       });
   }
 }

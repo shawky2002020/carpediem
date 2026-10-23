@@ -110,7 +110,7 @@ h1 {
 .cancellation-info {
   padding: var(--cd-space-3);
   border-radius: var(--cd-radius-control);
-  background: var(--cd-bg-muted, #f8fafc);
+  background: var(--cd-bg-subtle);
   margin-block-start: var(--cd-space-2);
 }
 
@@ -136,7 +136,7 @@ button {
 .btn-confirm-cancel {
   border: 2px solid var(--cd-status-danger-fg);
   background: var(--cd-status-danger-fg);
-  color: #fff;
+  color: var(--cd-text-inverse);
 }
 
 .btn-dismiss,

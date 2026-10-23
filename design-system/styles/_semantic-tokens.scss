@@ -2,32 +2,73 @@
 
 :root {
   color-scheme: light;
+
+  // Brand Palette: Deep Forest & Warm Earth
+  --cd-brand-forest-900: #0d261e;
+  --cd-brand-forest-800: #153c30;
+  --cd-brand-forest-700: #{p.$forest};
+  --cd-brand-forest-600: #266b57;
+  --cd-brand-forest-100: #{p.$surface-subtle};
+  --cd-brand-forest-50:  #f4f8f5;
+
+  // Warm Paper Canvas, Surfaces & Ink
   --cd-bg-canvas: #{p.$canvas};
   --cd-bg-surface: #{p.$white};
   --cd-bg-subtle: #{p.$surface-subtle};
+  --cd-canvas-paper: #{p.$canvas};
+  --cd-surface-pure: #{p.$white};
+  --cd-surface-muted: #f0f2ec;
+  --cd-surface-hover: var(--cd-bg-subtle);
+  --cd-surface-pressed: color-mix(in srgb, var(--cd-bg-subtle) 80%, var(--cd-border-strong));
+  --cd-surface-active: var(--cd-bg-subtle);
+
   --cd-text-primary: #{p.$evergreen};
   --cd-text-secondary: #{p.$ink-secondary};
   --cd-text-muted: #{p.$ink-secondary};
   --cd-text-inverse: #{p.$white};
+  --cd-ink-primary: #{p.$evergreen};
+  --cd-ink-secondary: #4a5b51;
+  --cd-ink-muted: #{p.$ink-secondary};
+
+  // Borders & Dividers
   --cd-border-default: #{p.$border};
   --cd-border-strong: #{p.$border-strong};
+  --cd-border-focus: #{p.$forest};
+  --cd-border-width: 1px;
+
+  // Nav & Forms
   --cd-nav-bg: var(--cd-bg-surface);
   --cd-nav-text: var(--cd-text-primary);
   --cd-form-bg: var(--cd-bg-surface);
   --cd-form-border: var(--cd-border-strong);
-  --cd-form-error: var(--cd-status-danger-fg);
+  --cd-form-error: var(--cd-signal-danger);
+
+  // Actions & Focus
   --cd-action-primary: #{p.$forest};
   --cd-action-primary-hover: #174335;
   --cd-action-primary-active: #102f25;
   --cd-focus-ring: #{p.$forest};
-  --cd-status-success-fg: #{p.$success};
-  --cd-status-success-bg: #eef7f0;
-  --cd-status-warning-fg: #{p.$warning};
-  --cd-status-warning-bg: #fff8eb;
-  --cd-status-danger-fg: #{p.$danger};
-  --cd-status-danger-bg: #fff2f0;
-  --cd-status-info-fg: #{p.$info};
-  --cd-status-info-bg: #ecf6fa;
+
+  // Tactical Status & Signal Palette
+  --cd-signal-success: #15803d;
+  --cd-signal-success-bg: #f0fdf4;
+  --cd-signal-warning: #b45309;
+  --cd-signal-warning-bg: #fffbeb;
+  --cd-signal-danger: #b91c1c;
+  --cd-signal-danger-bg: #fef2f2;
+  --cd-signal-info: #0369a1;
+  --cd-signal-info-bg: #f0f9ff;
+
+  --cd-status-success-fg: var(--cd-signal-success);
+  --cd-status-success-bg: var(--cd-signal-success-bg);
+  --cd-status-warning-fg: var(--cd-signal-warning);
+  --cd-status-warning-bg: var(--cd-signal-warning-bg);
+  --cd-status-danger-fg: var(--cd-signal-danger);
+  --cd-status-danger-bg: var(--cd-signal-danger-bg);
+  --cd-status-info-fg: var(--cd-signal-info);
+  --cd-status-info-bg: var(--cd-signal-info-bg);
+
+  // Typography Scale
   --cd-font-display: 'Bricolage Grotesque', 'Trebuchet MS', sans-serif;
   --cd-font-ui: 'Hanken Grotesk', 'Segoe UI', sans-serif;
   --cd-font-size-xs: 0.75rem;
@@ -44,6 +85,8 @@
   --cd-weight-semibold: 600;
   --cd-weight-bold: 700;
   --cd-letter-spacing-caps: 0.04em;
+
+  // Spatial Scale
   --cd-space-1: 0.25rem;
   --cd-space-2: 0.5rem;
   --cd-space-3: 0.75rem;
@@ -53,11 +96,25 @@
   --cd-space-8: 2rem;
   --cd-space-10: 2.5rem;
   --cd-space-12: 3rem;
+
+  // Micro-Radii (Structured, Crisp, Swiss Utility)
+  --cd-radius-xs: 0.25rem;
+  --cd-radius-sm: 0.375rem;
+  --cd-radius-md: #{p.$radius-control};
+  --cd-radius-lg: #{p.$radius-panel};
+  --cd-radius-full: #{p.$radius-pill};
   --cd-radius-control: #{p.$radius-control};
   --cd-radius-panel: #{p.$radius-panel};
   --cd-radius-pill: #{p.$radius-pill};
-  --cd-border-width: 1px;
+
+  // Elevation & Surface Depth
+  --cd-shadow-sm: 0 1px 2px 0 rgb(21 40 29 / 0.05);
+  --cd-shadow-md: 0 4px 6px -1px rgb(21 40 29 / 0.08), 0 2px 4px -2px rgb(21 40 29 / 0.05);
+  --cd-shadow-lg: 0 10px 15px -3px rgb(21 40 29 / 0.1), 0 4px 6px -4px rgb(21 40 29 / 0.05);
+  --cd-shadow-modal: 0 20px 25px -5px rgb(21 40 29 / 0.15), 0 8px 10px -6px rgb(21 40 29 / 0.1);
   --cd-shadow-raised: 0 4px 16px rgb(21 40 29 / 10%);
+
+  // Layers & Transitions
   --cd-opacity-disabled: 0.45;
   --cd-layer-base: 0;
   --cd-layer-sticky: 10;
@@ -70,12 +127,15 @@
   --cd-ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --cd-ease-enter: cubic-bezier(0, 0, 0.2, 1);
   --cd-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  // Ergonomic Controls & Layout Rhythms
   --cd-control-min-block-size: 3rem;
+  --cd-touch-min: 44px;
   --cd-touch-target-min: 2.75rem;
   --cd-icon-size-sm: 1.25rem;
   --cd-icon-size-md: 1.5rem;
-  --cd-content-max: 72rem;
-  --cd-reading-max: 42rem;
+  --cd-content-max: 76rem;
+  --cd-reading-max: 65ch;
   --cd-page-gutter: 1rem;
 }
 

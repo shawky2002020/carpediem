@@ -1,14 +1,17 @@
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { filter } from 'rxjs';
 import { toApiProblem } from '../../core/http/api.interceptor';
 import { OperationalDashboardService, OperationalEvent } from './operational-dashboard.service';
 import { SessionService } from '../../core/auth/session.service';
 
+export type DashboardFilter = 'All' | 'RequiresAction' | 'Published' | 'Drafts' | 'Concluded';
+
 @Component({
   selector: 'app-operational-dashboard',
-  imports: [RouterLink],
+  imports: [CommonModule, RouterLink],
   templateUrl: './operational-dashboard.component.html',
   styleUrl: './operational-dashboard.component.scss',
 })
@@ -19,9 +22,38 @@ export class OperationalDashboardComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private timer?: ReturnType<typeof setInterval>;
   private pending = false;
+
   readonly events = signal<OperationalEvent[]>([]);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
+  readonly activeFilter = signal<DashboardFilter>('All');
+
+  // Executive KPI Status Ribbon Metrics
+  readonly draftCount = computed(() => this.events().filter(e => e.status === 'Draft').length);
+  readonly activeStaffingCount = computed(() => this.events().filter(e => e.status === 'Published' && !e.inProgress).length);
+  readonly pendingAttendanceCount = computed(() => this.events().filter(e => e.pendingAttendance).length);
+  readonly concludedCount = computed(() => this.events().filter(e => e.status === 'Completed').length);
+
+  // Filtered Events
+  readonly filteredEvents = computed(() => {
+    const list = this.events();
+    switch (this.activeFilter()) {
+      case 'RequiresAction':
+        return list.filter(e => e.pendingAttendance || (e.status === 'Published' && e.activeRosterCount === 0));
+      case 'Published':
+        return list.filter(e => e.status === 'Published');
+      case 'Drafts':
+        return list.filter(e => e.status === 'Draft');
+      case 'Concluded':
+        return list.filter(e => e.status === 'Completed' || e.status === 'Cancelled');
+      default:
+        return list;
+    }
+  });
+
+  setFilter(filterName: DashboardFilter): void {
+    this.activeFilter.set(filterName);
+  }
 
   ngOnInit(): void {
     this.refresh();

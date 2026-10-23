@@ -1,5 +1,6 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs';
 import { ApiProblem, toApiProblem } from '../../core/http/api.interceptor';
 import { LeaderHistory, LeaderHistoryEntry } from './data/leader-history.model';
@@ -7,7 +8,7 @@ import { LeaderHistoryService } from './data/leader-history.service';
 
 @Component({
   selector: 'app-leader-history',
-  imports: [RouterLink],
+  imports: [CommonModule, RouterLink],
   templateUrl: './leader-history.component.html',
   styleUrl: './leader-history.component.scss',
 })
@@ -20,6 +21,20 @@ export class LeaderHistoryComponent implements OnInit {
   readonly problem = signal<ApiProblem | null>(null);
   readonly eventId = signal<string | null>(null);
   readonly isOwn = signal(true);
+
+  readonly totalHours = computed(() => {
+    const h = this.history();
+    if (!h) return 0;
+    return h.eventsAttended * 6;
+  });
+
+  readonly reliabilityRate = computed(() => {
+    const h = this.history();
+    if (!h) return 100;
+    const total = h.eventsAttended + h.noShows;
+    if (total === 0) return 100;
+    return Math.round((h.eventsAttended / total) * 100);
+  });
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {

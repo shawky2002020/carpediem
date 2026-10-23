@@ -1,4 +1,4 @@
-.replacement-container { max-width: 800px; margin: 0 auto; padding: var(--cd-space-3); overflow-wrap: anywhere; }
+.replacement-container { max-width: 800px; max-inline-size: 100%; box-sizing: border-box; margin: 0 auto; padding: var(--cd-space-3); overflow-wrap: anywhere; }
 .eyebrow { font-size: .75rem; font-weight: 700; text-transform: uppercase; color: var(--cd-text-secondary); margin: 0 0 .25rem; }
 #replacement-title { font-size: 1.5rem; margin: 0 0 1rem; }
 .event-summary-card, .gap-item, .team-item, .candidate-item { background: var(--cd-bg-surface); border: 1px solid var(--cd-border-default); border-radius: var(--cd-radius-panel); padding: .875rem 1rem; }

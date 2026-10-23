@@ -1,0 +1,543 @@
+// =============================================================================
+// CARPEDIEM DESIGN SYSTEM - COMPONENT LAYER
+// Civic Dispatch & Operational Utility Classes
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// 1. Buttons (.cd-btn)
+// -----------------------------------------------------------------------------
+.cd-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--cd-space-2);
+  min-block-size: var(--cd-touch-min, 44px);
+  min-inline-size: var(--cd-touch-min, 44px);
+  padding: var(--cd-space-2) var(--cd-space-4);
+  border-radius: var(--cd-radius-control);
+  font-family: var(--cd-font-ui);
+  font-size: var(--cd-font-size-sm);
+  font-weight: var(--cd-weight-semibold);
+  line-height: 1.25;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: normal;
+  text-align: center;
+  box-sizing: border-box;
+  transition:
+    background-color var(--cd-duration-fast) var(--cd-ease-standard),
+    border-color var(--cd-duration-fast) var(--cd-ease-standard),
+    box-shadow var(--cd-duration-fast) var(--cd-ease-standard),
+    color var(--cd-duration-fast) var(--cd-ease-standard);
+
+  &:focus-visible {
+    outline: 3px solid var(--cd-focus-ring);
+    outline-offset: 2px;
+  }
+
+  &:disabled,
+  &[aria-disabled='true'] {
+    opacity: var(--cd-opacity-disabled);
+    cursor: not-allowed;
+  }
+}
+
+.cd-btn--primary {
+  background: var(--cd-action-primary);
+  border: 1px solid var(--cd-action-primary);
+  color: var(--cd-text-inverse);
+
+  &:hover:not(:disabled) {
+    background: var(--cd-action-primary-hover);
+    border-color: var(--cd-action-primary-hover);
+    color: var(--cd-text-inverse);
+  }
+
+  &:active:not(:disabled) {
+    background: var(--cd-action-primary-active);
+    border-color: var(--cd-action-primary-active);
+  }
+}
+
+.cd-btn--secondary {
+  background: var(--cd-bg-surface);
+  border: 1px solid var(--cd-border-strong);
+  color: var(--cd-text-primary);
+
+  &:hover:not(:disabled) {
+    background: var(--cd-bg-subtle);
+    border-color: var(--cd-text-primary);
+    color: var(--cd-text-primary);
+  }
+
+  &:active:not(:disabled) {
+    background: var(--cd-surface-pressed);
+  }
+}
+
+.cd-btn--subtle {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--cd-text-secondary);
+
+  &:hover:not(:disabled) {
+    background: var(--cd-bg-subtle);
+    border-color: var(--cd-border-default);
+    color: var(--cd-text-primary);
+  }
+
+  &:active:not(:disabled) {
+    background: var(--cd-surface-pressed);
+  }
+}
+
+.cd-btn--danger {
+  background: var(--cd-signal-danger-bg);
+  border: 1px solid var(--cd-signal-danger);
+  color: var(--cd-signal-danger);
+
+  &:hover:not(:disabled) {
+    background: var(--cd-signal-danger);
+    border-color: var(--cd-signal-danger);
+    color: var(--cd-text-inverse);
+  }
+
+  &:active:not(:disabled) {
+    background: color-mix(in srgb, var(--cd-signal-danger) 85%, black);
+    border-color: color-mix(in srgb, var(--cd-signal-danger) 85%, black);
+    color: var(--cd-text-inverse);
+  }
+}
+
+.cd-btn--sm {
+  min-block-size: 2.25rem;
+  padding: var(--cd-space-1) var(--cd-space-3);
+  font-size: var(--cd-font-size-xs);
+}
+
+.cd-btn--lg {
+  min-block-size: 3.25rem;
+  padding: var(--cd-space-3) var(--cd-space-6);
+  font-size: var(--cd-font-size-md);
+}
+
+// -----------------------------------------------------------------------------
+// 2. Status Badges & Pills (.cd-badge)
+// -----------------------------------------------------------------------------
+.cd-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cd-space-1);
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--cd-radius-pill);
+  font-family: var(--cd-font-ui);
+  font-size: var(--cd-font-size-xs);
+  font-weight: var(--cd-weight-bold);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+  max-inline-size: 100%;
+  white-space: normal;
+  text-align: center;
+}
+
+.cd-badge--info {
+  background: var(--cd-signal-info-bg);
+  color: var(--cd-signal-info);
+  border-color: color-mix(in srgb, var(--cd-signal-info) 30%, transparent);
+}
+
+.cd-badge--success {
+  background: var(--cd-signal-success-bg);
+  color: var(--cd-signal-success);
+  border-color: color-mix(in srgb, var(--cd-signal-success) 30%, transparent);
+}
+
+.cd-badge--warning {
+  background: var(--cd-signal-warning-bg);
+  color: var(--cd-signal-warning);
+  border-color: color-mix(in srgb, var(--cd-signal-warning) 30%, transparent);
+}
+
+.cd-badge--danger {
+  background: var(--cd-signal-danger-bg);
+  color: var(--cd-signal-danger);
+  border-color: color-mix(in srgb, var(--cd-signal-danger) 30%, transparent);
+}
+
+.cd-badge--neutral {
+  background: var(--cd-bg-subtle);
+  color: var(--cd-text-secondary);
+  border-color: var(--cd-border-default);
+}
+
+.cd-badge__dot {
+  display: inline-block;
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+// -----------------------------------------------------------------------------
+// 3. Alert Callouts (.cd-callout)
+// -----------------------------------------------------------------------------
+.cd-callout {
+  position: relative;
+  padding: var(--cd-space-4);
+  border: 1px solid var(--cd-border-default);
+  border-inline-start: 4px solid var(--cd-border-strong);
+  border-radius: var(--cd-radius-panel);
+  background: var(--cd-bg-surface);
+  color: var(--cd-text-primary);
+  margin-block: var(--cd-space-3);
+
+  & > h2,
+  & > h3,
+  & > .cd-callout__title {
+    margin: 0 0 var(--cd-space-1);
+    font-size: var(--cd-font-size-md);
+    font-weight: var(--cd-weight-semibold);
+    color: inherit;
+  }
+
+  & > p,
+  & > .cd-callout__body {
+    margin: 0;
+    font-size: var(--cd-font-size-sm);
+    color: var(--cd-text-secondary);
+    max-inline-size: var(--cd-reading-max);
+  }
+}
+
+.cd-callout--info {
+  border-inline-start-color: var(--cd-signal-info);
+  background: var(--cd-signal-info-bg);
+  & > h2, & > h3, & > .cd-callout__title { color: var(--cd-signal-info); }
+}
+
+.cd-callout--success {
+  border-inline-start-color: var(--cd-signal-success);
+  background: var(--cd-signal-success-bg);
+  & > h2, & > h3, & > .cd-callout__title { color: var(--cd-signal-success); }
+}
+
+.cd-callout--warning {
+  border-inline-start-color: var(--cd-signal-warning);
+  background: var(--cd-signal-warning-bg);
+  & > h2, & > h3, & > .cd-callout__title { color: var(--cd-signal-warning); }
+}
+
+.cd-callout--danger {
+  border-inline-start-color: var(--cd-signal-danger);
+  background: var(--cd-signal-danger-bg);
+  & > h2, & > h3, & > .cd-callout__title { color: var(--cd-signal-danger); }
+}
+
+// -----------------------------------------------------------------------------
+// 4. Data Tables & Roster Lists (.cd-table, .cd-roster)
+// -----------------------------------------------------------------------------
+.cd-table-container {
+  inline-size: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--cd-border-default);
+  border-radius: var(--cd-radius-panel);
+  background: var(--cd-bg-surface);
+}
+
+.cd-table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-family: var(--cd-font-ui);
+
+  th {
+    background: var(--cd-bg-subtle);
+    color: var(--cd-text-secondary);
+    font-size: var(--cd-font-size-xs);
+    font-weight: var(--cd-weight-semibold);
+    text-align: start;
+    padding: var(--cd-space-3) var(--cd-space-4);
+    border-block-end: 1px solid var(--cd-border-default);
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: var(--cd-space-3) var(--cd-space-4);
+    border-block-end: 1px solid var(--cd-border-default);
+    font-size: var(--cd-font-size-sm);
+    color: var(--cd-text-primary);
+  }
+
+  tbody tr:last-child td {
+    border-block-end: none;
+  }
+
+  tbody tr:hover {
+    background: color-mix(in srgb, var(--cd-bg-subtle) 40%, var(--cd-bg-surface));
+  }
+}
+
+.cd-roster {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cd-space-2);
+}
+
+.cd-roster__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cd-space-3);
+  padding: var(--cd-space-3) var(--cd-space-4);
+  border: 1px solid var(--cd-border-default);
+  border-radius: var(--cd-radius-control);
+  background: var(--cd-bg-surface);
+  transition:
+    background-color var(--cd-duration-fast) var(--cd-ease-standard),
+    border-color var(--cd-duration-fast) var(--cd-ease-standard);
+
+  &:hover {
+    background: var(--cd-bg-subtle);
+    border-color: var(--cd-border-strong);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// 5. Utility Classes & Animations
+// -----------------------------------------------------------------------------
+.cd-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes cd-pulse-kf {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(21, 128, 61, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 5px rgba(21, 128, 61, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(21, 128, 61, 0); }
+}
+
+.cd-pulse-dot {
+  display: inline-block;
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+  border-radius: 50%;
+  background: var(--cd-signal-success);
+  animation: cd-pulse-kf 1.8s infinite;
+}
+
+
+// -----------------------------------------------------------------------------
+// 6. Executive Vitals, KPI Cards & Filter Chips (.kpi-*, .filter-chip*)
+// -----------------------------------------------------------------------------
+.kpi-ribbon {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--cd-space-2);
+}
+
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  padding: var(--cd-space-3);
+  background: var(--cd-bg-surface);
+  border: 1px solid var(--cd-border-default);
+  border-radius: var(--cd-radius-panel);
+  text-align: start;
+  cursor: pointer;
+  transition: border-color var(--cd-duration-fast) var(--cd-ease-standard);
+
+  &:hover { border-color: var(--cd-action-primary); }
+
+  &.active {
+    border-color: var(--cd-action-primary);
+    box-shadow: 0 0 0 2px var(--cd-bg-canvas), 0 0 0 4px var(--cd-focus-ring);
+    background: var(--cd-bg-subtle);
+  }
+
+  &--attention.active {
+    border-color: var(--cd-signal-warning);
+    box-shadow: 0 0 0 2px var(--cd-bg-canvas), 0 0 0 4px var(--cd-signal-warning);
+  }
+}
+
+.kpi-label {
+  font-size: var(--cd-font-size-xs);
+  font-weight: var(--cd-weight-semibold);
+  color: var(--cd-text-secondary);
+}
+
+.kpi-value {
+  margin-block: var(--cd-space-1);
+  font-family: var(--cd-font-display);
+  font-size: var(--cd-font-size-xl);
+  font-weight: var(--cd-weight-bold);
+  color: var(--cd-text-primary);
+  line-height: 1;
+}
+
+.kpi-sub {
+  font-size: 0.6875rem;
+  color: var(--cd-text-muted);
+}
+
+.filter-chip-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--cd-space-2);
+}
+
+.filter-chip {
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--cd-radius-pill);
+  border: 1px solid var(--cd-border-default);
+  background: var(--cd-bg-surface);
+  color: var(--cd-text-secondary);
+  font-size: var(--cd-font-size-xs);
+  font-weight: var(--cd-weight-semibold);
+  cursor: pointer;
+  transition: all var(--cd-duration-fast) var(--cd-ease-standard);
+
+  &:hover {
+    background: var(--cd-bg-subtle);
+    color: var(--cd-text-primary);
+  }
+
+  &.active {
+    background: var(--cd-action-primary);
+    border-color: var(--cd-action-primary);
+    color: var(--cd-text-inverse);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// 7. Stats Grid & Roll Call Cards (.cd-stats-grid, .cd-stat-card)
+// -----------------------------------------------------------------------------
+.cd-stats-grid {
+  display: grid;
+  gap: var(--cd-space-2);
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+
+  &.sticky-summary {
+    position: sticky;
+    top: 4.25rem;
+    z-index: var(--cd-layer-sticky);
+    backdrop-filter: blur(8px);
+    background: color-mix(in srgb, var(--cd-bg-canvas) 90%, transparent);
+    padding: var(--cd-space-1) 0;
+  }
+}
+
+.cd-stat-card {
+  padding: var(--cd-space-2) var(--cd-space-3);
+  background: var(--cd-bg-surface);
+  border: 1px solid var(--cd-border-default);
+  border-radius: var(--cd-radius-panel);
+  display: flex;
+  flex-direction: column;
+
+  &--attended .cd-stat-value { color: var(--cd-signal-success); }
+  &--noshow .cd-stat-value { color: var(--cd-signal-danger); }
+  &--unrecorded .cd-stat-value { color: var(--cd-signal-warning); }
+}
+
+.cd-stat-label {
+  font-size: 0.65rem;
+  color: var(--cd-text-secondary);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.cd-stat-value {
+  font-family: var(--cd-font-display);
+  font-size: var(--cd-font-size-xl);
+  font-weight: 700;
+}
+
+// -----------------------------------------------------------------------------
+// 8. Mobile Bottom Navigation Bar (.mobile-bottom-bar, .mobile-nav-item)
+// -----------------------------------------------------------------------------
+.mobile-bottom-bar {
+  display: none;
+  position: fixed;
+  inset-block-end: 0;
+  inset-inline: 0;
+  block-size: 3.75rem;
+  background: var(--cd-bg-surface);
+  border-block-start: 1px solid var(--cd-border-default);
+  z-index: var(--cd-layer-sticky);
+  padding-inline: var(--cd-space-2);
+  justify-content: space-around;
+  align-items: center;
+  box-shadow: var(--cd-shadow-md);
+  max-inline-size: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  flex: 1 1 0;
+  min-inline-size: 0;
+  min-block-size: var(--cd-touch-min, 44px);
+  padding: 0.2rem;
+  text-decoration: none;
+  color: var(--cd-text-secondary);
+  font-size: 0.6875rem;
+  font-weight: var(--cd-weight-medium);
+  border-radius: var(--cd-radius-control);
+  position: relative;
+
+  &.active, &:hover { color: var(--cd-action-primary); }
+  &.active { font-weight: var(--cd-weight-bold); }
+}
+
+.mobile-nav-icon {
+  inline-size: 1.2rem;
+  block-size: 1.2rem;
+}
+
+.mobile-badge {
+  position: absolute;
+  top: 0.2rem;
+  right: 0.6rem;
+  min-inline-size: 0.9rem;
+  block-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--cd-radius-pill);
+  background: var(--cd-signal-danger);
+  color: var(--cd-text-inverse);
+  font-size: 0.6rem;
+  font-weight: var(--cd-weight-bold);
+  padding-inline: 0.15rem;
+}
+
+
+// -----------------------------------------------------------------------------
+// 9. Status Alerts, Loading & Empty States (.cd-alert, .cd-loading-state, .cd-empty-state)
+// -----------------------------------------------------------------------------
+.cd-alert {
+  padding: var(--cd-space-3);
+  border-radius: var(--cd-radius-control);
+  font-size: var(--cd-font-size-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--cd-space-2);
+  p { margin: 0; }
+  &--success { background: var(--cd-status-success-bg); border-inline-start: 4px solid var(--cd-status-success-fg); color: var(--cd-status-success-fg); }
+  &--error { background: var(--cd-status-danger-bg); border-inline-start: 4px solid var(--cd-status-danger-fg); color: var(--cd-status-danger-fg); }
+}
+
+.cd-loading-state,
+.cd-empty-state {
+  text-align: center;
+  color: var(--cd-text-secondary);
+  padding: var(--cd-space-6);
+}

@@ -97,6 +97,7 @@ test('Attendance roll sheet meets WCAG 2.2 AA, 44px touch targets, and 200% zoom
 
   // 200% font zoom reflow (no horizontal scroll overflow > 1px)
   await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+
   const overflow = await page.evaluate(() =>
     document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);

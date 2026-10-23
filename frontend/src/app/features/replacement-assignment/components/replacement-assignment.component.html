@@ -1,9 +1,21 @@
 <div class="replacement-container">
+  @if (context(); as ctx) {
+    <app-operational-spine
+      [title]="ctx.eventTitle"
+      [venue]="ctx.location"
+      [startDateTime]="ctx.startDateTime"
+      [endDateTime]="ctx.endDateTime"
+      [stage]="'Staffed'"
+      [fulfillmentCurrent]="activeCount()"
+      [fulfillmentTarget]="activeCount() + cancelledCount()">
+    </app-operational-spine>
+  }
+
   <header class="replacement-header">
     <p class="eyebrow">Volunteer Operations</p>
     <h1 id="replacement-title">Replacement Leader Assignment</h1>
     @if (context(); as ctx) {
-      <div class="event-summary-card">
+      <div class="event-summary-card cd-visually-hidden">
         <h2 class="event-title">{{ ctx.eventTitle }}</h2>
         <div class="event-meta">
           <p class="meta-item meta-text">
@@ -26,7 +38,7 @@
   </div>
 
   @if (problem(); as error) {
-    <section class="alert-box error" role="alert">
+    <section class="alert-box error cd-callout cd-callout--danger" role="alert">
       <h2>{{ error.title }}</h2>
       @if (error.code === 'unauthorized_chief_leader') {
         <p>Only the active Chief Leader or an Administrator can draft replacements for this event.</p>
@@ -39,15 +51,23 @@
       } @else {
         <p>{{ error.detail || 'An unexpected error occurred while assigning replacement.' }}</p>
       }
-      <button type="button" class="btn-retry" (click)="load()">Refresh context</button>
+      <button type="button" class="btn-retry cd-btn cd-btn--secondary" (click)="load()">Refresh context</button>
     </section>
   }
 
   @if (!loading() && context(); as ctx) {
     @if (!ctx.isWindowOpen) {
-      <div class="alert-box warning window-closed-note" role="note">
+      <div class="alert-box warning window-closed-note cd-callout cd-callout--warning" role="note">
         <h3>Replacement Window Closed</h3>
         <p>This event has already started. Replacement leader assignments are closed.</p>
+      </div>
+    }
+
+    <!-- Staffing Deficit Callout Banner -->
+    @if (cancelledCount() > 0) {
+      <div class="cd-callout cd-callout--warning deficit-alert" role="status">
+        <h3 class="cd-callout__title">Immediate Attention: {{ cancelledCount() }} Vacant Role Slot{{ cancelledCount() > 1 ? 's' : '' }}</h3>
+        <p class="cd-callout__body">Unfilled gaps require immediate replacement coverage before shift deployment. Select a cancelled slot below to draft a replacement.</p>
       </div>
     }
 
@@ -57,7 +77,7 @@
         <div class="section-header">
           <h2 id="gaps-heading">
             Staffing Gaps (Cancelled Slots)
-            <span class="count-badge">{{ cancelledCount() }}</span>
+            <span class="count-badge cd-badge cd-badge--danger cd-tabular">{{ cancelledCount() }}</span>
           </h2>
           <p class="section-hint">Select a vacant slot below to record which cancellation this replacement fills.</p>
         </div>
@@ -74,7 +94,7 @@
               (keydown.space)="selectSlot(cancelled.assignmentId)">
               <div class="gap-header">
                 <span class="cancelled-name">{{ cancelled.userName }}</span>
-                <span class="status-badge status-badge-cancelled">Cancelled</span>
+                <span class="status-badge status-badge-cancelled cd-badge cd-badge--danger">Cancelled</span>
               </div>
               <div class="gap-details">
                 <p class="meta-text"><strong>Cancelled On:</strong> {{ formatDate(cancelled.cancelledAt) }}</p>
@@ -82,7 +102,7 @@
               </div>
               <div class="slot-select-indicator">
                 @if (selectedReplacedAssignmentId() === cancelled.assignmentId) {
-                  <span class="selected-tag">Selected for Replacement</span>
+                  <span class="selected-tag cd-badge cd-badge--info">Selected for Replacement</span>
                 } @else {
                   <span class="unselected-tag">Click to link replacement</span>
                 }
@@ -98,7 +118,7 @@
       <div class="section-header">
         <h2 id="roster-heading">
           Active Team Roster
-          <span class="count-badge">{{ activeCount() }}</span>
+          <span class="count-badge cd-badge cd-badge--success cd-tabular">{{ activeCount() }}</span>
         </h2>
       </div>
 
@@ -109,7 +129,7 @@
           @for (member of ctx.activeTeam; track member.assignmentId) {
             <li class="team-item">
               <span class="member-name">{{ member.userName }}</span>
-              <span class="status-badge status-badge-active">Active</span>
+              <span class="status-badge status-badge-active cd-badge cd-badge--success">Active</span>
             </li>
           }
         </ul>
@@ -137,7 +157,7 @@
       <div class="section-header">
         <h2 id="candidates-heading">
           Eligible Replacement Candidates
-          <span class="count-badge">{{ candidates().length }}</span>
+          <span class="count-badge cd-badge cd-badge--neutral cd-tabular">{{ candidates().length }}</span>
         </h2>
       </div>
 
@@ -150,17 +170,17 @@
               <div class="candidate-info">
                 <span class="candidate-name">{{ candidate.userName }}</span>
                 @if (candidate.availabilityStatus === 'Available') {
-                  <span class="availability-badge badge-available">Available</span>
+                  <span class="availability-badge badge-available cd-badge cd-badge--success">Available</span>
                 } @else if (candidate.availabilityStatus === 'NotAvailable') {
-                  <span class="availability-badge badge-not-available">Unavailable</span>
+                  <span class="availability-badge badge-not-available cd-badge cd-badge--danger">Unavailable</span>
                 } @else {
-                  <span class="availability-badge badge-no-response">No Response</span>
+                  <span class="availability-badge badge-no-response cd-badge cd-badge--warning">No Response</span>
                 }
               </div>
 
               <button
                 type="button"
-                class="btn-action btn-select-replacement"
+                class="btn-action btn-select-replacement cd-btn cd-btn--primary"
                 [disabled]="!ctx.isWindowOpen || submitting()"
                 [attr.aria-label]="'Assign ' + candidate.userName + ' as replacement'"
                 (click)="assignReplacement(candidate)">

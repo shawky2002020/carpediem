@@ -28,7 +28,7 @@
   --cd-color-surface-secondary: var(--cd-bg-subtle);
   --cd-color-surface-elevated: var(--cd-bg-surface);
   --cd-color-surface-hover: var(--cd-bg-subtle);
-  --cd-color-surface-disabled: #eef1ed;
+  --cd-color-surface-disabled: color-mix(in srgb, var(--cd-bg-subtle) 75%, var(--cd-border-default));
   --cd-color-text-primary: var(--cd-text-primary);
   --cd-color-text-secondary: var(--cd-text-secondary);
   --cd-color-text-muted: var(--cd-text-muted);
@@ -40,10 +40,10 @@
   --cd-color-brand-subtle: var(--cd-bg-subtle);
   --cd-color-danger-primary: var(--cd-status-danger-fg);
   --cd-color-danger-surface: var(--cd-status-danger-bg);
-  --cd-color-danger-border: #eb9b95;
+  --cd-color-danger-border: color-mix(in srgb, var(--cd-status-danger-fg) 40%, var(--cd-bg-surface));
   --cd-color-danger-text: var(--cd-status-danger-fg);
   --cd-color-warning-surface: var(--cd-status-warning-bg);
-  --cd-color-warning-border: #e5b869;
+  --cd-color-warning-border: color-mix(in srgb, var(--cd-status-warning-fg) 40%, var(--cd-bg-surface));
   --cd-color-warning-text: var(--cd-status-warning-fg);
   --cd-color-focus-ring: var(--cd-focus-ring);
   --cd-shadow-xl: 0 12px 32px rgb(21 40 29 / 16%);
