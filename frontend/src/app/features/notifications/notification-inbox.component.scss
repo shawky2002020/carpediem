@@ -2,13 +2,13 @@
 .inbox-heading, .notification-heading, .notification-meta { display: flex; align-items: center; justify-content: space-between; gap: var(--cd-space-3); }
 .inbox-heading { flex-wrap: wrap; margin-block-end: var(--cd-space-6); }
 .inbox-heading h1 { margin-block-end: 0; }
-.inbox-heading p { color: var(--cd-text-secondary); }
-.notification-list { list-style: none; padding: 0; display: grid; gap: var(--cd-space-3); }
-.notification-list li { border: 1px solid var(--cd-border-default); border-radius: var(--cd-radius-control); padding: var(--cd-space-4); }
+.inbox-heading p { margin: var(--cd-space-1) 0 0; color: var(--cd-text-secondary); font-weight: var(--cd-weight-medium); }
+.notification-list { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--cd-space-3); }
+.notification-list li { border: 1px solid var(--cd-border-default); border-radius: var(--cd-radius-panel); padding: var(--cd-space-5); background: var(--cd-bg-surface); }
 .notification-list li.unread { border-inline-start: .3rem solid var(--cd-action-primary); }
 .notification-heading h2 { font-size: var(--cd-font-size-lg); margin: 0; }
-.notification-list p { margin-block: var(--cd-space-3); }
-.notification-meta { flex-wrap: wrap; color: var(--cd-text-secondary); }
-.unread-label { font-weight: var(--cd-weight-bold); }
-.inbox-error { margin-block: var(--cd-space-4); color: var(--cd-status-danger-fg); }
+.notification-list p { margin-block: var(--cd-space-3); color: var(--cd-text-primary); }
+.notification-meta { flex-wrap: wrap; color: var(--cd-text-secondary); font-size: var(--cd-font-size-sm); }
+.unread-label { padding: 0.15rem 0.55rem; border-radius: var(--cd-radius-pill); background: var(--cd-bg-subtle); color: var(--cd-action-primary); font-size: var(--cd-font-size-xs); font-weight: var(--cd-weight-bold); }
+.inbox-error { margin-block: var(--cd-space-4); padding: var(--cd-space-3) var(--cd-space-4); border-radius: var(--cd-radius-control); background: var(--cd-status-danger-bg); border-inline-start: 4px solid var(--cd-status-danger-fg); color: var(--cd-status-danger-fg); display: flex; align-items: center; justify-content: space-between; gap: var(--cd-space-3); }
 button { min-block-size: var(--cd-touch-target-min); }

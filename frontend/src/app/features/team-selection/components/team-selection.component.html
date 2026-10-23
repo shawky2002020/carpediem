@@ -7,8 +7,7 @@
         <h2 class="event-title">{{ ctx.eventTitle }}</h2>
         <div class="event-meta">
           <p class="meta-item meta-text">
-            <strong>Schedule:</strong>
-            <time [attr.datetime]="ctx.startDateTime">{{ formatDate(ctx.startDateTime) }}</time>
+            <strong>Schedule:</strong>&nbsp;<time [attr.datetime]="ctx.startDateTime">{{ formatDate(ctx.startDateTime) }}</time>
             –
             <time [attr.datetime]="ctx.endDateTime">{{ formatDate(ctx.endDateTime) }}</time>
           </p>

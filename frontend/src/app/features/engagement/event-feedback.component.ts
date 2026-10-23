@@ -10,13 +10,17 @@ interface FeedbackContext { eventId: string; eventTitle: string; canRateEvent: b
 
 @Component({
   selector: 'app-event-feedback',
-  template: `<section class="cd-reading"><h1>Event feedback</h1>
-    @if (error()) { <p role="alert">{{ error() }}</p> }
-    @if (success()) { <p role="status">{{ success() }}</p> }
+  template: `<section class="feedback-page cd-reading">
+    <p class="eyebrow">Post-Event Evaluation</p>
+    <h1>Event feedback</h1>
+    @if (error()) { <p role="alert" class="alert-error">{{ error() }}</p> }
+    @if (success()) { <p role="status" class="alert-success">{{ success() }}</p> }
     @if (loading()) { <p role="status">Loading feedback…</p> }
     @if (details(); as info) {
-      <h2>{{ info.eventTitle }}</h2>
-      @if (!info.canRateEvent && !info.canRateLeaders) { <p>Ratings open after this Event is completed.</p> }
+      <div class="event-banner">
+        <h2>{{ info.eventTitle }}</h2>
+      </div>
+      @if (!info.canRateEvent && !info.canRateLeaders) { <p class="info-note">Ratings open after this Event is completed.</p> }
       @if (info.canRateEvent && !rated(null, info)) {
         <form (submit)="submit($event, null)"><h3>Rate this Event</h3>
           <label for="event-rating">Rating</label><select id="event-rating" name="rating" required>
@@ -39,12 +43,34 @@ interface FeedbackContext { eventId: string; eventTitle: string; canRateEvent: b
           }
         }
       }
-      @if (info.ownFeedback.length) { <h3>Your submitted ratings</h3><ul>@for (item of info.ownFeedback; track item.id) {
-        <li>{{ item.kind }}: {{ item.rating }} of 5 @if (item.comment) { — {{ item.comment }} }</li>
-      }</ul> }
+      @if (info.ownFeedback.length) {
+        <div class="submitted-section">
+          <h3>Your submitted ratings</h3>
+          <ul class="submitted-list">@for (item of info.ownFeedback; track item.id) {
+            <li><strong>{{ item.kind }}:</strong> {{ item.rating }} of 5 @if (item.comment) { — {{ item.comment }} }</li>
+          }</ul>
+        </div>
+      }
     }
   </section>`,
-  styles: ['form { display:grid; gap:var(--cd-space-2); border:1px solid var(--cd-border-default); padding:var(--cd-space-4); margin-block:var(--cd-space-4); } select,textarea { inline-size:100%; } textarea { min-block-size:5rem; } button { min-block-size:var(--cd-touch-target-min); }'],
+  styles: [`
+    .feedback-page { display: grid; gap: var(--cd-space-4); }
+    .eyebrow { margin: 0; font-size: var(--cd-font-size-xs); font-weight: var(--cd-weight-bold); text-transform: uppercase; letter-spacing: var(--cd-letter-spacing-caps); color: var(--cd-text-secondary); }
+    .event-banner { padding: var(--cd-space-4); background: var(--cd-bg-surface); border: 1px solid var(--cd-border-default); border-radius: var(--cd-radius-panel); }
+    .event-banner h2 { margin: 0; font-size: var(--cd-font-size-lg); }
+    .info-note { padding: var(--cd-space-4); background: var(--cd-status-info-bg); border-inline-start: 4px solid var(--cd-status-info-fg); color: var(--cd-status-info-fg); border-radius: var(--cd-radius-control); }
+    .alert-error { margin: 0; padding: var(--cd-space-3) var(--cd-space-4); border-radius: var(--cd-radius-control); background: var(--cd-status-danger-bg); border-inline-start: 4px solid var(--cd-status-danger-fg); color: var(--cd-status-danger-fg); }
+    .alert-success { margin: 0; padding: var(--cd-space-3) var(--cd-space-4); border-radius: var(--cd-radius-control); background: var(--cd-status-success-bg); border-inline-start: 4px solid var(--cd-status-success-fg); color: var(--cd-status-success-fg); }
+    form { display: grid; gap: var(--cd-space-3); border: 1px solid var(--cd-border-default); border-radius: var(--cd-radius-panel); background: var(--cd-bg-surface); padding: var(--cd-space-5); }
+    form h3 { margin: 0; }
+    label { font-weight: var(--cd-weight-semibold); }
+    select, textarea { inline-size: 100%; }
+    textarea { min-block-size: 5rem; }
+    button { min-block-size: var(--cd-touch-target-min); justify-self: start; }
+    .submitted-section { padding: var(--cd-space-4); border: 1px solid var(--cd-border-default); border-radius: var(--cd-radius-panel); background: var(--cd-bg-surface); }
+    .submitted-list { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--cd-space-2); }
+    .submitted-list li { padding: var(--cd-space-3); border-radius: var(--cd-radius-control); background: var(--cd-bg-canvas); border: 1px solid var(--cd-border-default); }
+  `],
 })
 export class EventFeedbackComponent implements OnInit {
   private readonly http = inject(HttpClient);

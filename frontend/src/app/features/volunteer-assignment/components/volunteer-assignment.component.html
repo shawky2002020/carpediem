@@ -7,8 +7,7 @@
         <h2 class="event-title">{{ assign.eventTitle }}</h2>
         <div class="event-meta">
           <p class="meta-item meta-text">
-            <strong>Schedule:</strong>
-            <time [attr.datetime]="assign.startDateTime">{{ formatDate(assign.startDateTime) }}</time>
+            <strong>Schedule:</strong>&nbsp;<time [attr.datetime]="assign.startDateTime">{{ formatDate(assign.startDateTime) }}</time>
             –
             <time [attr.datetime]="assign.endDateTime">{{ formatDate(assign.endDateTime) }}</time>
           </p>

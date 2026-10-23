@@ -30,4 +30,8 @@ legend { font-size: var(--cd-font-size-lg); font-weight: var(--cd-weight-bold); 
 .declined-history ul { display: grid; gap: var(--cd-space-3); margin: 0; padding: 0; list-style: none; }
 .declined-history li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--cd-space-3); align-items: center; }
 .declined-label { color: var(--cd-status-danger-fg); font-weight: var(--cd-weight-semibold); }
-@media (max-width: 35rem) { .actions { flex-direction: column; } .actions button { inline-size: 100%; } }
+@media (max-width: 35rem) {
+  .message, .current-appointment, .declined-history { padding: var(--cd-space-4); }
+  .actions { flex-direction: column; }
+  .actions button { inline-size: 100%; }
+}

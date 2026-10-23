@@ -1,22 +1,28 @@
 <a class="skip-link" href="#main-content">Skip to content</a>
 <header class="site-header">
   <div class="cd-container header-inner">
-    <a class="brand" routerLink="/" aria-label="Carpediem home">Carpediem</a>
+    <a class="brand" routerLink="/" aria-label="Carpediem home">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>Carpediem</span>
+    </a>
     <nav aria-label="Primary navigation">
-      @if (session.isAdmin() || session.isChiefLeader()) { <a routerLink="/dashboard">Dashboard</a> }
-      @if (session.isAdmin()) { <a routerLink="/draft-events">Draft Events</a> }
-      @if (session.isAdmin()) { <a routerLink="/admin/accounts">Accounts</a> }
-      @if (session.isAdmin()) { <a routerLink="/admin/feedback">Feedback</a><a routerLink="/admin/incidents">Incidents</a> }
-      @if (session.isChiefLeader()) { <a routerLink="/my-appointments">My appointments</a> }
-      @if (session.isLeader()) { <a routerLink="/profile">My profile</a> }
+      @if (session.isAdmin() || session.isChiefLeader()) { <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a> }
+      @if (session.isAdmin()) { <a routerLink="/draft-events" routerLinkActive="active">Draft Events</a> }
+      @if (session.isAdmin()) { <a routerLink="/admin/accounts" routerLinkActive="active">Accounts</a> }
+      @if (session.isAdmin()) { <a routerLink="/admin/feedback" routerLinkActive="active">Feedback</a><a routerLink="/admin/incidents" routerLinkActive="active">Incidents</a> }
+      @if (session.isChiefLeader()) { <a routerLink="/my-appointments" routerLinkActive="active">My appointments</a> }
+      @if (session.isLeader()) { <a routerLink="/profile" routerLinkActive="active">My profile</a> }
       @if (session.isAuthenticated()) {
-        <a routerLink="/notifications" class="notification-link" [attr.aria-label]="notifications.unreadCount() ? 'Notifications, ' + notifications.unreadCount() + ' unread' : 'Notifications'">
+        <a routerLink="/notifications" routerLinkActive="active" class="notification-link" [attr.aria-label]="notifications.unreadCount() ? 'Notifications, ' + notifications.unreadCount() + ' unread' : 'Notifications'">
           Notifications @if (notifications.unreadCount() > 0) { <span class="notification-badge" aria-hidden="true">{{ notifications.unreadCount() }}</span> }
         </a>
       }
-      @if (!session.isAuthenticated()) { <a routerLink="/sign-in">Sign in</a> }
-      @if (!session.isAuthenticated()) { <a routerLink="/register">Register</a> }
-      @if (session.isAuthenticated()) { <span class="identity">{{ session.session()?.userName }}</span> }
+      @if (!session.isAuthenticated()) { <a routerLink="/sign-in" routerLinkActive="active">Sign in</a> }
+      @if (!session.isAuthenticated()) { <a routerLink="/register" routerLinkActive="active" class="nav-cta">Register</a> }
+      @if (session.isAuthenticated()) {
+        <span class="identity">{{ session.session()?.userName }}</span>
+        <button type="button" class="sign-out-button" (click)="signOut()">Sign out</button>
+      }
     </nav>
   </div>
 </header>
