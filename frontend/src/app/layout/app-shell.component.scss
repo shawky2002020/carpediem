@@ -55,12 +55,19 @@
 }
 
 .brand-mark {
-  inline-size: 1.5rem;
-  block-size: 1.5rem;
+  inline-size: 2rem;
+  block-size: 2rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--cd-action-primary);
+  flex-shrink: 0;
+
+  .brand-logo {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+  }
 
   .brand-compass {
     inline-size: 100%;

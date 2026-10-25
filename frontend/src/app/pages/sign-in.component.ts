@@ -9,8 +9,13 @@ import { SessionService } from '../core/auth/session.service';
   imports: [ReactiveFormsModule, RouterLink],
   template: `
     <section class="auth-card cd-reading">
-      <p class="eyebrow">Account access</p>
-      <h1>Sign in</h1>
+      <div class="auth-brand-header">
+        <img src="/logo.svg" alt="Carpediem logo" width="56" height="56" class="auth-logo" />
+        <div class="auth-title-group">
+          <p class="eyebrow">Account access</p>
+          <h1>Sign in</h1>
+        </div>
+      </div>
       <p class="subtitle">Sign in with your Carpediem username and password to access your operational workspace.</p>
       <form [formGroup]="form" (ngSubmit)="submit()">
         <div class="field">
@@ -35,6 +40,22 @@ import { SessionService } from '../core/auth/session.service';
       border: 1px solid var(--cd-border-default);
       border-radius: var(--cd-radius-panel);
       box-shadow: var(--cd-shadow-raised);
+    }
+    .auth-brand-header {
+      display: flex;
+      align-items: center;
+      gap: var(--cd-space-4);
+      margin-block-end: var(--cd-space-3);
+    }
+    .auth-logo {
+      inline-size: 3.5rem;
+      block-size: 3.5rem;
+      border-radius: 50%;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(5, 45, 29, 0.15);
+    }
+    .auth-title-group h1 {
+      margin: 0;
     }
     .eyebrow {
       margin: 0 0 var(--cd-space-1);

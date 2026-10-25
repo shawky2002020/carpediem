@@ -1,14 +1,34 @@
-# Carpediem
+<p align="center">
+  <img src="docs/logo.png" alt="Carpediem Logo" width="140" height="140" />
+</p>
 
-> **Enterprise-grade volunteer and event staffing platform built with Angular 22, ASP.NET Core 10, Entity Framework Core 10, and SQL Server 2025.**
+<h1 align="center">Carpediem</h1>
 
-[![Build & Test](https://img.shields.io/badge/.NET%20Core-10.0-512bd4.svg?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
-[![Frontend](https://img.shields.io/badge/Angular-22.0-dd0031.svg?logo=angular&logoColor=white)](https://angular.dev/)
-[![Database](https://img.shields.io/badge/SQL%20Server-2025-cc292b.svg?logo=microsoftsqlserver&logoColor=white)](https://www.microsoft.com/sql-server)
-[![Product Demo](https://img.shields.io/badge/Demo%20Video-Google%20Drive-4285F4.svg?logo=googledrive&logoColor=white)](https://drive.google.com/file/d/14rN_o3YPcDIsb1KE0zNQxaUlDLOZueM8/view?usp=sharing)
-[![Architecture](https://img.shields.io/badge/Architecture-Modular%20Monolith-blue.svg)](#7-architecture)
-[![Accessibility](https://img.shields.io/badge/WCAG-2.2%20AA%20Compliant-brightgreen.svg)](#phase-2--uiux-refinements)
-[![Tests](https://img.shields.io/badge/Tests-789%20Passing-success.svg)](#9-testing)
+<p align="center">
+  <strong>Enterprise-grade volunteer and event staffing platform built with Angular 22, ASP.NET Core 10, Entity Framework Core 10, and SQL Server 2025.</strong>
+</p>
+
+<p align="center">
+  <a href="https://dotnet.microsoft.com/"><img src="https://img.shields.io/badge/.NET%20Core-10.0-512bd4.svg?logo=dotnet&logoColor=white" alt="Build & Test" /></a>
+  <a href="https://angular.dev/"><img src="https://img.shields.io/badge/Angular-22.0-dd0031.svg?logo=angular&logoColor=white" alt="Frontend" /></a>
+  <a href="https://www.microsoft.com/sql-server"><img src="https://img.shields.io/badge/SQL%20Server-2025-cc292b.svg?logo=microsoftsqlserver&logoColor=white" alt="Database" /></a>
+  <a href="https://drive.google.com/file/d/14rN_o3YPcDIsb1KE0zNQxaUlDLOZueM8/view?usp=sharing"><img src="https://img.shields.io/badge/Demo%20Video-Google%20Drive-4285F4.svg?logo=googledrive&logoColor=white" alt="Product Demo" /></a>
+  <a href="#6-architecture"><img src="https://img.shields.io/badge/Architecture-Modular%20Monolith-blue.svg" alt="Architecture" /></a>
+  <a href="#5-end-to-end--accessibility-audits"><img src="https://img.shields.io/badge/WCAG-2.2%20AA%20Compliant-brightgreen.svg" alt="Accessibility" /></a>
+  <a href="#8-testing--quality-verification"><img src="https://img.shields.io/badge/Tests-789%20Passing-success.svg" alt="Tests" /></a>
+</p>
+
+---
+
+## 🎬 Product Demo Video
+
+Experience the complete Carpediem end-to-end workflow—from event creation and Chief Leader delegation to team formation, live attendance roll call, and post-event incident governance—in this **fast-paced, Full HD 1080p product walk-through** with realistic human cursor dynamics and radiant click/touch interaction feedback:
+
+[![Carpediem Product Demonstration](docs/demo/demo-thumbnail.png)](https://drive.google.com/file/d/14rN_o3YPcDIsb1KE0zNQxaUlDLOZueM8/view?usp=sharing)
+
+> 📹 **[Watch the Full HD Video Demo on Google Drive](https://drive.google.com/file/d/14rN_o3YPcDIsb1KE0zNQxaUlDLOZueM8/view?usp=sharing)**  
+> *Stream live in 1080p @ 30fps CFR (H.264 High / AAC) with smooth cubic-bezier cursor glides, clear radiant emerald click beacons, native iPhone 16 Pro mobile touch framing, and ambient score.*  
+> Production notes and UX walkthrough analysis: [`docs/demo/production-notes.md`](docs/demo/production-notes.md) and [`docs/demo/walkthrough-analysis.md`](docs/demo/walkthrough-analysis.md).
 
 ---
 
@@ -85,19 +105,7 @@ stateDiagram-v2
 
 ---
 
-## 4. Product Demo Video
-
-Experience the complete Carpediem end-to-end workflow—from event creation and Chief Leader delegation to team formation, live attendance roll call, and post-event incident governance—in this **fast-paced, Full HD 1080p product walk-through** with realistic human cursor dynamics and radiant click/touch interaction feedback:
-
-[![Carpediem Product Demonstration](docs/demo/demo-thumbnail.png)](https://drive.google.com/file/d/14rN_o3YPcDIsb1KE0zNQxaUlDLOZueM8/view?usp=sharing)
-
-> 📹 **[Watch the Full HD Video Demo on Google Drive](https://drive.google.com/file/d/14rN_o3YPcDIsb1KE0zNQxaUlDLOZueM8/view?usp=sharing)**  
-> *Stream live in 1080p @ 30fps CFR (H.264 High / AAC) with smooth cubic-bezier cursor glides, clear radiant emerald click beacons, native iPhone 16 Pro mobile touch framing, and ambient score.*  
-> Local file: [`docs/demo/carpediem-product-demo.mp4`](docs/demo/carpediem-product-demo.mp4). Production notes and scene scripts: [`docs/demo/production-notes.md`](docs/demo/production-notes.md) and [`docs/demo/storyboard.md`](docs/demo/storyboard.md).
-
----
-
-## 5. Features by Role
+## 4. Features by Role
 
 ### 👑 Administrator Capabilities
 - **Operational Dashboard**: High-level KPI summary cards displaying Draft, Published, Active, and Completed events with one-click contextual action links.
@@ -121,7 +129,7 @@ Experience the complete Carpediem end-to-end workflow—from event creation and 
 
 ---
 
-## 6. Technology Stack
+## 5. Technology Stack
 
 ### Frontend Architecture
 - **Framework**: [Angular 22](https://angular.dev/) (Standalone Components, Signals, `linkedSignal`, `resource`)
@@ -144,7 +152,7 @@ Experience the complete Carpediem end-to-end workflow—from event creation and 
 
 ---
 
-## 7. Architecture
+## 6. Architecture
 
 Carpediem is engineered as a **Modular Monolith**, maximizing development velocity and simplicity while enforcing clean architectural boundaries between distinct business domains:
 
@@ -195,7 +203,7 @@ graph TD
 
 ---
 
-## 8. Running Locally
+## 7. Running Locally
 
 Follow these instructions to run the complete Carpediem platform locally in development mode.
 
@@ -269,7 +277,7 @@ All development accounts are provisioned with the password: `Carpediem#2026SeedA
 
 ---
 
-## 9. Testing & Quality Verification
+## 8. Testing & Quality Verification
 
 Carpediem adheres to rigorous testing standards across unit, domain, integration, and browser end-to-end tiers.
 
@@ -322,7 +330,7 @@ npx playwright test
 
 ---
 
-## 10. Project Structure
+## 9. Project Structure
 
 ```text
 Carpediem/
@@ -362,7 +370,7 @@ Carpediem/
 
 ---
 
-## 11. Status and Roadmap
+## 10. Status and Roadmap
 
 ### Implemented Milestone: V1 Core Release (Slices 1–22)
 - [x] Foundation & Account Registration with Administrator Activation
@@ -387,7 +395,7 @@ Carpediem/
 
 ---
 
-## 12. Additional Documentation
+## 11. Additional Documentation
 
 For deeper technical dives, review the following repository references:
 - **[UI Audit & Remediations](docs/quality/ui-audit.md)**: Comprehensive breakdown of identified UI/UX issues, root cause analyses, and verified solutions.

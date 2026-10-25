@@ -33,7 +33,10 @@ import { SessionService } from '../core/auth/session.service';
       <!-- Editorial Civic Manifesto Hero -->
       <section class="manifesto-hero">
         <div class="manifesto-content">
-          <p class="manifesto-eyebrow">Civic Dispatch &amp; Community Stewardship</p>
+          <div class="manifesto-eyebrow-wrap">
+            <img src="/logo.svg" alt="" width="28" height="28" class="manifesto-logo" />
+            <p class="manifesto-eyebrow">Civic Dispatch &amp; Community Stewardship</p>
+          </div>
           <h1 class="manifesto-title">Empower community action through precision event coordination.</h1>
           <p class="manifesto-lead">
             Carpediem coordinates real-world civic initiatives, environmental cleanups, emergency responses, and public gatherings.
@@ -161,6 +164,20 @@ import { SessionService } from '../core/auth/session.service';
       border-radius: var(--cd-radius-panel);
       box-shadow: var(--cd-shadow-md);
       border-top: 4px solid var(--cd-action-primary);
+    }
+
+    .manifesto-eyebrow-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--cd-space-2);
+      margin-block-end: var(--cd-space-1);
+    }
+
+    .manifesto-logo {
+      inline-size: 1.75rem;
+      block-size: 1.75rem;
+      border-radius: 50%;
+      flex-shrink: 0;
     }
 
     .manifesto-eyebrow {
