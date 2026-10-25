@@ -20,11 +20,12 @@ The demo video showcases the end-to-end event staffing lifecycle across all thre
 | **Resolution** | `1920 × 1080` (Full HD, 16:9) | Crisp rendering of data tables, text, and badges |
 | **Frame Rate** | `30.00 fps` (Constant frame rate) | Standard for UI walk-through and motion clarity |
 | **Chroma Subsampling** | `yuv420p` | Universal web browser compatibility |
-| **Compression Profile** | CRF 18, Preset Fast | Visually lossless artifact-free text rendering |
+| **Compression Profile** | CRF 17, Preset Fast | Visually lossless artifact-free text rendering (~3.08 MB) |
 | **FastStart Optimization** | `-movflags +faststart` | Instant progressive web streaming playback |
-| **Target Duration** | ~145 seconds (~2m 25s) | Concise, engaging review pacing |
-| **Audio / Narration** | Visual lower-third narration cards | Silent-ready, accessible in noisy/muted environments |
-| **Captions** | High-contrast WCAG 2.2 AA compliant | Built directly into DOM capture pipeline |
+| **Target Duration** | ~20 seconds | Snappy, high-energy executive product tour with continuous flow |
+| **Interaction Dynamics** | Human-glide cursor with easing | Cubic-bezier motion, hover states, and active depressions |
+| **Clicks & Touches** | Radiant emerald click beacons & touch disks | High-contrast visual feedback on every interaction |
+| **Audio Design** | Synthesized ambient electronic groove | 44.1kHz AAC stereo with smooth fade-in/fade-out |
 
 ---
 
@@ -95,6 +96,7 @@ node frontend/scripts/produce-demo-video.mjs
 
 ### 3. Output Artifacts
 - Video: `docs/demo/carpediem-product-demo.mp4`
+- Google Drive Stream: [Carpediem Demo on Google Drive](https://drive.google.com/file/d/14rN_o3YPcDIsb1KE0zNQxaUlDLOZueM8/view?usp=sharing)
 - Thumbnail: `docs/demo/demo-thumbnail.png`
 - Intermediate frame cache: Automatically cleared upon completion (`docs/demo/temp-frames/`)
 

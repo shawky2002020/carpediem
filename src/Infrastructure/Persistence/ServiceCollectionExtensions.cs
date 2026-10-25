@@ -82,7 +82,7 @@ public static class ServiceCollectionExtensions
         {
             options.Cookie.Name = "Carpediem.Session";
             options.Cookie.HttpOnly = true;
-            options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.Always;
+            options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.SameAsRequest;
             options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
             options.SlidingExpiration = true;
             options.Events.OnRedirectToLogin = context =>

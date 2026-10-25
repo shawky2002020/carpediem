@@ -5,6 +5,7 @@
 [![Build & Test](https://img.shields.io/badge/.NET%20Core-10.0-512bd4.svg?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
 [![Frontend](https://img.shields.io/badge/Angular-22.0-dd0031.svg?logo=angular&logoColor=white)](https://angular.dev/)
 [![Database](https://img.shields.io/badge/SQL%20Server-2025-cc292b.svg?logo=microsoftsqlserver&logoColor=white)](https://www.microsoft.com/sql-server)
+[![Product Demo](https://img.shields.io/badge/Demo%20Video-Google%20Drive-4285F4.svg?logo=googledrive&logoColor=white)](https://drive.google.com/file/d/14rN_o3YPcDIsb1KE0zNQxaUlDLOZueM8/view?usp=sharing)
 [![Architecture](https://img.shields.io/badge/Architecture-Modular%20Monolith-blue.svg)](#7-architecture)
 [![Accessibility](https://img.shields.io/badge/WCAG-2.2%20AA%20Compliant-brightgreen.svg)](#phase-2--uiux-refinements)
 [![Tests](https://img.shields.io/badge/Tests-789%20Passing-success.svg)](#9-testing)
@@ -86,13 +87,13 @@ stateDiagram-v2
 
 ## 4. Product Demo Video
 
-Experience the complete Carpediem end-to-end workflow—from event creation and Chief Leader delegation to team formation, live attendance roll call, and post-event incident governance—in this 2-minute Full HD walk-through:
+Experience the complete Carpediem end-to-end workflow—from event creation and Chief Leader delegation to team formation, live attendance roll call, and post-event incident governance—in this **fast-paced, Full HD 1080p product walk-through** with realistic human cursor dynamics and radiant click/touch interaction feedback:
 
-[![Carpediem Product Demonstration](docs/demo/demo-thumbnail.png)](docs/demo/carpediem-product-demo.mp4)
+[![Carpediem Product Demonstration](docs/demo/demo-thumbnail.png)](https://drive.google.com/file/d/14rN_o3YPcDIsb1KE0zNQxaUlDLOZueM8/view?usp=sharing)
 
-> 📹 **[Watch the Full HD Video Demo (`docs/demo/carpediem-product-demo.mp4`)](docs/demo/carpediem-product-demo.mp4)**  
-> *Recorded in 1080p @ 30fps with synchronized captions and zero artificial mockups.*  
-> Comprehensive production notes and scene scripts are available in [`docs/demo/production-notes.md`](docs/demo/production-notes.md) and [`docs/demo/storyboard.md`](docs/demo/storyboard.md).
+> 📹 **[Watch the Full HD Video Demo on Google Drive](https://drive.google.com/file/d/14rN_o3YPcDIsb1KE0zNQxaUlDLOZueM8/view?usp=sharing)**  
+> *Stream live in 1080p @ 30fps CFR (H.264 High / AAC) with smooth cubic-bezier cursor glides, clear radiant emerald click beacons, native iPhone 16 Pro mobile touch framing, and ambient score.*  
+> Local file: [`docs/demo/carpediem-product-demo.mp4`](docs/demo/carpediem-product-demo.mp4). Production notes and scene scripts: [`docs/demo/production-notes.md`](docs/demo/production-notes.md) and [`docs/demo/storyboard.md`](docs/demo/storyboard.md).
 
 ---
 

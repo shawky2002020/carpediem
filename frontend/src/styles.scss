@@ -147,3 +147,22 @@ button:disabled { cursor: not-allowed; opacity: var(--cd-opacity-disabled); }
   font-weight: var(--cd-weight-semibold);
   color: var(--cd-text-primary);
 }
+
+.skip-link {
+  position: absolute;
+  top: -9999px;
+  left: -9999px;
+  background: var(--cd-action-primary);
+  color: var(--cd-text-inverse, #f8f9f5);
+  padding: 0.5rem 1rem;
+  z-index: 999999;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 0 0 6px 6px;
+
+  &:focus,
+  &:focus-visible {
+    top: 0;
+    left: 1rem;
+  }
+}

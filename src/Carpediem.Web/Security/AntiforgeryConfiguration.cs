@@ -11,7 +11,7 @@ public static class AntiforgeryConfiguration
             options.HeaderName = HeaderName;
             options.Cookie.Name = "Carpediem.Antiforgery";
             options.Cookie.HttpOnly = true;
-            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
             options.Cookie.SameSite = SameSiteMode.Lax;
         });
         return services;
