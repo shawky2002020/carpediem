@@ -1,9 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, HostListener, Input, OnInit, Output, inject, signal } from '@angular/core';
+import { Component, DestroyRef, EventEmitter, HostListener, Input, OnInit, Output, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { EventCompletionService } from '../../data/event-completion.service';
 import { CompleteEventResponse } from '../../data/event-completion.model';
+import { EventCancellationService } from '../../../event-cancellation/event-cancellation.service';
+import { toApiProblem } from '../../../../core/http/api.interceptor';
 
 @Component({
   selector: 'app-complete-event-dialog',
@@ -16,6 +19,8 @@ export class CompleteEventDialogComponent implements OnInit {
   private readonly completionService = inject(EventCompletionService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly eventContext = inject(EventCancellationService);
 
   @Input() eventId = '';
   @Input() eventTitle = '';
@@ -29,6 +34,7 @@ export class CompleteEventDialogComponent implements OnInit {
   readonly errorMessage = signal<string | null>(null);
   readonly successMessage = signal<string | null>(null);
   readonly liveStatus = signal<string>('');
+  readonly loadingContext = signal(false);
 
   ngOnInit(): void {
     if (!this.eventId) {
@@ -40,6 +46,22 @@ export class CompleteEventDialogComponent implements OnInit {
       if (!this.currentVersion && state.version) this.currentVersion = state.version;
       if (!this.endDateTime && state.end) this.endDateTime = state.end;
     }
+    if (this.eventId && !this.currentVersion) this.loadContext();
+  }
+
+  loadContext(): void {
+    this.errorMessage.set(null);
+    this.loadingContext.set(true);
+    this.eventContext.getContext(this.eventId).pipe(
+      takeUntilDestroyed(this.destroyRef),
+      finalize(() => this.loadingContext.set(false)),
+    ).subscribe({
+      next: event => {
+        this.eventTitle = event.title;
+        this.currentVersion = event.version;
+      },
+      error: failure => this.errorMessage.set(toApiProblem(failure, 'Event details could not be loaded.').title),
+    });
   }
 
   @HostListener('keydown.escape')
@@ -52,11 +74,12 @@ export class CompleteEventDialogComponent implements OnInit {
   cancel(): void {
     this.cancelled.emit();
     if (this.route.snapshot.paramMap.get('eventId')) {
-      this.router.navigate(['/']);
+      this.router.navigate(['/dashboard']);
     }
   }
 
   submitCompletion(): void {
+    if (this.isSubmitting() || this.successMessage()) return;
     this.errorMessage.set(null);
     this.successMessage.set(null);
 
@@ -84,10 +107,12 @@ export class CompleteEventDialogComponent implements OnInit {
           this.liveStatus.set('Success: Event marked as completed.');
           this.completed.emit(response);
           if (this.route.snapshot.paramMap.get('eventId')) {
-            setTimeout(() => this.router.navigate(['/']), 1000);
+            const redirect = setTimeout(() => this.router.navigate(['/dashboard']), 1000);
+            this.destroyRef.onDestroy(() => clearTimeout(redirect));
           }
         },
         error: (err) => {
+          if (err.status === 412) this.currentVersion = '';
           const detail = err?.error?.detail ?? err?.error?.title ?? 'Failed to complete event. Please try again.';
           this.errorMessage.set(detail);
           this.liveStatus.set(`Error: ${detail}`);

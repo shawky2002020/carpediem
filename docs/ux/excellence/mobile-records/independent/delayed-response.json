@@ -1,0 +1,40 @@
+{
+  "directEntry": "←\nNotifications\n\nEvent availability\n\nNight hike orientation\nDec\n12\n\nSaturday / 2026\nSaturday, 12 Dec 2026\n\n23:30\n–\nto\n13 Dec 2026, 01:00\nCairo time\n\nNorth orchard gate\n\nCan you take part?\nAvailable\n✓\nAvailable\n−\nNot available\n\nUpdated 26 Nov 2026, 08:45 Cairo",
+  "normalBox": {
+    "x": 199,
+    "y": 398.890625,
+    "width": 175,
+    "height": 48
+  },
+  "pending": "←\nNotifications\n\nEvent availability\n\nNight hike orientation\nUpdating your availability…\nDec\n12\n\nSaturday / 2026\nSaturday, 12 Dec 2026\n\n23:30\n–\nto\n13 Dec 2026, 01:00\nCairo time\n\nNorth orchard gate\n\nCan you take part?\nSaving…\n✓\nAvailable\n−\nNot available\n\nUpdated 26 Nov 2026, 08:45 Cairo",
+  "pendingDisabled": true,
+  "requestsDuringRepeat": 1,
+  "pendingBox": {
+    "x": 199,
+    "y": 398.890625,
+    "width": 175,
+    "height": 48
+  },
+  "error": "Availability could not be updated.\n\nAn unexpected error occurred while saving your response.\n\nCheck the saved response before choosing again.\n\nRefresh status",
+  "focusAfterError": "<button _ngcontent-ng-c3110921363=\"\" type=\"button\" aria-label=\"Mark Not Available\" class=\"response-choice btn-not-available\" aria-pressed=\"false\" aria-disabled=\"true\"><span _ngcont",
+  "requestsBeforeRefresh": 1,
+  "focusAfterRefresh": "Can you take part?",
+  "successBox": {
+    "x": 199,
+    "y": 398.890625,
+    "width": 175,
+    "height": 48
+  },
+  "afterReload": "←\nNotifications\n\nEvent availability\n\nNight hike orientation\nDec\n12\n\nSaturday / 2026\nSaturday, 12 Dec 2026\n\n23:30\n–\nto\n13 Dec 2026, 01:00\nCairo time\n\nNorth orchard gate\n\nCan you take part?\nNot Available\n✓\nAvailable\n−\nNot available\n\nUpdated 26 Nov 2026, 08:45 Cairo",
+  "writes": [
+    [
+      "NotAvailable",
+      "\"AQ==\""
+    ],
+    [
+      "NotAvailable",
+      "\"AQ==\""
+    ]
+  ],
+  "issues": []
+}

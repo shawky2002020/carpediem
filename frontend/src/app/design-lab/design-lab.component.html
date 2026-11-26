@@ -1,0 +1,32 @@
+<header><h1>Component field guide</h1><p>Interactive specimens for Carpediem design reviews.</p></header>
+<section id="actions"><h2>Actions</h2><div class="group">
+  <button class="cd-btn cd-btn--primary" (click)="intent.set('selection'); confirmation.showModal()">Confirm selection</button>
+  <button class="cd-btn cd-btn--secondary" (click)="working.set(!working())" [attr.aria-pressed]="working()">Toggle loading</button>
+  <a class="cd-btn cd-btn--subtle" href="#context">Event details</a>
+  <button class="cd-btn cd-btn--danger" (click)="intent.set('removal'); confirmation.showModal()">Remove assignment</button>
+  <button class="cd-btn cd-btn--primary" disabled [attr.aria-busy]="working()">{{ working() ? 'Saving…' : 'Unavailable' }}</button>
+</div></section>
+<section id="context"><h2>Event context</h2><app-operational-spine title="Winter camp orientation" venue="Mango Tree Campsite" startDateTime="2026-12-12T07:00:00Z" endDateTime="2026-12-12T13:00:00Z" /></section>
+<section id="signals"><h2>Status and feedback</h2><div class="group">@for (tone of tones; track tone) {
+  <span [class]="'cd-badge cd-badge--'+tone">{{ ['Draft','Published','Attended','Pending','Cancelled'][$index] }}</span>
+}</div>
+<p class="cd-alert cd-alert--success" role="status">{{ outcome() || 'Attendance saved.' }}</p>
+<div class="cd-callout cd-callout--warning"><h3>Staffing window closed</h3><p>Changes to the team are unavailable.</p></div>
+<div class="cd-alert cd-alert--error"><p>Attendance could not be saved.</p></div>
+@if (working()) { <p class="cd-loading-state" role="status">Loading events…</p> } @else { <p class="cd-empty-state">No pending appointments.</p> }
+</section>
+<section id="controls"><h2>Filters and selections</h2>
+<div class="field-grid"><label>Find a Leader<input type="search" placeholder="Search by name"></label><label>Attendance<select><option>All outcomes</option><option>Attended</option></select></label></div>
+<fieldset><legend>Team</legend><label><input type="checkbox"> Include available Leaders</label></fieldset>
+<fieldset><legend>Outcome</legend><label><input type="radio" name="outcome" checked> Attended</label><label><input type="radio" name="outcome"> No-show</label></fieldset>
+<details><summary>Assignment history</summary><p>Assigned on 12 December.</p></details></section>
+<section id="account"><h2>Account access</h2>
+<details><summary>Preview account controls</summary><app-account-access #access>
+<label for="specimen-password">Password</label>
+<input id="specimen-password" [type]="access.passwordVisible() ? 'text' : 'password'" autocomplete="off">
+<button class="cd-btn cd-btn--subtle" (click)="access.togglePassword()">{{ access.passwordVisible() ? 'Hide password' : 'Show password' }}</button>
+</app-account-access></details></section>
+<section id="wayfinding"><h2>Wayfinding</h2><div class="group"><span><app-navigation-icon name="dashboard"/> Dashboard</span>
+<span><app-navigation-icon name="drafts"/> Draft events</span> <span><app-navigation-icon name="inbox"/> Notifications</span></div></section>
+<section id="form"><h2>Draft editor</h2><app-draft-event-form (saveDraft)="outcome.set('Draft validated.')" (cancel)="outcome.set('Editing cancelled.')" /></section>
+<dialog #confirmation aria-labelledby="confirm-title"><form method="dialog"><h2 id="confirm-title">{{ intent() === 'removal' ? 'Remove this assignment?' : 'Confirm this selection?' }}</h2><div class="group"><button autofocus class="cd-btn cd-btn--secondary">Go back</button><button class="cd-btn cd-btn--primary" [class.cd-btn--danger]="intent() === 'removal'" (click)="outcome.set(intent() === 'removal' ? 'Assignment removed.' : 'Selection confirmed.')">{{ intent() === 'removal' ? 'Remove assignment' : 'Confirm' }}</button></div></form></dialog>

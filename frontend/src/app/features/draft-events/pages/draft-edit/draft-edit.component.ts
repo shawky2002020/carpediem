@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { ApiProblem, toApiProblem } from '../../../../core/http/api.interceptor';
@@ -20,6 +20,7 @@ export class DraftEditComponent implements OnInit {
   private readonly id = this.route.snapshot.paramMap.get('id')!;
 
   @ViewChild(DraftEventFormComponent) form?: DraftEventFormComponent;
+  @ViewChild('publishDialog') publishDialog?: ElementRef<HTMLDialogElement>;
   readonly draft = signal<DraftEvent | null>(null);
   readonly loading = signal(true);
   readonly saving = signal(false);
@@ -27,28 +28,34 @@ export class DraftEditComponent implements OnInit {
   readonly problem = signal<ApiProblem | null>(null);
   readonly chiefLeaderAppointment = signal<ChiefLeaderAppointment | null>(null);
   readonly appointmentLoading = signal(true);
+  readonly appointmentProblem = signal(false);
   readonly publishing = signal(false);
-  readonly confirmPublish = signal(false);
+  readonly publishProblem = signal<ApiProblem | null>(null);
   readonly publishedNotice = signal<string | null>(null);
 
   openPublishDialog(): void {
-    this.confirmPublish.set(true);
+    this.publishProblem.set(null);
+    this.publishDialog?.nativeElement.showModal?.();
   }
 
   cancelPublish(): void {
-    this.confirmPublish.set(false);
+    if (!this.publishing()) this.closePublishDialog();
+  }
+
+  private closePublishDialog(): void {
+    this.publishDialog?.nativeElement.close?.();
   }
 
   publish(): void {
     const current = this.draft();
     if (!current || this.publishing() || this.saving()) return;
     this.publishing.set(true);
-    this.problem.set(null);
+    this.publishProblem.set(null);
     this.drafts.publishDraftEvent(current.id, current.version)
       .pipe(finalize(() => this.publishing.set(false)))
       .subscribe({
         next: published => {
-          this.confirmPublish.set(false);
+          this.closePublishDialog();
           this.draft.set({
             ...current,
             status: 'Published',
@@ -57,8 +64,8 @@ export class DraftEditComponent implements OnInit {
           this.publishedNotice.set('Event published successfully. Volunteers can now submit availability.');
         },
         error: error => {
-          this.confirmPublish.set(false);
-          this.problem.set(toApiProblem(error, 'The Event could not be published.'));
+          this.closePublishDialog();
+          this.publishProblem.set(toApiProblem(error, 'The Event could not be published.'));
         },
       });
   }
@@ -81,13 +88,17 @@ export class DraftEditComponent implements OnInit {
     });
   }
 
-  private loadAppointment(eventId: string): void {
+  loadAppointment(eventId: string): void {
     this.appointmentLoading.set(true);
+    this.appointmentProblem.set(false);
     this.appointments.getContext(eventId)
       .pipe(finalize(() => this.appointmentLoading.set(false)))
       .subscribe({
         next: value => this.chiefLeaderAppointment.set(value.currentAppointment),
-        error: () => this.chiefLeaderAppointment.set(null),
+        error: () => {
+          this.chiefLeaderAppointment.set(null);
+          this.appointmentProblem.set(true);
+        },
       });
   }
 
@@ -111,7 +122,7 @@ export class DraftEditComponent implements OnInit {
   }
 
   cancel(): void {
-    if (this.canDeactivate()) void this.router.navigate(['/draft-events']);
+    void this.router.navigate(['/draft-events']);
   }
 
   canDeactivate(): boolean {

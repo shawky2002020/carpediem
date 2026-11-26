@@ -179,6 +179,16 @@ components:
         eventStatus:
           type: string
           description: Current Event status (Draft, Published, Completed, Cancelled).
+        itinerary:
+          type: object
+          nullable: true
+          description: Current schedule and venue for a published event. Null in other lifecycle states.
+          required: [title, location, startDateTime, endDateTime]
+          properties:
+            title: { type: string }
+            location: { type: string }
+            startDateTime: { type: string, format: date-time }
+            endDateTime: { type: string, format: date-time }
         isChiefLeaderOnEvent:
           type: boolean
           description: True if the current user is the Active Chief Leader on this Event.

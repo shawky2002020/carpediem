@@ -1,0 +1,47 @@
+[
+  {
+    "name": "mobile-navigation",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "cls": 0.0658,
+    "lcpMs": 156,
+    "frameSamples": 125,
+    "medianFrameMs": 16.7,
+    "p95FrameMs": 16.8,
+    "intervalsOver50Ms": 0,
+    "longTasksMs": [],
+    "errors": []
+  },
+  {
+    "name": "draft-validation",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "cls": 0,
+    "lcpMs": 172,
+    "frameSamples": 68,
+    "medianFrameMs": 16.7,
+    "p95FrameMs": 16.8,
+    "intervalsOver50Ms": 0,
+    "longTasksMs": [],
+    "errors": []
+  },
+  {
+    "name": "attendance-finalization",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "cls": 0,
+    "lcpMs": 132,
+    "frameSamples": 89,
+    "medianFrameMs": 16.7,
+    "p95FrameMs": 16.8,
+    "intervalsOver50Ms": 0,
+    "longTasksMs": [],
+    "errors": []
+  }
+]

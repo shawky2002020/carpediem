@@ -2,6 +2,9 @@
 
 :root {
   color-scheme: light;
+  --cd-radius-action: 1.5rem;
+  --cd-brand-vermilion: #ac452b;
+  --cd-field-fill: #f0f2ea;
 
   // Brand Palette: Deep Forest & Warm Earth
   --cd-brand-forest-900: #0d261e;
@@ -10,6 +13,11 @@
   --cd-brand-forest-600: #266b57;
   --cd-brand-forest-100: #{p.$surface-subtle};
   --cd-brand-forest-50:  #f4f8f5;
+  --cd-brand-rail: #{p.$evergreen};
+  --cd-brand-mango: #{p.$mango};
+  --cd-brand-ink: #{p.$ink};
+  --cd-brand-on-rail: #f7f3e5;
+  --cd-brand-rail-muted: #b7c9bd;
 
   // Warm Paper Canvas, Surfaces & Ink
   --cd-bg-canvas: #{p.$canvas};
@@ -22,11 +30,11 @@
   --cd-surface-pressed: color-mix(in srgb, var(--cd-bg-subtle) 80%, var(--cd-border-strong));
   --cd-surface-active: var(--cd-bg-subtle);
 
-  --cd-text-primary: #{p.$evergreen};
+  --cd-text-primary: #{p.$ink};
   --cd-text-secondary: #{p.$ink-secondary};
   --cd-text-muted: #{p.$ink-secondary};
   --cd-text-inverse: #{p.$white};
-  --cd-ink-primary: #{p.$evergreen};
+  --cd-ink-primary: #{p.$ink};
   --cd-ink-secondary: #4a5b51;
   --cd-ink-muted: #{p.$ink-secondary};
 
@@ -50,13 +58,13 @@
   --cd-focus-ring: #{p.$forest};
 
   // Tactical Status & Signal Palette
-  --cd-signal-success: #15803d;
+  --cd-signal-success: #256340;
   --cd-signal-success-bg: #f0fdf4;
-  --cd-signal-warning: #b45309;
+  --cd-signal-warning: #875019;
   --cd-signal-warning-bg: #fffbeb;
-  --cd-signal-danger: #b91c1c;
+  --cd-signal-danger: #a0382c;
   --cd-signal-danger-bg: #fef2f2;
-  --cd-signal-info: #0369a1;
+  --cd-signal-info: #295c72;
   --cd-signal-info-bg: #f0f9ff;
 
   --cd-status-success-fg: var(--cd-signal-success);
@@ -74,6 +82,7 @@
   --cd-font-size-xs: 0.75rem;
   --cd-font-size-sm: 0.875rem;
   --cd-font-size-md: 1rem;
+  --cd-font-size-base: var(--cd-font-size-md);
   --cd-font-size-lg: 1.25rem;
   --cd-font-size-xl: 1.5rem;
   --cd-font-size-2xl: 2rem;
@@ -135,6 +144,7 @@
   --cd-icon-size-sm: 1.25rem;
   --cd-icon-size-md: 1.5rem;
   --cd-content-max: 76rem;
+  --cd-mobile-nav-height: 4rem;
   --cd-reading-max: 65ch;
   --cd-page-gutter: 1rem;
 }

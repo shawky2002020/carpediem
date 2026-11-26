@@ -1,0 +1,55 @@
+@if (session.loaded() && session.isAuthenticated()) {
+  <section class="workspace" aria-labelledby="workspace-title">
+    <header class="workspace-heading">
+      <h1 id="workspace-title">Your workspace</h1>
+      <p>Signed in as <strong>{{ session.session()?.userName }}</strong></p>
+    </header>
+    <div class="workspace-body">
+      <a class="workspace-feature" [routerLink]="featured().url">
+        <div class="feature-art" aria-hidden="true"></div>
+        <div class="feature-content">
+          <strong>{{ featured().label }}</strong>
+          <span>{{ featured().description }}</span>
+          <span class="feature-open">{{ featured().action }}</span>
+        </div>
+      </a>
+      <ul class="workspace-list">
+        @for (item of destinations(); track item.url) {
+          <li><a [routerLink]="item.url">
+            <strong>{{ item.label }}</strong><span>{{ item.description }}</span>
+            <span class="arrow" aria-hidden="true">›</span>
+          </a></li>
+        }
+      </ul>
+    </div>
+  </section>
+} @else {
+  <section class="welcome" aria-labelledby="welcome-title">
+    <div class="welcome-copy">
+      <h1 id="welcome-title">Your camp workspace.</h1>
+      <p>Plan Carpediem events, find out who’s available, and get everyone ready for the day.</p>
+      @if (session.loaded()) {
+        <div class="welcome-actions">
+          <a routerLink="/sign-in" class="cd-btn cd-btn--primary">Sign in</a>
+          <a routerLink="/register" class="entry-link">Register as a Leader</a>
+        </div>
+      } @else {
+        <p role="status" class="session-loading">Checking your session…</p>
+      }
+    </div>
+    <div class="welcome-brand">
+      <img src="/brand/orchard-print.webp" srcset="/brand/orchard-print-small.webp 480w, /brand/orchard-print.webp 880w"
+        sizes="(max-width: 47.99rem) 95vw, (min-width: 82rem) 35rem, 44vw"
+        alt="" class="orchard" width="880" height="1100" fetchpriority="high" />
+      <img src="/brand/camp-wordmark.webp" alt="Carpe Diem" class="signature" width="448" height="239" />
+    </div>
+  </section>
+  <section class="welcome-roles" aria-labelledby="welcome-roles-title">
+    <h2 id="welcome-roles-title">Who does what</h2>
+    <dl>
+      <div><dt>Administrators</dt><dd>Prepare events, appoint Chief Leaders, and manage access.</dd></div>
+      <div><dt>Chief Leaders</dt><dd>Build the team and record attendance on the day.</dd></div>
+      <div><dt>Leaders</dt><dd>Share availability, see assignments, and review your event history.</dd></div>
+    </dl>
+  </section>
+}

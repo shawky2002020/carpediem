@@ -19,6 +19,7 @@ export class EventCancellationComponent implements OnInit {
   readonly loading = signal(true);
   readonly saving = signal(false);
   readonly error = signal<string | null>(null);
+  readonly reloadNeeded = signal(false);
 
   ngOnInit(): void { this.load(); }
 
@@ -26,15 +27,22 @@ export class EventCancellationComponent implements OnInit {
     const eventId = this.route.snapshot.paramMap.get('eventId');
     if (!eventId) return;
     this.loading.set(true);
+    this.error.set(null);
     this.service.getContext(eventId).pipe(finalize(() => this.loading.set(false))).subscribe({
-      next: context => this.context.set(context),
-      error: error => this.error.set(toApiProblem(error, 'Could not load Event.').title),
+      next: context => {
+        this.context.set(context);
+        this.reloadNeeded.set(false);
+      },
+      error: failure => {
+        this.reloadNeeded.set(true);
+        this.error.set(toApiProblem(failure, 'Could not load Event.').title);
+      },
     });
   }
 
   submit(): void {
     const context = this.context();
-    if (!context || this.saving()) return;
+    if (!context || this.saving() || this.loading() || this.reloadNeeded()) return;
     if (this.reason().trim().length < 10 || this.reason().trim().length > 500) {
       this.error.set('Enter a reason between 10 and 500 characters.');
       return;
@@ -45,7 +53,10 @@ export class EventCancellationComponent implements OnInit {
       .pipe(finalize(() => this.saving.set(false)))
       .subscribe({
         next: () => this.router.navigate(['/dashboard']),
-        error: error => this.error.set(toApiProblem(error, 'Event could not be cancelled.').title),
+        error: failure => {
+          this.reloadNeeded.set(failure.status === 412);
+          this.error.set(toApiProblem(failure, 'Event could not be cancelled.').title);
+        },
       });
   }
 }

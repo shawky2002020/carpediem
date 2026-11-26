@@ -1,9 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
-import { vi, describe, beforeEach, it, expect } from 'vitest';
+import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { RescheduleDialogComponent } from './reschedule-dialog.component';
 import { EventRescheduleService } from '../../data/event-reschedule.service';
+import { EventCancellationService } from '../../../event-cancellation/event-cancellation.service';
 import { RescheduleEventResponse } from '../../data/event-reschedule.model';
 
 describe('RescheduleDialogComponent', () => {
@@ -29,6 +30,8 @@ describe('RescheduleDialogComponent', () => {
   };
 
   beforeEach(async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-10-02T12:00:00Z'));
     serviceMock = {
       rescheduleEvent: vi.fn(),
     };
@@ -38,6 +41,7 @@ describe('RescheduleDialogComponent', () => {
       providers: [
         provideRouter([]),
         { provide: EventRescheduleService, useValue: serviceMock },
+        { provide: EventCancellationService, useValue: { getContext: vi.fn() } },
       ],
     }).compileComponents();
 
@@ -48,6 +52,8 @@ describe('RescheduleDialogComponent', () => {
     component.currentVersion = 'old-version==';
     fixture.detectChanges();
   });
+
+  afterEach(() => vi.useRealTimers());
 
   it('should create and initialize form', () => {
     expect(component).toBeTruthy();

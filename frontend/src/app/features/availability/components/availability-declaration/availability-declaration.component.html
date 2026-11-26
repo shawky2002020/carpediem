@@ -1,18 +1,38 @@
-<div class="availability-container">
+<article class="availability-container" aria-labelledby="availability-title">
+  <a class="back-link" routerLink="/notifications"><span aria-hidden="true">←</span> Notifications</a>
   <header class="availability-header">
-    <p class="eyebrow">Volunteer Staffing</p>
-    <h1 id="availability-title">Event Availability</h1>
-    <p class="subtitle">Declare or update your schedule availability for this upcoming event.</p>
+    @if (eventTitle(); as title) {
+      <p class="section-label">Event availability</p>
+      <h1 id="availability-title" class="availability-event-title">{{ title }}</h1>
+    } @else { <h1 id="availability-title">Event availability</h1> }
   </header>
 
-  <div class="live-region" role="status" aria-live="polite" aria-atomic="true">
+  <div class="live-region" [class.cd-visually-hidden]="!loading() || !!availability()" role="status" aria-atomic="true">
     @if (loading()) { Loading availability details… }
     @else if (submitting()) { Updating your availability… }
     @else if (statusMessage()) { {{ statusMessage() }} }
   </div>
 
+  @if (availability(); as item) {
+    @if (schedule(); as when) {
+      <div class="itinerary">
+        <div class="date-leaf" aria-hidden="true"><span>{{ when.month }}</span><b>{{ when.day }}</b></div>
+        <div class="schedule-lines">
+          <p class="day"><span aria-hidden="true">{{ when.weekday }} <span class="year">/ {{ when.year }}</span></span>
+            <span class="cd-visually-hidden">{{ when.weekday }}, {{ when.fullDate }}</span></p>
+          <p class="time-range"><time [attr.datetime]="item.itinerary?.startDateTime">{{ when.start }}</time>
+            <span aria-hidden="true">–</span><span class="cd-visually-hidden">to</span>
+            <time [attr.datetime]="item.itinerary?.endDateTime">{{ when.end }}</time> <span class="zone">Cairo time</span></p>
+          @if (item.itinerary?.location; as venue) {
+            <p class="venue"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 8c0 4.1-6 9-6 9S4 12.1 4 8a6 6 0 1 1 12 0Z"/><circle cx="10" cy="8" r="2"/></svg>{{ venue }}</p>
+          }
+        </div>
+      </div>
+    } @else if (item.isWindowOpen && !loading()) { <p class="missing">Schedule and venue unavailable.</p> }
+  }
+
   @if (problem(); as error) {
-    <section class="alert-box error" role="alert">
+    <section class="cd-callout cd-callout--danger alert-box error" role="alert">
       <h2>{{ error.title }}</h2>
       @if (error.code === 'chief_leader_conflict') {
         <p>You are the Chief Leader for this event and cannot declare volunteer availability.</p>
@@ -25,62 +45,49 @@
       } @else {
         <p>{{ error.detail || 'An unexpected error occurred while saving your response.' }}</p>
       }
-      <button type="button" class="btn-retry" (click)="load()">Refresh status</button>
+      @if (error.status === 0 || error.status >= 500) {
+        <p>{{ availability() ? 'Check the saved response before choosing again.' : 'Try again to load this event.' }}</p>
+      }
+      <button type="button" class="cd-btn cd-btn--secondary btn-retry" (click)="load(false, true)">Refresh status</button>
     </section>
   }
 
-  @if (!loading() && availability(); as item) {
+
+  @if (availability(); as item) {
     @if (isChiefLeader()) {
-      <section class="alert-box notice" role="note" aria-labelledby="chief-conflict-heading">
+      <section class="cd-callout cd-callout--info alert-box notice" role="note" aria-labelledby="chief-conflict-heading">
         <h2 id="chief-conflict-heading">Chief Leader Assignment</h2>
         <p>You are the appointed Chief Leader for this event. Chief Leaders cannot declare volunteer availability on events they lead.</p>
       </section>
     }
 
     @if (isClosed() && !isChiefLeader()) {
-      <section class="alert-box warning" role="note" aria-labelledby="window-closed-heading">
+      <section class="cd-callout cd-callout--warning alert-box warning" role="note" aria-labelledby="window-closed-heading">
         <h2 id="window-closed-heading">Window Closed</h2>
         <p>The availability window for this event is closed. Schedule declarations can no longer be modified.</p>
       </section>
     }
 
-    <section class="status-card" aria-labelledby="current-status-heading">
-      <div class="status-header">
-        <h2 id="current-status-heading">Your Schedule Response</h2>
-        <span class="status-badge" [class]="statusBadgeClass()" role="status">
-          {{ currentStatusLabel() }}
-        </span>
+
+    <section class="response" aria-labelledby="current-status-heading">
+      <div class="response-heading">
+        <h2 #responseHeading tabindex="-1" id="current-status-heading">Can you take part?</h2>
+        <span class="status-badge" [class]="statusBadgeClass()">{{ submitting() ? 'Saving…' : (isClosed() && !item.response ? 'No response' : currentStatusLabel()) }}</span>
       </div>
-
-      @if (item.declaredAt) {
-        <p class="declared-timestamp">
-          Last updated: <time [attr.datetime]="item.declaredAt">{{ formatDate(item.declaredAt) }}</time>
-        </p>
-      } @else {
-        <p class="declared-timestamp">
-          You have not submitted a response yet. Please indicate your availability below.
-        </p>
-      }
-
-      <div class="action-buttons">
-        <button
-          type="button"
-          class="btn-available"
-          [class.active]="item.response === 'Available'"
-          [disabled]="!canDeclare()"
-          (click)="declare('Available')">
-          Mark Available
-        </button>
-
-        <button
-          type="button"
-          class="btn-not-available"
-          [class.active]="item.response === 'NotAvailable'"
-          [disabled]="!canDeclare()"
-          (click)="declare('NotAvailable')">
-          Mark Not Available
-        </button>
+      <div class="action-buttons" role="group" aria-labelledby="current-status-heading">
+        <button type="button" class="response-choice btn-available" aria-label="Mark Available"
+          [class.active]="item.response === 'Available'" [attr.aria-pressed]="item.response === 'Available'"
+          [disabled]="!item.isWindowOpen || item.isChiefLeaderOnEvent || loading()"
+          [attr.aria-disabled]="!canDeclare()" (click)="declare('Available')"><span class="symbol" aria-hidden="true">✓</span> Available</button>
+        <button type="button" class="response-choice btn-not-available" aria-label="Mark Not Available"
+          [class.active]="item.response === 'NotAvailable'" [attr.aria-pressed]="item.response === 'NotAvailable'"
+          [disabled]="!item.isWindowOpen || item.isChiefLeaderOnEvent || loading()"
+          [attr.aria-disabled]="!canDeclare()" (click)="declare('NotAvailable')"><span class="symbol" aria-hidden="true">−</span> Not available</button>
       </div>
+      <p class="response-note">
+        @if (item.declaredAt) { Updated <time [attr.datetime]="item.declaredAt">{{ formatDate(item.declaredAt) }}</time> }
+        @else if (item.isWindowOpen && !isChiefLeader()) { You can change your answer until the event starts. }
+      </p>
     </section>
   }
-</div>
+</article>

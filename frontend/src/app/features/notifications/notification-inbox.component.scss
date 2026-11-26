@@ -1,7 +1,5 @@
-.inbox {
-  max-inline-size: 48rem;
-  margin-inline: auto;
-}
+@use '../field-pages' as field;
+.inbox { max-inline-size: 49rem; margin-inline: auto; }
 
 .inbox-heading {
   display: flex;
@@ -9,60 +7,29 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: var(--cd-space-3);
-  margin-block-end: var(--cd-space-5);
+  margin-block-end: var(--cd-space-8);
 
-  h1 {
-    margin-block-end: 0;
-    font-family: var(--cd-font-display);
-  }
+  h1 { margin-block-end: 0; font-size: clamp(2rem, 4vw, 3rem); }
 }
 
-.unread-summary {
-  margin: var(--cd-space-1) 0 0;
-  color: var(--cd-text-secondary);
-  font-weight: var(--cd-weight-medium);
-  font-size: var(--cd-font-size-sm);
-}
-
-.grouped-notifications {
-  display: flex;
-  flex-direction: column;
-  gap: var(--cd-space-6);
-}
-
-.group-heading {
-  font-size: var(--cd-font-size-sm);
-  font-weight: var(--cd-weight-bold);
-  text-transform: uppercase;
-  letter-spacing: var(--cd-letter-spacing-caps);
-  color: var(--cd-text-secondary);
-  margin-block-end: var(--cd-space-3);
-  border-block-end: 1px solid var(--cd-border-default);
-  padding-block-end: var(--cd-space-1);
-}
+.unread-summary { margin: var(--cd-space-1) 0 0; color: var(--cd-text-secondary); }
+.grouped-notifications { display: grid; gap: var(--cd-space-6); }
+.group-heading { font-size: var(--cd-font-size-lg); margin-block-end: var(--cd-space-2); }
 
 .notification-list {
   list-style: none;
   padding: 0;
   margin: 0;
-  display: grid;
-  gap: var(--cd-space-3);
+  border-block-start: 1px solid var(--cd-border-default);
 }
 
 .notification-card {
-  border: 1px solid var(--cd-border-default);
-  border-radius: var(--cd-radius-panel);
-  padding: var(--cd-space-4);
-  background: var(--cd-bg-surface);
-  box-shadow: var(--cd-shadow-sm);
-  display: flex;
-  flex-direction: column;
-  gap: var(--cd-space-2);
-  transition: transform var(--cd-duration-fast) var(--cd-ease-standard);
+  border-block-end: 1px solid var(--cd-border-default);
+  padding: var(--cd-space-4) var(--cd-space-3);
+  display: grid;
+  gap: var(--cd-space-1);
 
-  &.unread {
-    border-inline-start: 4px solid var(--cd-action-primary);
-  }
+  &.unread { background: var(--cd-bg-subtle); }
 }
 
 .notification-heading {
@@ -72,57 +39,43 @@
   flex-wrap: wrap;
   gap: var(--cd-space-2);
 
-  h3 {
-    font-size: var(--cd-font-size-md);
-    margin: 0;
-  }
+  h3 { margin: 0; font-size: var(--cd-font-size-md); }
 }
 
-.notification-detail {
-  margin: 0;
-  color: var(--cd-text-primary);
-  font-size: var(--cd-font-size-sm);
-  line-height: var(--cd-line-normal);
-}
-
+.notification-detail { margin: 0; }
 .notification-meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: var(--cd-space-3);
-  color: var(--cd-text-secondary);
-  font-size: var(--cd-font-size-xs);
-  margin-block-start: var(--cd-space-1);
-  padding-block-start: var(--cd-space-2);
-  border-block-start: 1px solid var(--cd-border-default);
-}
-
-.notification-actions {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
   gap: var(--cd-space-2);
+  color: var(--cd-text-secondary);
+  font-size: var(--cd-font-size-sm);
+  margin-block-start: var(--cd-space-1);
 }
-
-.unread-label {
-  width: fit-content;
-}
+.notification-actions { display: flex; align-items: center; flex-wrap: wrap; gap: var(--cd-space-2); }
 
 .inbox-error {
   margin-block: var(--cd-space-4);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: var(--cd-space-3);
 }
-
-.loading-state,
-.empty-state {
-  padding: var(--cd-space-6);
-  text-align: center;
+.loading-state, .empty-state {
+  padding-block: var(--cd-space-5);
+  border-block-start: 1px solid var(--cd-border-default);
   color: var(--cd-text-secondary);
-  background: var(--cd-bg-surface);
-  border: 1px solid var(--cd-border-default);
-  border-radius: var(--cd-radius-panel);
+}
+
+.inbox { max-inline-size:61rem; }
+.inbox-heading h1 { @include field.title; }
+.notification-list { border-block-start:0; }
+.notification-card { padding:clamp(1rem,2vw,1.5rem); border-inline-start:3px solid transparent; }
+.notification-card.unread { border-inline-start-color:#66825c; background:#e6eddf; }
+.notification-heading h3 { font-size:1.3rem; }
+@media(min-width:58rem) {
+ .notification-group { display:grid; grid-template-columns:minmax(8rem,1fr) minmax(0,4fr); align-items:start; border-block-start:1px solid var(--cd-border-default); }
+ .group-heading { padding-block-start:1rem; }
 }

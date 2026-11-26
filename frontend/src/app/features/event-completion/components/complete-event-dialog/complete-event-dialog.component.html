@@ -1,28 +1,15 @@
-<div class="cd-completion-backdrop" role="presentation">
-  <div
-    class="cd-completion-dialog"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="completion-dialog-title"
-    aria-describedby="completion-dialog-desc"
-    tabindex="-1"
-  >
+<section class="event-action-page" aria-labelledby="completion-dialog-title">
     <div class="cd-completion-header">
-      <h2 id="completion-dialog-title" class="cd-completion-title">Complete Event</h2>
+      <h1 id="completion-dialog-title">Complete Event</h1>
       <p class="cd-completion-subtitle" *ngIf="eventTitle">
-        Administrative closeout for: <strong>{{ eventTitle }}</strong>
+        <strong>{{ eventTitle }}</strong>
       </p>
     </div>
 
-    <div class="cd-notice cd-notice--info" role="note" id="completion-dialog-desc">
-      <p>
-        <strong>Administrative Closeout Notice:</strong> Completing this event transitions its lifecycle status to <em>Completed</em>.
-      </p>
-      <p class="cd-notice-detail">
-        Active team assignments will remain active. Volunteer attendance recording operates independently and can be recorded subsequently.
-      </p>
-    </div>
-
+    @if (loadingContext()) { <p role="status">Loading event details…</p> }
+    @if (errorMessage() && !currentVersion && !loadingContext() && eventId) {
+      <button type="button" (click)="loadContext()">Reload event details</button>
+    }
     <div
       *ngIf="errorMessage()"
       class="cd-alert cd-alert--error"
@@ -41,32 +28,36 @@
       {{ successMessage() }}
     </div>
 
-    <div class="cd-completion-summary" *ngIf="endDateTime">
-      <span class="cd-summary-label">Scheduled End Time:</span>
-      <span class="cd-summary-value">{{ endDateTime }}</span>
-    </div>
+    <div class="closeout-record">
+      <div class="cd-completion-summary" *ngIf="endDateTime">
+        <span class="cd-summary-label">Scheduled End Time:</span>
+        <span class="cd-summary-value">{{ endDateTime }}</span>
+      </div>
 
-    <div class="cd-completion-actions">
-      <button
-        type="button"
-        class="cd-button cd-button--secondary"
-        (click)="cancel()"
-        [disabled]="isSubmitting()"
-      >
-        Cancel
-      </button>
-      <button
-        type="button"
-        class="cd-button cd-button--primary"
-        (click)="submitCompletion()"
-        [disabled]="isSubmitting()"
-      >
-        {{ isSubmitting() ? 'Completing Event...' : 'Confirm Closeout' }}
-      </button>
+      <div role="note" id="completion-dialog-desc" class="closeout-terms">
+        <p>This sets the event status to <strong>Completed</strong>.</p>
+        <p>Active team assignments will remain active. Attendance can still be recorded after closeout.</p>
+      </div>
+      <div class="cd-completion-actions">
+        <button
+          type="button"
+          class="cd-btn cd-btn--secondary cd-button cd-button--secondary"
+          (click)="cancel()"
+          [disabled]="isSubmitting()"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          class="cd-btn cd-btn--primary cd-button cd-button--primary"
+          (click)="submitCompletion()"
+          [disabled]="isSubmitting() || !currentVersion || !!successMessage()"
+        >
+          {{ isSubmitting() ? 'Completing Event...' : 'Confirm Closeout' }}
+        </button>
+      </div>
     </div>
-
-    <div role="status" aria-live="polite" class="cd-sr-only">
+    <div role="status" aria-live="polite" class="cd-visually-hidden cd-sr-only">
       {{ liveStatus() }}
     </div>
-  </div>
-</div>
+</section>

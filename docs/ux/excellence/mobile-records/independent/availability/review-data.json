@@ -1,0 +1,63 @@
+[
+  {
+    "name": "availability",
+    "width": 390,
+    "overflow": 0,
+    "issues": [],
+    "axe": [],
+    "actions": [
+      {
+        "label": "Mark Available",
+        "y": 399,
+        "h": 48,
+        "w": 175
+      },
+      {
+        "label": "Mark Not Available",
+        "y": 399,
+        "h": 48,
+        "w": 175
+      }
+    ]
+  },
+  {
+    "name": "availability",
+    "width": 1440,
+    "overflow": 0,
+    "issues": [],
+    "actions": [
+      {
+        "label": "Mark Available",
+        "y": 467,
+        "h": 48,
+        "w": 348
+      },
+      {
+        "label": "Mark Not Available",
+        "y": 467,
+        "h": 48,
+        "w": 348
+      }
+    ]
+  },
+  {
+    "name": "availability",
+    "width": 320,
+    "overflow": 0,
+    "issues": [],
+    "actions": [
+      {
+        "label": "Mark Available",
+        "y": 1633,
+        "h": 96,
+        "w": 256
+      },
+      {
+        "label": "Mark Not Available",
+        "y": 1745,
+        "h": 130,
+        "w": 256
+      }
+    ]
+  }
+]

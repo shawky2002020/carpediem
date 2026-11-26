@@ -73,6 +73,17 @@ In case of any conflict, authority follows this strict precedence hierarchy:
 - **Skills**: `playwright-best-practices`, `accessibility` (where relevant), `verification-before-completion`
 - **Rule**: Verify against mobile viewports first (minimum 44x44px touch targets) and WCAG 2.2 AA accessibility requirements.
 
+### UI Transformation Skill Register
+
+These project-scoped Codex skills are installed in `.agents/skills/` and recorded in `skills-lock.json`. Load the skills relevant to each phase.
+
+| Focus | Skills |
+| --- | --- |
+| Creative direction, visual critique, and refinement | `impeccable`, `ui-ux-pro-max` |
+| Interaction design and CSS motion | `emil-design-eng`, `animate`, `animation-performance`, `review-animations` |
+| Touch ergonomics and difficult content | `mobile-native`, `break-ui` |
+| Playwright browser inspection and repeatable visual evidence | `playwright-snapshots`, `webapp-testing` |
+
 ### 9. Systematic Bug Debugging
 - **Skills**: `systematic-debugging`
 - **Rule**: Identify the exact root cause from logs/tracebacks before introducing code changes. Do not mask runtime errors with superficial fallback logic.

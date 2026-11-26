@@ -1,0 +1,10 @@
+@use 'records';
+.incidents-list { border-block-start:2px solid var(--cd-text-primary); }
+.incident-card { display:grid; align-items:start; gap:.7rem; padding-block:1.25rem; border-block-end:1px solid var(--cd-border-default); }
+.incident-desc { margin:0; max-inline-size:55ch; }
+.review-form, .review-summary { margin:0; padding:1rem; background:#e6eddf; }
+@container(min-width:44rem) {
+  .incident-card { grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:.45rem 2rem; align-content:start; }
+  .card-top,.incident-desc,.meta-sub { grid-column:1; }
+  .review-form,.review-summary { grid-column:2; grid-row:1/5; }
+}

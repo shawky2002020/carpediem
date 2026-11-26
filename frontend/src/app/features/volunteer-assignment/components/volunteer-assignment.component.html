@@ -1,19 +1,28 @@
-<div class="assignment-container">
+<div class="assignment-container cd-reading">
   <header class="assignment-header">
-    <p class="eyebrow">Volunteer Operations</p>
-    <h1 id="assignment-title">My Event Assignment</h1>
+    <h1 #assignmentTitle id="assignment-title" tabindex="-1">My Event Assignment</h1>
     @if (assignment(); as assign) {
       <div class="event-summary-card">
         <h2 class="event-title">{{ assign.eventTitle }}</h2>
         <div class="event-meta">
-          <p class="meta-item meta-text">
-            <strong>Schedule:</strong>&nbsp;<time [attr.datetime]="assign.startDateTime">{{ formatDate(assign.startDateTime) }}</time>
-            –
-            <time [attr.datetime]="assign.endDateTime">{{ formatDate(assign.endDateTime) }}</time>
-          </p>
-          <p class="meta-item meta-text">
-            <strong>Location:</strong> {{ assign.location }}
-          </p>
+          <p class="venue">{{ assign.location }}</p>
+          @let sameDay = day(assign.startDateTime) === day(assign.endDateTime);
+          <div class="schedule-caption">
+            @if (sameDay) { <time [attr.datetime]="assign.startDateTime">{{ day(assign.startDateTime) }}</time> }
+            <span>Cairo time</span>
+          </div>
+          <div class="itinerary">
+            <div class="journey-stop">
+              <span class="stop-time">{{ clock(assign.startDateTime) }}</span>
+              <span>Starts</span>
+              @if (!sameDay) { <time [attr.datetime]="assign.startDateTime">{{ day(assign.startDateTime) }}</time> }
+            </div>
+            <div class="journey-stop">
+              <span class="stop-time">{{ clock(assign.endDateTime) }}</span>
+              <span>Ends</span>
+              @if (!sameDay) { <time [attr.datetime]="assign.endDateTime">{{ day(assign.endDateTime) }}</time> }
+            </div>
+          </div>
         </div>
       </div>
     }
@@ -25,8 +34,8 @@
     @else if (statusMessage()) { {{ statusMessage() }} }
   </div>
 
-  @if (problem(); as error) {
-    <section class="alert-box error" role="alert">
+  @if (!modalOpen() && problem(); as error) {
+    <section class="cd-callout cd-callout--danger alert-box error" role="alert">
       <h2>{{ error.title }}</h2>
       @if (error.code === 'unauthorized_assignment_owner') {
         <p>You are not authorized to cancel this assignment.</p>
@@ -41,35 +50,39 @@
       } @else {
         <p>{{ error.detail || 'An unexpected error occurred while processing your request.' }}</p>
       }
-      <button type="button" class="btn-retry" (click)="load()">Refresh details</button>
+      <button type="button" class="cd-btn cd-btn--secondary btn-retry" (click)="load()">Refresh details</button>
     </section>
   }
 
   @if (!loading() && assignment(); as assign) {
-    <!-- Status Card -->
     <section class="status-section" aria-labelledby="status-heading">
       <div class="status-card">
         <div class="status-header">
-          <h2 id="status-heading">Placement Status</h2>
+          <h2 id="status-heading">Assignment status</h2>
           @if (isActive()) {
-            <span class="status-badge status-badge-active" role="status">Active</span>
+            <span class="cd-badge cd-badge--success status-badge status-badge-active" role="status">
+              <span class="cd-badge__dot"></span>
+              Active
+            </span>
           } @else if (isCancelled()) {
-            <span class="status-badge status-badge-cancelled" role="status">Cancelled</span>
+            <span class="cd-badge cd-badge--danger status-badge status-badge-cancelled" role="status">
+              Cancelled
+            </span>
           }
         </div>
 
         <div class="status-details">
           <p class="meta-text">
-            <strong>Assigned On:</strong> {{ formatDate(assign.assignedAt) }}
+            <strong>Assigned on</strong> <time class="cd-tabular">{{ formatDate(assign.assignedAt) }}</time>
           </p>
 
           @if (isCancelled()) {
             <div class="cancellation-info">
               <p class="meta-text">
-                <strong>Cancelled On:</strong> {{ formatDate(assign.cancelledAt) }}
+                <strong>Cancelled on</strong> <time class="cd-tabular">{{ formatDate(assign.cancelledAt) }}</time>
               </p>
               <div class="reason-box">
-                <span class="reason-label"><strong>Cancellation Reason:</strong></span>
+                <span class="reason-label"><strong>Cancellation reason</strong></span>
                 <p class="reason-text">{{ assign.cancellationReason }}</p>
               </div>
             </div>
@@ -78,7 +91,7 @@
 
         @if (isActive()) {
           @if (!assign.isWindowOpen) {
-            <div class="alert-box warning window-closed-note" role="note">
+            <div class="cd-callout cd-callout--warning alert-box warning window-closed-note" role="note">
               <h3>Cancellation Window Closed</h3>
               <p>This event has already started. Self-cancellation is no longer available.</p>
             </div>
@@ -86,7 +99,7 @@
             <div class="actions-row">
               <button
                 type="button"
-                class="btn-action btn-cancel-trigger"
+                class="cd-btn cd-btn--danger btn-action btn-cancel-trigger"
                 (click)="openCancelModal()"
                 [disabled]="submitting()">
                 Cancel Assignment
@@ -97,23 +110,18 @@
       </div>
     </section>
 
-    <!-- Controlled Cancellation Modal -->
-    @if (modalOpen()) {
-      <div class="modal-backdrop" (click)="closeCancelModal()">
-        <div
-          class="modal-dialog"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="cancel-modal-title"
-          (click)="$event.stopPropagation()">
+    <dialog #cancelDialog class="modal-dialog" aria-labelledby="cancel-modal-title"
+      (cancel)="$event.preventDefault(); closeCancelModal()">
           <header class="modal-header">
             <h2 id="cancel-modal-title">Cancel Event Assignment</h2>
           </header>
 
           <div class="modal-body">
-            <p class="modal-notice">
-              Cancelling your assignment immediately removes you from the active team roster and alerts the Chief Leader and Operations Administrators so they can draft a replacement.
-            </p>
+            <div class="cd-callout cd-callout--danger modal-notice-callout">
+              <p class="modal-notice">
+                You’ll be removed from the active team. The Chief Leader and administrators will be notified.
+              </p>
+            </div>
 
             <div class="form-group">
               <label for="cancellation-reason">
@@ -126,8 +134,9 @@
                 (input)="onJustificationChange($event)"
                 maxlength="500"
                 rows="4"
-                placeholder="Explain why you are unable to fulfill this assignment (e.g. academic exam conflict, health emergency)..."
+                autofocus
                 aria-required="true"
+                [attr.aria-invalid]="validationError() ? 'true' : null"
                 [attr.aria-describedby]="validationError() ? 'reason-error char-count' : 'char-count'"></textarea>
 
               <div class="textarea-footer">
@@ -136,24 +145,27 @@
                 } @else {
                   <span></span>
                 }
-                <span id="char-count" class="char-count" aria-live="off">
+                <span id="char-count" class="char-count cd-tabular" aria-live="off">
                   {{ charCount() }} / 500 characters
                 </span>
               </div>
             </div>
           </div>
 
+          @if (problem(); as error) {
+            <p class="cd-callout cd-callout--danger" role="alert">{{ error.detail || error.title }}</p>
+          }
           <footer class="modal-footer">
             <button
               type="button"
-              class="btn-modal btn-dismiss"
+              class="cd-btn cd-btn--secondary btn-modal btn-dismiss"
               [disabled]="submitting()"
               (click)="closeCancelModal()">
               Keep Assignment
             </button>
             <button
               type="button"
-              class="btn-modal btn-confirm-cancel"
+              class="cd-btn cd-btn--danger btn-modal btn-confirm-cancel"
               [disabled]="submitting() || charCount() === 0"
               (click)="confirmCancellation()">
               @if (submitting()) {
@@ -163,8 +175,6 @@
               }
             </button>
           </footer>
-        </div>
-      </div>
-    }
+    </dialog>
   }
 </div>

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { vi, describe, beforeEach, it, expect } from 'vitest';
 import { ReplacementAssignmentComponent } from './replacement-assignment.component';
@@ -65,6 +65,7 @@ describe('ReplacementAssignmentComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ReplacementAssignmentComponent],
       providers: [
+        provideRouter([]),
         { provide: ReplacementAssignmentService, useValue: serviceMock },
         {
           provide: ActivatedRoute,
@@ -101,6 +102,15 @@ describe('ReplacementAssignmentComponent', () => {
   it('selects cancelled slot when clicked', () => {
     component.selectSlot('55555555-5555-5555-5555-555555555555');
     expect(component.selectedReplacedAssignmentId()).toBe('55555555-5555-5555-5555-555555555555');
+  });
+
+  it('supports assigning without linking a cancellation', () => {
+    const unlinked = Array.from<HTMLInputElement>(fixture.nativeElement.querySelectorAll('input[type="radio"]')).at(-1);
+    unlinked?.click();
+    fixture.detectChanges();
+
+    expect(unlinked?.checked).toBe(true);
+    expect(component.selectedReplacedAssignmentId()).toBeNull();
   });
 
   it('drafts replacement candidate successfully and updates roster', () => {

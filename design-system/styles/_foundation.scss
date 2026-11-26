@@ -8,10 +8,11 @@ body {
   font-size: var(--cd-font-size-md);
   line-height: var(--cd-line-normal);
 }
+::selection { color: var(--cd-brand-ink); background: var(--cd-brand-mango); }
 button, input, select, textarea { font: inherit; }
 img, svg { display: block; max-inline-size: 100%; }
 img { block-size: auto; }
-:where(h1, h2, h3, p) { overflow-wrap: break-word; }
+:where(h1, h2, h3, p, dd) { overflow-wrap: anywhere; }
 :where(button, input, select, textarea, a):focus-visible {
   outline: 3px solid var(--cd-focus-ring);
   outline-offset: 3px;

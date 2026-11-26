@@ -41,6 +41,7 @@ test.describe('V1 Slices 13 & 17-22 E2E Lifecycle', () => {
     await expect(page.getByRole('heading', { name: 'Cairo River Cleanup' })).toBeVisible();
     await expect(page.getByText('Pending Attendance')).toBeVisible();
 
+    await page.getByText('More actions for Cairo River Cleanup').click();
     await page.getByRole('link', { name: 'Cancel event' }).click();
     await expect(page).toHaveURL(`/events/${targetEventId}/cancel`);
     await expect(page.getByRole('heading', { name: 'Cancel event' })).toBeVisible();
@@ -77,7 +78,9 @@ test.describe('V1 Slices 13 & 17-22 E2E Lifecycle', () => {
     await expect(page.getByRole('heading', { name: 'Event feedback' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Rate leader.one' })).toBeVisible();
 
-    await page.locator(`#rating-${targetLeaderId}`).selectOption('5');
+    const rating = page.getByRole('group', { name: 'Rating for leader.one' }).getByRole('radio', { name: '5 of 5' });
+    await rating.check();
+    await expect(rating).toBeChecked();
     await page.locator(`#comment-${targetLeaderId}`).fill('Excellent coordination on site.');
     await page.getByRole('button', { name: 'Submit rating' }).click();
     await expect(page.getByRole('status').filter({ hasText: 'Rating submitted.' })).toBeVisible();

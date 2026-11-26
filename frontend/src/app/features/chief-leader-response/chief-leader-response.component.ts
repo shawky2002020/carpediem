@@ -1,8 +1,13 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { afterNextRender, Component, computed, ElementRef, inject, Injector, OnInit, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { finalize, Observable } from 'rxjs';
 import { ApiProblem, toApiProblem } from '../../core/http/api.interceptor';
 import { ChiefLeaderResponse, ChiefLeaderResponseService } from './chief-leader-response.service';
+
+const cairoDay = new Intl.DateTimeFormat('en-GB', { timeZone: 'Africa/Cairo', dateStyle: 'medium' });
+const cairoDateTime = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Africa/Cairo', dateStyle: 'medium', timeStyle: 'short',
+});
 
 @Component({
   selector: 'app-chief-leader-response',
@@ -18,7 +23,10 @@ export class ChiefLeaderResponseComponent implements OnInit {
   readonly pending = signal<ChiefLeaderResponse[]>([]);
   readonly detail = signal<ChiefLeaderResponse | null>(null);
   readonly loading = signal(true);
-  readonly saving = signal(false);
+  private readonly injector = inject(Injector);
+  private readonly receipt = viewChild<ElementRef<HTMLElement>>('receipt');
+  readonly pendingDecision = signal<'accept' | 'decline' | null>(null);
+  readonly saving = computed(() => this.pendingDecision() !== null);
   readonly problem = signal<ApiProblem | null>(null);
   readonly success = signal<string | null>(null);
   readonly uncertain = signal(false);
@@ -46,14 +54,17 @@ export class ChiefLeaderResponseComponent implements OnInit {
   decide(action: 'accept' | 'decline'): void {
     const appointment = this.detail();
     if (!appointment || appointment.status !== 'Pending' || this.saving() || this.uncertain()) return;
-    this.saving.set(true);
+    this.pendingDecision.set(action);
     this.problem.set(null);
     this.success.set(null);
     this.service.respond(appointment.id, action, appointment.version)
-      .pipe(finalize(() => this.saving.set(false)))
+      .pipe(finalize(() => this.pendingDecision.set(null)))
       .subscribe({
         next: value => {
           this.detail.set(value);
+          afterNextRender(() => {
+            if (document.activeElement === document.body) this.receipt()?.nativeElement.focus();
+          }, { injector: this.injector });
           this.success.set(action === 'accept'
             ? 'Appointment accepted. This Event remains a Draft.'
             : 'Appointment declined. Operations Administrators have been alerted.');
@@ -68,8 +79,12 @@ export class ChiefLeaderResponseComponent implements OnInit {
   }
 
   displayDate(value: string): string {
-    return new Intl.DateTimeFormat('en', {
-      timeZone: 'Africa/Cairo', dateStyle: 'medium', timeStyle: 'short',
-    }).format(new Date(value)) + ' Cairo';
+    return cairoDateTime.format(new Date(value)) + ' Cairo';
+  }
+
+  invitedOn(value: string): string { return cairoDay.format(new Date(value)); }
+
+  schedule(start: string, end: string): string {
+    return cairoDateTime.formatRange(new Date(start), new Date(end));
   }
 }

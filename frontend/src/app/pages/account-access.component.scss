@@ -1,0 +1,18 @@
+.access-layout { display: grid; min-inline-size: 0; max-inline-size: 64rem; margin-inline: auto; }
+.access-content { min-inline-size: 0; }
+.access-brand { display: none; }
+@media (min-width: 48rem) {
+  .access-layout { grid-template-columns: minmax(12rem, .87fr) minmax(0, 1fr); align-items: stretch; gap: clamp(3rem, 7vw, 7.5rem); }
+  .access-content { align-self: center; padding-block: 1.5rem; max-inline-size: 27rem; }
+  .access-brand {
+    display: grid; align-content: end; justify-items: start; min-block-size: 34rem;
+    padding: clamp(1rem, 3vw, 3rem); background: #183d2f url('/brand/orchard-print.webp') center / cover;
+  }
+  .access-brand img { inline-size: 6.25rem; height: auto; }
+}
+
+@media (max-width: 47.99rem) {
+  .access-layout { max-inline-size: 30rem; }
+  .access-brand { display: block; height: 3.25rem; margin-block-end: .5rem; background: #183d2f url('/brand/orchard-print-small.webp') 50% 33% / cover; }
+  .access-brand img { display: none; }
+}

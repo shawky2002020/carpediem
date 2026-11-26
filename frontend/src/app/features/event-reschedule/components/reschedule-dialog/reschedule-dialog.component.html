@@ -1,24 +1,21 @@
-<div class="cd-reschedule-backdrop" role="presentation">
-  <div
-    class="cd-reschedule-dialog"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="reschedule-dialog-title"
-    tabindex="-1"
-  >
+<section class="event-action-page" aria-labelledby="reschedule-dialog-title">
     <div class="cd-reschedule-header">
-      <h2 id="reschedule-dialog-title" class="cd-reschedule-title">Reschedule Event</h2>
+      <h1 id="reschedule-dialog-title">Reschedule Event</h1>
       <p class="cd-reschedule-subtitle" *ngIf="eventTitle">
-        Adjusting operational schedule for: <strong>{{ eventTitle }}</strong>
+        <strong>{{ eventTitle }}</strong>
       </p>
     </div>
 
     <div class="cd-notice cd-notice--warning" role="note">
       <p>
-        <strong>Staffing Cycle Notice:</strong> Rescheduling will seal the active staffing cycle and create a new clean cycle. Previous volunteer availability and roster selections will be archived.
+        Rescheduling archives the current availability responses and team selection. A new staffing cycle opens for the new date.
       </p>
     </div>
 
+    @if (loadingContext()) { <p role="status">Loading event details…</p> }
+    @if (errorMessage() && !currentVersion && !loadingContext() && eventId) {
+      <button type="button" (click)="loadContext()">Reload event details</button>
+    }
     <div
       *ngIf="errorMessage()"
       class="cd-alert cd-alert--error"
@@ -108,7 +105,7 @@
       <div class="cd-reschedule-actions">
         <button
           type="button"
-          class="cd-button cd-button--secondary"
+          class="cd-btn cd-btn--secondary cd-button cd-button--secondary"
           (click)="cancel()"
           [disabled]="isSubmitting()"
         >
@@ -116,16 +113,15 @@
         </button>
         <button
           type="submit"
-          class="cd-button cd-button--primary"
-          [disabled]="isSubmitting()"
+          class="cd-btn cd-btn--primary cd-button cd-button--primary"
+          [disabled]="isSubmitting() || !currentVersion || !!successMessage()"
         >
           {{ isSubmitting() ? 'Rescheduling...' : 'Confirm Reschedule' }}
         </button>
       </div>
     </form>
 
-    <div role="status" aria-live="polite" class="cd-sr-only">
+    <div role="status" aria-live="polite" class="cd-visually-hidden cd-sr-only">
       {{ liveStatus() }}
     </div>
-  </div>
-</div>
+</section>

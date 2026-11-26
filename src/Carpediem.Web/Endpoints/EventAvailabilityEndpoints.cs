@@ -72,7 +72,8 @@ public static class EventAvailabilityEndpoints
             Version: result.Version,
             IsWindowOpen: result.IsWindowOpen,
             EventStatus: result.EventStatus,
-            IsChiefLeaderOnEvent: result.IsChiefLeaderOnEvent));
+            IsChiefLeaderOnEvent: result.IsChiefLeaderOnEvent,
+            Itinerary: result.Itinerary));
     }
 
     private static async Task<IResult> DeclareAvailabilityAsync(
@@ -225,7 +226,8 @@ public static class EventAvailabilityEndpoints
         string? Version,
         bool IsWindowOpen,
         string EventStatus,
-        bool IsChiefLeaderOnEvent);
+        bool IsChiefLeaderOnEvent,
+        PublishedEventItinerary? Itinerary);
 
     public sealed record AvailabilityDeclarationResponse(
         Guid Id,

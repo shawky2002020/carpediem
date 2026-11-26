@@ -35,7 +35,7 @@ export class DraftCreateComponent {
   }
 
   cancel(): void {
-    if (this.canDeactivate()) void this.router.navigate(['/draft-events']);
+    void this.router.navigate(['/draft-events']);
   }
 
   canDeactivate(): boolean {

@@ -1,243 +1,215 @@
 <section class="cd-attendance-container" aria-labelledby="attendance-page-title">
-  <!-- Operational Spine Navigation -->
-  @if (rollSheet(); as sheet) {
-    <app-operational-spine
-      [title]="sheet.eventTitle"
-      [venue]="sheet.location"
-      [startDateTime]="sheet.startDateTime"
-      [endDateTime]="sheet.endDateTime"
-      [stage]="sheet.isCompleted ? 'Concluded' : 'InProgress'"
-      [fulfillmentCurrent]="attendedCount()"
-      [fulfillmentTarget]="totalCount()">
-    </app-operational-spine>
-  }
-
-  <!-- Header & Navigation -->
   <header class="cd-attendance-header">
-    <div class="cd-breadcrumb">
-      <a routerLink="/" class="cd-back-link" aria-label="Back to home">
-        &larr; Back
-      </a>
-    </div>
+    <a routerLink="/dashboard" class="cd-back-link">&larr; Dashboard</a>
+    <h1 id="attendance-page-title" class="cd-page-title">On-Site Attendance Roll Call</h1>
 
-    <div class="cd-header-content">
-      <div class="cd-title-group">
-        <h1 id="attendance-page-title" class="cd-page-title">On-Site Attendance Roll Call</h1>
-        @if (rollSheet(); as sheet) {
-          <div class="cd-event-meta">
-            <span class="cd-status-badge" [attr.data-status]="sheet.status">
-              {{ sheet.status }}
-            </span>
-            <span class="cd-meta-item">{{ sheet.location }}</span>
-          </div>
-        }
-      </div>
-
-      <div class="cd-header-actions">
-        <button
-          type="button"
-          class="cd-btn cd-btn--secondary"
-          (click)="markAllAttended()"
-          [disabled]="loading() || submitting() || entries().length === 0"
-          aria-label="Mark all volunteers as attended">
-          Mark All Attended
-        </button>
-
-        <button
-          type="button"
-          class="cd-btn cd-btn--primary"
-          (click)="submit()"
-          [disabled]="loading() || submitting() || !hasChanges()"
-          aria-label="Finalize attendance roll call">
-          @if (submitting()) {
-            <span class="cd-spinner" aria-hidden="true"></span>
-            Submitting...
-          } @else {
-            Finalize Roll Call
-          }
-        </button>
-      </div>
-    </div>
+    @if (rollSheet(); as sheet) {
+      <app-operational-spine
+        [title]="sheet.eventTitle"
+        [venue]="sheet.location"
+        [startDateTime]="sheet.startDateTime"
+        [endDateTime]="sheet.endDateTime"
+      />
+    }
   </header>
 
-  <!-- Live Announcements -->
-  <div class="cd-sr-only" aria-live="polite" aria-atomic="true">
-    @if (statusMessage()) {
-      {{ statusMessage() }}
-    }
-  </div>
+  <div class="cd-visually-hidden" role="status" aria-atomic="true">{{ statusMessage() }}</div>
 
-  <!-- Feedback Alerts -->
   @if (successMessage()) {
-    <div class="cd-alert cd-alert--success" role="status" aria-live="polite">
-      <span class="cd-alert-icon" aria-hidden="true">&#x2713;</span>
-      <p class="cd-alert-text">{{ successMessage() }}</p>
+    <div class="cd-alert--success cd-callout cd-callout--success" role="status">
+      {{ successMessage() }}
     </div>
   }
 
   @if (errorMessage()) {
-    <div class="cd-alert cd-alert--error" role="alert" aria-live="assertive">
-      <span class="cd-alert-icon" aria-hidden="true">&#x26A0;</span>
-      <p class="cd-alert-text">{{ errorMessage() }}</p>
+    <div class="cd-alert--error cd-callout cd-callout--danger" role="alert">
+      <p>{{ errorMessage() }}</p>
+      @if (loadFailed()) {
+        <button type="button" class="cd-btn cd-btn--secondary" (click)="load()" [disabled]="loading()">Reload roll sheet</button>
+      }
     </div>
   }
 
-  <!-- Sticky Tactical Summary Statistics Bar -->
-  <section class="cd-stats-grid sticky-summary" aria-label="Attendance statistics summary">
-    <div class="cd-stat-card">
-      <span class="cd-stat-label">Total Roster</span>
-      <span class="cd-stat-value cd-tabular" data-testid="stat-total">{{ totalCount() }}</span>
-    </div>
-    <div class="cd-stat-card cd-stat-card--attended">
-      <span class="cd-stat-label">Attended</span>
-      <span class="cd-stat-value cd-tabular" data-testid="stat-attended">{{ attendedCount() }}</span>
-    </div>
-    <div class="cd-stat-card cd-stat-card--noshow">
-      <span class="cd-stat-label">No Show</span>
-      <span class="cd-stat-value cd-tabular" data-testid="stat-noshow">{{ noShowCount() }}</span>
-    </div>
-    <div class="cd-stat-card cd-stat-card--unrecorded">
-      <span class="cd-stat-label">Unrecorded</span>
-      <span class="cd-stat-value cd-tabular" data-testid="stat-unrecorded">{{ unrecordedCount() }}</span>
-    </div>
-  </section>
+  @if (loading() && !rollSheet()) {
+    <p class="cd-loading-state" role="status">Loading attendance roll sheet…</p>
+  }
 
-  <!-- Loading State -->
-  @if (loading()) {
-    <div class="cd-loading-state" role="status" aria-live="polite">
-      <span class="cd-spinner" aria-hidden="true"></span>
-      <p>Loading attendance roll sheet...</p>
-    </div>
-  } @else if (entries().length === 0) {
-    <!-- Empty State -->
-    <div class="cd-empty-state">
-      <p class="cd-empty-title">No Active Volunteers Assigned</p>
-      <p class="cd-empty-desc">
-        There are currently no active team members assigned to this event's staffing cycle.
-      </p>
-    </div>
-  } @else {
-    <!-- Roster Roll Call List (Tactile Outdoor Mode) -->
-    <section class="cd-roster-section" aria-label="Volunteer roll call list">
-      <ul class="cd-roster-list" role="list">
-        @for (entry of entries(); track entry.teamAssignmentId) {
-          <li class="cd-roster-item"
-              [class.cd-roster-item--noshow]="getEffectiveOutcome(entry.teamAssignmentId) === 'NoShow'"
-              [class.cd-roster-item--attended]="getEffectiveOutcome(entry.teamAssignmentId) === 'Attended'"
-              [attr.data-assignment-id]="entry.teamAssignmentId">
-            <div class="cd-volunteer-row">
-              <div class="cd-volunteer-info">
-                <span class="cd-volunteer-name">{{ entry.volunteerName }}</span>
-                <span class="cd-current-status cd-badge"
-                      [class.cd-badge--success]="getEffectiveOutcome(entry.teamAssignmentId) === 'Attended'"
-                      [class.cd-badge--danger]="getEffectiveOutcome(entry.teamAssignmentId) === 'NoShow'"
-                      [class.cd-badge--warning]="!getEffectiveOutcome(entry.teamAssignmentId)"
-                      [attr.data-outcome]="getEffectiveOutcome(entry.teamAssignmentId) ?? 'Unrecorded'">
-                  {{ getEffectiveOutcome(entry.teamAssignmentId) ?? 'Unrecorded' }}
-                </span>
-              </div>
+  @if (rollSheet(); as sheet) {
+    @if (entries().length === 0) {
+      <section class="cd-empty-state" aria-labelledby="empty-roster-heading">
+        <h2 id="empty-roster-heading">No active volunteers</h2>
+        <p>Attendance is available when volunteers join the active team roster.</p>
+      </section>
+    } @else {
+      <dl class="attendance-summary" aria-label="Attendance statistics summary">
+        <div>
+          <dt>Roster</dt>
+          <dd data-testid="stat-total">{{ totalCount() }}</dd>
+        </div>
+        <div>
+          <dt>Attended</dt>
+          <dd data-testid="stat-attended">{{ attendedCount() }}</dd>
+        </div>
+        <div>
+          <dt>No show</dt>
+          <dd data-testid="stat-noshow">{{ noShowCount() }}</dd>
+        </div>
+        <div>
+          <dt>Unrecorded</dt>
+          <dd data-testid="stat-unrecorded">{{ unrecordedCount() }}</dd>
+        </div>
+      </dl>
 
-              <div class="cd-action-group" role="group" [attr.aria-label]="'Attendance controls for ' + entry.volunteerName">
-                @if (entry.finalizedAt) {
-                  @if (sessionService.isAdmin()) {
-                    @if (correctingOutcomeId() === entry.teamAssignmentId) {
-                      <div class="cd-correction-form">
-                        <div class="cd-correction-fields">
-                          <label class="cd-sr-only" for="newOutcome-{{entry.teamAssignmentId}}">New Outcome</label>
-                          <select
-                            id="newOutcome-{{entry.teamAssignmentId}}"
-                            class="cd-select"
-                            [ngModel]="correctionOutcome()"
-                            (ngModelChange)="correctionOutcome.set($event)">
-                            <option value="Attended">Attended</option>
-                            <option value="NoShow">No Show</option>
-                          </select>
-                          <label class="cd-sr-only" for="reason-{{entry.teamAssignmentId}}">Reason</label>
-                          <input
-                            type="text"
-                            id="reason-{{entry.teamAssignmentId}}"
-                            class="cd-input"
-                            placeholder="Reason required"
-                            [ngModel]="correctionReason()"
-                            (ngModelChange)="correctionReason.set($event)">
-                        </div>
-                        <div class="cd-correction-actions">
-                          <button
-                            type="button"
-                            class="cd-btn cd-btn--primary cd-btn--small"
-                            (click)="submitCorrection(entry.teamAssignmentId)"
-                            [disabled]="correctionSubmitting()">Save</button>
-                          <button
-                            type="button"
-                            class="cd-btn cd-btn--secondary cd-btn--small"
-                            (click)="cancelCorrection()"
-                            [disabled]="correctionSubmitting()">Cancel</button>
-                        </div>
-                      </div>
-                    } @else {
+      <section class="cd-roster-section" aria-labelledby="attendance-roster-heading" [attr.aria-busy]="loading()">
+        <div class="cd-roster-heading">
+          <div>
+            <h2 id="attendance-roster-heading">Volunteer roster</h2>
+            @if (sheet.isAllFinalized) {
+              <p>Attendance is finalized for this roster.</p>
+            }
+          </div>
+          @if (!sheet.isAllFinalized) {
+            <button
+              type="button"
+              class="cd-btn cd-btn--secondary"
+              (click)="markAllAttended()"
+              [disabled]="loading() || loadFailed() || submitting() || correctionSubmitting()"
+              aria-label="Mark all volunteers as attended"
+            >Mark All Attended</button>
+          }
+        </div>
+
+        <ul class="cd-roster-list" role="list">
+          @for (entry of entries(); track entry.teamAssignmentId) {
+            @let outcome = outcomesState().get(entry.teamAssignmentId) ?? entry.outcome;
+            <li
+              class="cd-roster-item"
+              [attr.data-assignment-id]="entry.teamAssignmentId"
+              [class.cd-roster-item--attended]="outcome === 'Attended'"
+              [class.cd-roster-item--noshow]="outcome === 'NoShow'"
+            >
+              <div class="cd-volunteer-row">
+                <div class="cd-volunteer-info">
+                  <strong class="cd-volunteer-name">{{ entry.volunteerName }}</strong>
+                  <div class="cd-outcome">
+                    <span
+                      class="cd-current-status"
+                      [class.cd-current-status--attended]="outcome === 'Attended'"
+                      [class.cd-current-status--noshow]="outcome === 'NoShow'"
+                      [attr.data-outcome]="outcome ?? 'Unrecorded'"
+                    >{{ outcome === 'NoShow' ? 'No show' : (outcome ?? 'Unrecorded') }}</span>
+                    @if (entry.finalizedAt) {
                       <span class="cd-finalized-text">Finalized</span>
-                      <button
-                        type="button"
-                        class="cd-btn cd-btn--secondary cd-btn--small"
-                        (click)="startCorrection(entry.teamAssignmentId, entry.outcome!)"
-                        [disabled]="submitting() || correctionSubmitting()"
-                        aria-label="Correct attendance for {{entry.volunteerName}}">
-                        Correct
-                      </button>
                     }
-                  } @else {
-                    <span class="cd-finalized-text">Finalized</span>
+                  </div>
+                </div>
+
+                @if (entry.finalizedAt) {
+                  @if (sessionService.isAdmin() && entry.attendanceOutcomeId && entry.outcome && correctingOutcomeId() !== entry.teamAssignmentId) {
+                    <button
+                      #correctAction
+                      type="button"
+                      class="cd-btn cd-btn--secondary"
+                      [attr.data-correction-id]="entry.teamAssignmentId"
+                      (click)="startCorrection(entry.teamAssignmentId, entry.outcome)"
+                      [disabled]="loading() || loadFailed() || submitting() || correctionSubmitting() || correctingOutcomeId() !== null"
+                      [attr.aria-label]="'Correct attendance for ' + entry.volunteerName"
+                    >Correct</button>
                   }
                 } @else {
-                  <button
-                    type="button"
-                    class="cd-toggle-btn cd-toggle-btn--attended"
-                    [class.active]="getEffectiveOutcome(entry.teamAssignmentId) === 'Attended'"
-                    [attr.aria-pressed]="getEffectiveOutcome(entry.teamAssignmentId) === 'Attended'"
-                    (click)="setOutcome(entry.teamAssignmentId, 'Attended')"
-                    [disabled]="submitting()"
-                    [attr.aria-label]="'Mark ' + entry.volunteerName + ' as attended'">
-                    Attended
-                  </button>
+                  <div class="cd-action-group" role="group" [attr.aria-label]="'Attendance controls for ' + entry.volunteerName">
+                    <button
+                      type="button"
+                      class="cd-toggle-btn cd-toggle-btn--attended"
+                      [class.active]="outcome === 'Attended'"
+                      [attr.aria-pressed]="outcome === 'Attended'"
+                      (click)="setOutcome(entry.teamAssignmentId, 'Attended')"
+                      [disabled]="loading() || loadFailed() || submitting() || correctionSubmitting()"
+                      [attr.aria-label]="'Mark ' + entry.volunteerName + ' as attended'"
+                    >Attended</button>
 
-                  <button
-                    type="button"
-                    class="cd-toggle-btn cd-toggle-btn--noshow"
-                    [class.active]="getEffectiveOutcome(entry.teamAssignmentId) === 'NoShow'"
-                    [attr.aria-pressed]="getEffectiveOutcome(entry.teamAssignmentId) === 'NoShow'"
-                    (click)="setOutcome(entry.teamAssignmentId, 'NoShow')"
-                    [disabled]="submitting()"
-                    [attr.aria-label]="'Mark ' + entry.volunteerName + ' as no show'">
-                    No Show
-                  </button>
+                    <button
+                      type="button"
+                      class="cd-toggle-btn cd-toggle-btn--noshow"
+                      [class.active]="outcome === 'NoShow'"
+                      [attr.aria-pressed]="outcome === 'NoShow'"
+                      (click)="setOutcome(entry.teamAssignmentId, 'NoShow')"
+                      [disabled]="loading() || loadFailed() || submitting() || correctionSubmitting()"
+                      [attr.aria-label]="'Mark ' + entry.volunteerName + ' as no show'"
+                    >No Show</button>
+                  </div>
                 }
               </div>
-            </div>
 
-            <!-- One-tap inline substitute drawer when a volunteer is marked No Show -->
-            @if (getEffectiveOutcome(entry.teamAssignmentId) === 'NoShow') {
-              <div class="cd-substitute-drawer" role="region" [attr.aria-label]="'Substitute options for ' + entry.volunteerName">
-                <div class="substitute-drawer-content">
-                  <div class="substitute-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                      <circle cx="8.5" cy="7" r="4"/>
-                      <line x1="20" y1="8" x2="20" y2="14"/>
-                      <line x1="23" y1="11" x2="17" y2="11"/>
-                    </svg>
+              @if (sessionService.isAdmin() && correctingOutcomeId() === entry.teamAssignmentId) {
+                <form class="cd-correction-form" [formGroup]="correctionForm" (ngSubmit)="submitCorrection(entry.teamAssignmentId)">
+                  <div class="cd-correction-fields">
+                    <div>
+                      <label for="correction-outcome">New outcome</label>
+                      <select id="correction-outcome" #correctionOutcomeField formControlName="outcome">
+                        <option value="Attended">Attended</option>
+                        <option value="NoShow">No show</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label for="correction-reason">Reason for correction</label>
+                      <input
+                        id="correction-reason"
+                        #correctionReasonField
+                        type="text"
+                        placeholder="Reason required"
+                        formControlName="reason"
+                        required
+                        (input)="correctionReasonRequired.set(false)"
+                        [attr.aria-invalid]="correctionReasonRequired() ? 'true' : null"
+                        [attr.aria-describedby]="correctionReasonRequired() ? 'correction-reason-error' : null"
+                      />
+                      @if (correctionReasonRequired()) {
+                        <p class="cd-alert--error cd-field-error" id="correction-reason-error" role="alert">
+                          Please provide a mandatory reason for the correction.
+                        </p>
+                      }
+                    </div>
                   </div>
-                  <p class="substitute-prompt">
-                    <strong>Absence Recorded.</strong> Immediate substitute coverage recommended.
-                  </p>
-                  <a class="cd-btn cd-btn--secondary cd-btn--sm" [routerLink]="['/events', effectiveEventId(), 'replacement-assignment']">
-                    Assign Replacement
-                  </a>
-                </div>
-              </div>
-            }
-          </li>
+                  <div class="cd-correction-actions">
+                    <button type="submit" class="cd-btn cd-btn--primary" [disabled]="loading() || loadFailed() || submitting() || correctionSubmitting()">
+                      {{ correctionSubmitting() ? 'Saving…' : 'Save' }}
+                    </button>
+                    <button type="button" class="cd-btn cd-btn--secondary" (click)="cancelCorrection()" [disabled]="correctionSubmitting()">Cancel</button>
+                  </div>
+                </form>
+              }
+            </li>
+          }
+        </ul>
+
+        @if (!sheet.isAllFinalized) {
+          <div class="cd-submit-bar">
+            <small>
+              @if (loading()) {
+                Refreshing the roll sheet…
+              } @else if (hasChanges()) {
+                {{ outcomesState().size }} unsaved {{ outcomesState().size === 1 ? 'entry' : 'entries' }}
+              } @else {
+                Mark outcomes to finalize attendance.
+              }
+            </small>
+            <button
+              type="button"
+              class="cd-btn cd-btn--primary"
+              (click)="submit()"
+              [disabled]="loading() || loadFailed() || submitting() || correctionSubmitting() || !hasChanges()"
+              aria-label="Finalize attendance roll call"
+            >{{ submitting() ? 'Finalizing…' : 'Finalize Roll Call' }}</button>
+          </div>
         }
-      </ul>
-    </section>
+      </section>
+    }
+
+    @if (!sheet.isCompleted) {
+      <a class="cd-related-link" [routerLink]="['/events', effectiveEventId(), 'replacement-assignment']">
+        Replacement assignments
+      </a>
+    }
   }
 </section>

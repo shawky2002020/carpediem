@@ -1,0 +1,11 @@
+:host { display:block; --cd-save-position:static; max-inline-size:62rem; margin:auto; }
+header { margin-block-end:2rem; }
+section { container-type:inline-size; padding-block:1.4rem; border-block-start:1px solid var(--cd-border-default); }
+.group, fieldset { display:flex; flex-wrap:wrap; align-items:center; gap:.75rem; }
+.field-grid { display:grid; gap:1rem; grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr)); }
+label { display:block; padding-block:.35rem; }
+fieldset label { display:inline-flex; align-items:center; min-block-size:var(--cd-touch-target-min); }
+fieldset { margin-block:1rem; }
+summary { cursor:pointer; padding-block:.7rem; }
+dialog form { display:grid; gap:.75rem; }
+#signals .group { row-gap:.55rem; column-gap:1.05rem; }

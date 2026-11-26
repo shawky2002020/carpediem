@@ -1,210 +1,227 @@
 <div class="team-selection-container">
-  @if (context(); as ctx) {
-    <app-operational-spine
-      [title]="ctx.eventTitle"
-      [venue]="ctx.location"
-      [startDateTime]="ctx.startDateTime"
-      [endDateTime]="ctx.endDateTime"
-      [stage]="'Staffed'"
-      [fulfillmentCurrent]="activeTeamCount()"
-      [fulfillmentTarget]="activeTeamCount() + availableCandidatesCount()">
-    </app-operational-spine>
-  }
-
   <header class="team-selection-header">
-    <div class="header-titles">
-      <p class="eyebrow">Event Operations</p>
-      <h1 id="team-selection-title">Team Selection</h1>
-    </div>
-
+    <a class="back-link" routerLink="/dashboard">&larr; Dashboard</a>
+    <h1 id="team-selection-title">Team Selection</h1>
     @if (context(); as ctx) {
-      <div class="event-summary-card cd-visually-hidden">
-        <h2 class="event-title">{{ ctx.eventTitle }}</h2>
-        <div class="event-meta">
-          <p class="meta-item meta-text">
-            <strong>Schedule:</strong>&nbsp;<time [attr.datetime]="ctx.startDateTime">{{ formatDate(ctx.startDateTime) }}</time>
-            –
-            <time [attr.datetime]="ctx.endDateTime">{{ formatDate(ctx.endDateTime) }}</time>
-          </p>
-          <p class="meta-item meta-text">
-            <strong>Location:</strong> {{ ctx.location }}
-          </p>
-        </div>
-      </div>
+      <app-operational-spine
+        [title]="ctx.eventTitle"
+        [venue]="ctx.location"
+        [startDateTime]="ctx.startDateTime"
+        [endDateTime]="ctx.endDateTime"
+      />
     }
   </header>
 
-  <div class="live-region" role="status" aria-live="polite" aria-atomic="true">
-    @if (loading()) { Loading team selection context… }
-    @else if (submittingId()) { Processing team assignment… }
-    @else if (statusMessage()) { {{ statusMessage() }} }
+  <div
+    class="live-region"
+    [class.cd-visually-hidden]="!loading() && !submittingId() && !statusMessage()"
+    role="status"
+    aria-atomic="true"
+  >
+    @if (loading()) {
+      Loading team selection…
+    } @else if (submittingId()) {
+      Updating team roster…
+    } @else if (statusMessage()) {
+      {{ statusMessage() }}
+    }
   </div>
 
   @if (problem(); as error) {
     <section class="alert-box error cd-callout cd-callout--danger" role="alert">
       <h2>{{ error.title }}</h2>
-      @if (error.code === 'chief_leader_conflict') {
-        <p>The Chief Leader cannot be selected as a volunteer team member on this event.</p>
-      } @else if (error.code === 'candidate_not_available') {
-        <p>This volunteer is no longer available in the current staffing cycle.</p>
-      } @else if (error.code === 'leader_role_required') {
-        <p>Direct assignment requires the candidate to hold the Leader role.</p>
-      } @else if (error.code === 'window_closed') {
-        <p>Team selection is closed because the event has already started.</p>
-      } @else if (error.code === 'invalid_event_status') {
-        <p>Team selection is only permitted for published events.</p>
-      } @else if (error.code === 'unauthorized_chief_leader') {
-        <p>You are not authorized to assign team members for this event.</p>
-      } @else {
-        <p>{{ error.detail || 'An unexpected error occurred while processing team selection.' }}</p>
+      @switch (error.code) {
+        @case ('chief_leader_conflict') {
+          <p>The Chief Leader cannot be selected as a volunteer team member on this event.</p>
+        }
+        @case ('candidate_not_available') {
+          <p>This volunteer is no longer available in the current staffing cycle.</p>
+        }
+        @case ('leader_role_required') {
+          <p>Direct assignment requires the candidate to hold the Leader role.</p>
+        }
+        @case ('window_closed') {
+          <p>Team selection is closed because the event has already started.</p>
+        }
+        @case ('invalid_event_status') {
+          <p>Team selection is only permitted for published events.</p>
+        }
+        @case ('unauthorized_chief_leader') {
+          <p>You are not authorized to assign team members for this event.</p>
+        }
+        @default {
+          <p>{{ error.detail || 'Check your connection and try again.' }}</p>
+        }
       }
-      <button type="button" class="btn-retry cd-btn cd-btn--secondary" (click)="load()">Refresh roster</button>
+      <button type="button" class="btn-retry cd-btn cd-btn--secondary" (click)="load()" [disabled]="loading()">Refresh roster</button>
     </section>
   }
 
-  @if (!loading() && context(); as ctx) {
+  @if (context(); as ctx) {
     @if (!ctx.isWindowOpen) {
-      <section class="alert-box warning cd-callout cd-callout--warning" role="note" aria-labelledby="window-closed-heading">
+      <section class="alert-box warning cd-callout cd-callout--warning" aria-labelledby="window-closed-heading">
         <h2 id="window-closed-heading">Selection Window Closed</h2>
-        <p>This event has already started. Team selection is closed and the roster cannot be modified.</p>
+        <p>This event has already started. You can review the roster below.</p>
       </section>
     }
 
-    <!-- Asymmetric Split Workbench: Desktop Left = Pool & Direct Draft, Right = Active Team Roster -->
-    <div class="selection-workbench">
-      <!-- Active Team Roster Section (First in DOM for sequential accessibility and test ordering) -->
-      <div class="workbench-column workbench-roster">
-        <section class="roster-section" aria-labelledby="active-roster-heading">
-          <div class="section-header">
-            <div class="roster-header-info">
-              <h2 id="active-roster-heading">Active Team Roster</h2>
-              <span class="roster-sub-status">Slotted Leaders</span>
-            </div>
-            <span class="count-badge cd-badge cd-badge--success" [attr.aria-label]="activeTeamCount() + ' active team members'">
-              {{ activeTeamCount() }}
-            </span>
-          </div>
-
-          @if (activeTeam().length === 0) {
-            <p class="empty-state">No team members selected yet. Select available volunteers below.</p>
-          } @else {
-            <ul class="item-list team-list" role="list">
-              @for (member of activeTeam(); track member.assignmentId) {
-                <li class="list-item team-item">
-                  <div class="item-info member-info">
-                    <span class="member-name">{{ member.userName }}</span>
-                    <a [routerLink]="['/events', effectiveEventId(), 'leaders', member.userId, 'history']">View history</a>
-                    <span class="member-timestamp meta-text">Selected: {{ formatDate(member.assignedAt) }}</span>
-                  </div>
-                  <span class="status-badge status-badge-active cd-badge cd-badge--success" role="status">Active</span>
-                </li>
-              }
-            </ul>
-          }
-        </section>
-      </div>
-
-      <!-- Candidate Pools Column (Left in 2-column desktop layout) -->
-      <div class="workbench-column workbench-pool">
-        <!-- Search & Filter Controls -->
-        <div class="pool-search-container">
-          <label for="candidate-search" class="cd-visually-hidden">Search available volunteers</label>
-          <input
-            id="candidate-search"
-            type="search"
-            class="pool-search-input"
-            [value]="candidateSearch()"
-            (input)="candidateSearch.set($any($event.target).value)"
-            placeholder="Search volunteers by name…">
-        </div>
-
-        <!-- Available Volunteers Section -->
+    <div class="selection-workbench" [attr.aria-busy]="loading()">
+      <div class="workbench-pool">
         <section class="candidates-section" aria-labelledby="available-candidates-heading">
           <div class="section-header">
-            <h2 id="available-candidates-heading">Available Volunteers</h2>
-            <span class="count-badge count-badge-candidates muted cd-badge cd-badge--neutral" [attr.aria-label]="availableCandidatesCount() + ' available volunteers'">
+            <h2 id="available-candidates-heading" tabindex="-1">Available volunteers</h2>
+            <span class="count-badge cd-tabular" [attr.aria-label]="availableCandidatesCount() + ' available volunteers'">
               {{ availableCandidatesCount() }}
             </span>
           </div>
 
+          <a class="roster-jump" href="#active-roster-heading"
+              (click)="$event.preventDefault(); rosterExpanded.set(true); rosterHeading.focus()">
+              View active roster ({{ activeTeamCount() }})
+            </a>
+            <div class="pool-search-container">
+            <div class="pool-search-label">
+              <label for="candidate-search">Find a candidate</label>
+              <a href="#direct-candidates-heading" (click)="$event.preventDefault(); directHeading.focus()">Jump to direct assignment</a>
+            </div>
+            <input
+              id="candidate-search"
+              #candidateFilter
+              type="search"
+              [value]="candidateSearch()"
+              (input)="candidateSearch.set(candidateFilter.value)"
+              placeholder="Search both pools by name"
+            />
+          </div>
+
           @if (availableCandidates().length === 0) {
-            <p class="empty-state">No available volunteers found in the pool for this cycle.</p>
+            <p class="empty-state">No available volunteers found for this staffing cycle.</p>
           } @else if (filteredAvailableCandidates().length === 0) {
-            <p class="empty-state">No volunteers match "{{ candidateSearch() }}".</p>
+            <p class="empty-state">No available volunteers match “{{ candidateSearch().trim() }}”.</p>
           } @else {
             <ul class="item-list candidates-list" role="list">
               @for (candidate of filteredAvailableCandidates(); track candidate.userId) {
                 <li class="list-item candidate-item">
-                  <div class="item-info candidate-info">
-                    <span class="candidate-name">{{ candidate.userName }}</span>
-                    <a [routerLink]="['/events', effectiveEventId(), 'leaders', candidate.userId, 'history']">View history</a>
-                    <span class="candidate-timestamp meta-text">Available since: {{ formatDate(candidate.declaredAt) }}</span>
+                  <div class="item-info">
+                    <strong class="candidate-name">{{ candidate.userName }}</strong>
+                    <span class="candidate-timestamp meta-text">Available since <time [attr.datetime]="candidate.declaredAt">{{ formatDate(candidate.declaredAt) }}</time></span>
                   </div>
-                  <button
-                    type="button"
-                    class="btn-action btn-select cd-btn cd-btn--primary"
-                    [disabled]="!ctx.isWindowOpen || submittingId() !== null"
-                    [attr.aria-label]="'Select ' + candidate.userName + ' for team'"
-                    (click)="selectVolunteer(candidate)">
-                    @if (submittingId() === candidate.userId) {
-                      Selecting…
-                    } @else {
-                      Select for Team
-                    }
-                  </button>
+                  <div class="candidate-actions">
+                    <a
+                      class="history-link"
+                      [routerLink]="['/events', effectiveEventId(), 'leaders', candidate.userId, 'history']"
+                      [attr.aria-label]="'View history for ' + candidate.userName"
+                    >View history</a>
+                    <button
+                      type="button"
+                      class="btn-select cd-btn cd-btn--primary"
+                      [disabled]="!ctx.isWindowOpen || loading() || submittingId() !== null"
+                      [attr.aria-label]="'Select ' + candidate.userName + ' for team'"
+                      (click)="selectVolunteer(candidate, $event)"
+                    >{{ submittingId() === candidate.userId ? 'Selecting…' : 'Select for Team' }}</button>
+                  </div>
                 </li>
               }
             </ul>
           }
         </section>
 
-        <!-- Direct Draft Pool Section (SLICE-09) -->
         <section class="direct-assignment-section" aria-labelledby="direct-candidates-heading">
           <div class="section-header">
-            <h2 id="direct-candidates-heading">Direct Draft Pool (Non-Respondents & Not Available)</h2>
-            <span class="count-badge count-badge-direct muted cd-badge cd-badge--neutral" [attr.aria-label]="directCandidatesCount() + ' direct draft candidates'">
-              {{ directCandidatesCount() }}
-            </span>
+            <h2 #directHeading id="direct-candidates-heading" tabindex="-1">Direct assignment</h2>
+            @if (!directLoading() && !directProblem()) {
+              <span class="count-badge cd-tabular" [attr.aria-label]="directCandidatesCount() + ' direct assignment candidates'">
+                {{ directCandidatesCount() }}
+              </span>
+            }
           </div>
+          <p class="pool-description">Leaders who declined or have yet to respond. Direct assignment adds the leader to the active team.</p>
 
-          @if (directCandidates().length === 0) {
+          @if (directLoading()) {
+            <p class="empty-state" role="status">Loading direct assignment candidates…</p>
+          } @else if (directProblem(); as directError) {
+            <div class="cd-callout cd-callout--danger" role="alert">
+              <p>{{ directError.detail || directError.title }}</p>
+              <button class="cd-btn cd-btn--secondary" type="button" (click)="loadDirectCandidates()">Retry candidate list</button>
+            </div>
+          } @else if (directCandidates().length === 0) {
             <p class="empty-state">No leaders available for direct drafting.</p>
+          } @else if (filteredDirectCandidates().length === 0) {
+            <p class="empty-state">No direct assignment candidates match “{{ candidateSearch().trim() }}”.</p>
           } @else {
             <ul class="item-list direct-candidates-list" role="list">
-              @for (candidate of directCandidates(); track candidate.userId) {
+              @for (candidate of filteredDirectCandidates(); track candidate.userId) {
                 <li class="list-item candidate-item direct-item">
-                  <div class="item-info candidate-info">
+                  <div class="item-info">
                     <div class="candidate-name-row">
-                      <span class="candidate-name">{{ candidate.userName }}</span>
-                      <a [routerLink]="['/events', effectiveEventId(), 'leaders', candidate.userId, 'history']">View history</a>
+                      <strong class="candidate-name">{{ candidate.userName }}</strong>
                       @if (candidate.availabilityStatus === 'NotAvailable') {
-                        <span class="status-badge danger status-badge-unavailable badge-unavailable cd-badge cd-badge--danger">Not Available</span>
+                        <span class="badge-unavailable cd-badge cd-badge--danger">Not Available</span>
                       } @else {
-                        <span class="status-badge warning status-badge-no-response badge-no-response cd-badge cd-badge--warning">Response Needed</span>
+                        <span class="badge-no-response cd-badge cd-badge--warning">Response Needed</span>
                       }
                     </div>
                     @if (candidate.declaredAt) {
-                      <span class="candidate-timestamp meta-text">Declined: {{ formatDate(candidate.declaredAt) }}</span>
+                      <span class="candidate-timestamp meta-text">Declined: <time [attr.datetime]="candidate.declaredAt">{{ formatDate(candidate.declaredAt) }}</time></span>
                     }
                   </div>
-                  <button
-                    type="button"
-                    class="btn-action btn-direct-assign cd-btn cd-btn--secondary"
-                    [disabled]="!ctx.isWindowOpen || submittingId() !== null"
-                    [attr.aria-label]="'Directly assign ' + candidate.userName + ' to team'"
-                    (click)="directAssignLeader(candidate)">
-                    @if (submittingId() === candidate.userId) {
-                      Assigning…
-                    } @else {
-                      Direct Assign
-                    }
-                  </button>
+                  <div class="candidate-actions">
+                    <a
+                      class="history-link"
+                      [routerLink]="['/events', effectiveEventId(), 'leaders', candidate.userId, 'history']"
+                      [attr.aria-label]="'View history for ' + candidate.userName"
+                    >View history</a>
+                    <button
+                      type="button"
+                      class="btn-direct-assign cd-btn cd-btn--secondary"
+                      [disabled]="!ctx.isWindowOpen || loading() || submittingId() !== null"
+                      [attr.aria-label]="'Directly assign ' + candidate.userName + ' to team'"
+                      (click)="directAssignLeader(candidate, $event)"
+                    >{{ submittingId() === candidate.userId ? 'Assigning…' : 'Direct Assign' }}</button>
+                  </div>
                 </li>
               }
             </ul>
           }
         </section>
       </div>
+      <section class="roster-section" aria-labelledby="active-roster-heading">
+        <div class="section-header">
+          <h2 #rosterHeading tabindex="-1" id="active-roster-heading">Active team roster</h2>
+          <span class="count-badge cd-tabular" [attr.aria-label]="activeTeamCount() + ' active team members'">
+            {{ activeTeamCount() }}
+          </span>
+        </div>
+        @if (activeTeamCount()) {
+          <button
+            class="roster-toggle cd-btn cd-btn--secondary"
+            type="button"
+            aria-controls="active-roster-list"
+            [attr.aria-expanded]="rosterExpanded()"
+            (click)="toggleRoster()"
+          >{{ rosterExpanded() ? 'Hide roster' : 'Show roster' }}</button>
+        }
+        @if (activeTeam().length === 0) {
+          <p class="empty-state">No team members selected yet.</p>
+        } @else {
+          <ul id="active-roster-list" class="item-list team-list" [class.roster-collapsed]="!rosterExpanded()" role="list">
+            @for (member of activeTeam(); track member.assignmentId) {
+              <li class="list-item team-item">
+                <div class="item-info">
+                  <strong class="member-name">{{ member.userName }}</strong>
+                  <span class="meta-text">Selected <time [attr.datetime]="member.assignedAt">{{ formatDate(member.assignedAt) }}</time></span>
+                </div>
+                <a
+                  class="history-link"
+                  [routerLink]="['/events', effectiveEventId(), 'leaders', member.userId, 'history']"
+                  [attr.aria-label]="'View history for ' + member.userName"
+                >View history</a>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
     </div>
   }
 </div>

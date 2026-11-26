@@ -1,0 +1,36 @@
+# Browser comparison index
+
+The before column uses the implementation rejected at the start of this challenge. After screenshots use the same roles, data and viewports. The 28 cases cover all 27 product routes, including guest and Admin home. Separate captures verify Chief Leader and Leader home. Each link opens a full-size image.
+
+| Screen | Decision | Focal point | Desktop · 1440 px | Phone · 390 px |
+| --- | --- | --- | --- | --- |
+| Welcome | REBUILD | Illustrated entry and two account actions | [Before](before/welcome-1440.png) · [After](after/welcome-1440.png) | [Before](before/welcome-390.png) · [After](after/welcome-390.png) |
+| Sign in | RECOMPOSE | Access print beside a measured form column | [Before](before/sign-in-1440.png) · [After](after/sign-in-1440.png) | [Before](before/sign-in-390.png) · [After](after/sign-in-390.png) |
+| Registration | RECOMPOSE | Mobile access band, pending state and visible field validation | [Before](before/register-1440.png) · [After](after/register-1440.png) | [Before](before/register-390.png) · [After](after/register-390.png) |
+| Role workspace | RECOMPOSE | One featured destination and a shorter role-specific index | [Before](before/workspace-1440.png) · [After](after/workspace-1440.png) | [Before](before/workspace-390.png) · [After](after/workspace-390.png) |
+| Operational dashboard | REBUILD | Schedule grouped by date and adjacent filter index | [Before](before/operations-1440.png) · [After](after/operations-1440.png) | [Before](before/operations-390.png) · [After](after/operations-390.png) |
+| Draft register | REDESIGN | Date-led links and transparent paging | [Before](before/drafts-1440.png) · [After](after/drafts-1440.png) | [Before](before/drafts-390.png) · [After](after/drafts-390.png) |
+| Create draft | REBUILD | Separate event facts and Cairo schedule | [Before](before/draft-create-1440.png) · [After](after/draft-create-1440.png) | [Before](before/draft-create-390.png) · [After](after/draft-create-390.png) |
+| Edit draft | REBUILD | Publication and appointment checks grouped with the editor | [Before](before/draft-edit-1440.png) · [After](after/draft-edit-1440.png) | [Before](before/draft-edit-390.png) · [After](after/draft-edit-390.png) |
+| Appoint Chief Leader | REDESIGN | One aligned radio list and explicit commit | [Before](before/appoint-1440.png) · [After](after/appoint-1440.png) | [Before](before/appoint-390.png) · [After](after/appoint-390.png) |
+| My appointments | RECOMPOSE | Linked invitations with event and venue | [Before](before/appointments-1440.png) · [After](after/appointments-1440.png) | [Before](before/appointments-390.png) · [After](after/appointments-390.png) |
+| Appointment decision | RECOMPOSE | Invitation facts precede its response | [Before](before/appointment-1440.png) · [After](mobile-records/appointment-1440.png) | [Before](before/appointment-390.png) · [After](mobile-records/appointment-390.png) |
+| Availability | REBUILD | Cairo date, time and venue above two equal-weight responses | [Before](before/availability-1440.png) · [After](mobile-records/availability-1440.png) | [Before](before/availability-390.png) · [After](mobile-records/availability-390.png) |
+| Select a team | REPOSITION | Available candidates first, active roster alongside | [Before](before/team-1440.png) · [After](after/team-1440.png) | [Before](before/team-390.png) · [After](after/team-390.png) |
+| Replace a Leader | REFINE | Linked cancellation and candidate choice remain together | [Before](before/replacement-1440.png) · [After](after/replacement-1440.png) | [Before](before/replacement-390.png) · [After](after/replacement-390.png) |
+| Attendance | REBUILD | One record per person, paired outcomes and immediate totals | [Before](before/attendance-1440.png) · [After](after/attendance-1440.png) | [Before](before/attendance-390.png) · [After](after/attendance-390.png) |
+| My assignment | RECOMPOSE | Itinerary, status and cancellation confirmation | [Before](before/assignment-1440.png) · [After](mobile-records/assignment-1440.png) | [Before](before/assignment-390.png) · [After](mobile-records/assignment-390.png) |
+| My profile | RECOMPOSE | Factual identity and event record | [Before](before/profile-1440.png) · [After](after/profile-1440.png) | [Before](before/profile-390.png) · [After](after/profile-390.png) |
+| Leader history | RECOMPOSE | Event history separated from the participant nameplate | [Before](before/leader-history-1440.png) · [After](after/leader-history-1440.png) | [Before](before/leader-history-390.png) · [After](after/leader-history-390.png) |
+| Notifications | REDESIGN | Date track, unread marker and contextual action | [Before](before/inbox-1440.png) · [After](after/inbox-1440.png) | [Before](before/inbox-390.png) · [After](after/inbox-390.png) |
+| Cancel event | RECOMPOSE | Durable consequence and required justification | [Before](before/cancel-1440.png) · [After](mobile-records/cancel-1440.png) | [Before](before/cancel-390.png) · [After](mobile-records/cancel-390.png) |
+| Reschedule | RECOMPOSE | Separate time input and consequence | [Before](before/reschedule-1440.png) · [After](mobile-records/reschedule-1440.png) | [Before](before/reschedule-390.png) · [After](mobile-records/reschedule-390.png) |
+| Closeout | RECOMPOSE | Confirmation actions attached to the event consequence | [Before](before/complete-1440.png) · [After](after/complete-1440.png) | [Before](before/complete-390.png) · [After](after/complete-390.png) |
+| Account administration | RECOMPOSE | Identity, roles and activation on one baseline | [Before](before/accounts-1440.png) · [After](after/accounts-1440.png) | [Before](before/accounts-390.png) · [After](after/accounts-390.png) |
+| Review feedback | REDESIGN | Recorded rating separated from comment prose | [Before](before/feedback-review-1440.png) · [After](after/feedback-review-1440.png) | [Before](before/feedback-review-390.png) · [After](after/feedback-review-390.png) |
+| Review incidents | REBUILD | Report beside the editable review on desktop | [Before](before/incident-review-1440.png) · [After](after/incident-review-1440.png) | [Before](before/incident-review-390.png) · [After](after/incident-review-390.png) |
+| Give feedback | REDESIGN | Five native rating choices available at a glance | [Before](before/event-feedback-1440.png) · [After](mobile-records/event-feedback-1440.png) | [Before](before/event-feedback-390.png) · [After](mobile-records/event-feedback-390.png) |
+| Report incidents | RECOMPOSE | Report form grouped with the event's incidents | [Before](before/event-incidents-1440.png) · [After](mobile-records/event-incidents-1440.png) | [Before](before/event-incidents-390.png) · [After](mobile-records/event-incidents-390.png) |
+| Restricted access | REFINE | Explicit permission boundary and return action | [Before](before/access-denied-1440.png) · [After](after/access-denied-1440.png) | [Before](before/access-denied-390.png) · [After](after/access-denied-390.png) |
+
+The [public design review](public/PUBLIC-DESIGN.md) and [operational critique](operations/OPERATIONS.md) explain the changes between rounds. The [component guide](COMPONENTS-AND-MOTION.md) covers controls and their interactive states.

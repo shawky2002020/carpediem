@@ -31,6 +31,7 @@ test('candidate declines and cannot send an opposite response', async ({ page })
   await page.getByRole('button', { name: 'Decline appointment' }).click();
   await expect(page.getByRole('status')).toContainText('Appointment declined');
   await expect(page.getByText('Declined', { exact: true })).toBeVisible();
+  await expect(page.getByText('You declined this appointment.', {exact:false}).locator('..')).toBeFocused();
   expect(api.declines).toBe(1);
   await expect(page.getByRole('button', { name: 'Accept appointment' })).toHaveCount(0);
 });

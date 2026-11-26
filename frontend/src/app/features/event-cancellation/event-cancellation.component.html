@@ -1,24 +1,52 @@
 <section class="cancel-event cd-reading" aria-labelledby="cancel-title">
-  <p class="eyebrow">Event operations</p>
-  <h1 id="cancel-title">Cancel event</h1>
-  @if (loading()) { <p role="status">Loading Event…</p> }
-  @if (error(); as message) { <p role="alert">{{ message }}</p> }
+  <header class="cancel-header">
+    <h1 id="cancel-title">Cancel event</h1>
+  </header>
+  @if (loading()) {
+    <div role="status" class="cd-loading-state">
+      <p>Loading Event…</p>
+    </div>
+  }
+  @if (error(); as message) {
+    <div role="alert" class="cd-alert cd-alert--error">
+      <p>{{ message }}</p>
+      @if (reloadNeeded() && !loading()) {
+        <button type="button" (click)="load()">Reload event details</button>
+      }
+    </div>
+  }
   @if (context(); as event) {
-    <p><strong>{{ event.title }}</strong> · {{ event.status }}</p>
+    <div class="event-meta-banner">
+      <span class="banner-title">{{ event.title }}</span>
+      <span class="cd-badge cd-badge--warning">{{ event.status }}</span>
+    </div>
     @if (event.status === 'Draft' || event.status === 'Published') {
-      <p>Cancellation will end this Event. Current roster assignments will be preserved as cancelled history. Published Event team members and the Chief Leader will be notified.</p>
-      <form (submit)="$event.preventDefault(); submit()">
-        <label for="cancellation-reason">Reason for cancellation</label>
-        <textarea id="cancellation-reason" rows="5" required minlength="10" maxlength="500"
-          [value]="reason()" (input)="reason.set($any($event.target).value)"></textarea>
+      <div class="cd-callout cd-callout--danger">
+        <p>Cancelling ends this event permanently and preserves roster assignments in its history. If the event is published, the team and Chief Leader will be notified.</p>
+      </div>
+      <form class="cancel-form" (submit)="$event.preventDefault(); submit()">
+        <div class="field">
+          <label for="cancellation-reason">Reason for cancellation <span class="required" aria-hidden="true">*</span></label>
+          <textarea id="cancellation-reason" rows="5" required minlength="10" maxlength="500"
+            [value]="reason()" (input)="reason.set($any($event.target).value)"
+            aria-describedby="cancellation-reason-hint"></textarea>
+          <div class="field-hint" id="cancellation-reason-hint">
+            <span>At least 10 characters</span>
+            <span>{{ reason().length }} / 500 characters</span>
+          </div>
+        </div>
         <div class="actions">
-          <button type="submit" [disabled]="saving()">{{ saving() ? 'Cancelling…' : 'Cancel event' }}</button>
-          <a routerLink="/dashboard">Keep event</a>
+          <button type="submit" class="cd-btn cd-btn--danger" [disabled]="saving() || loading() || reloadNeeded() || reason().trim().length < 10">
+            {{ saving() ? 'Cancelling…' : 'Cancel event' }}
+          </button>
+          <a routerLink="/dashboard" class="cd-btn cd-btn--secondary">Keep event</a>
         </div>
       </form>
     } @else {
-      <p>This Event is already closed.</p>
-      <a routerLink="/dashboard">Back to dashboard</a>
+      <div class="cd-callout cd-callout--info">
+        <p>This Event is already closed.</p>
+      </div>
+      <a routerLink="/dashboard" class="cd-btn cd-btn--secondary">Back to dashboard</a>
     }
   }
 </section>

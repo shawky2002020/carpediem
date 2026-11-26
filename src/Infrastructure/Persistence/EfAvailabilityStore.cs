@@ -11,18 +11,14 @@ public sealed class EfAvailabilityStore(CarpediemDbContext db) : IAvailabilitySt
 {
     public async Task<MyAvailabilityDto?> GetMyAvailabilityAsync(Guid eventId, Guid userId, CancellationToken cancellationToken)
     {
-        var eventItem = await db.Events.AsNoTracking()
-            .SingleOrDefaultAsync(e => e.Id == eventId, cancellationToken);
+        var eventItem = await (
+            from item in db.Events.AsNoTracking()
+            join cycle in db.StaffingCycles on item.Id equals cycle.EventId
+            where item.Id == eventId && cycle.IsCurrent
+            select new { item.Title, item.Location, item.StartDateTime, item.EndDateTime, item.Status, CycleId = cycle.Id })
+            .SingleOrDefaultAsync(cancellationToken);
 
         if (eventItem is null)
-        {
-            return null;
-        }
-
-        var cycle = await db.StaffingCycles.AsNoTracking()
-            .SingleOrDefaultAsync(c => c.EventId == eventId && c.IsCurrent, cancellationToken);
-
-        if (cycle is null)
         {
             return null;
         }
@@ -34,17 +30,20 @@ public sealed class EfAvailabilityStore(CarpediemDbContext db) : IAvailabilitySt
         var isWindowOpen = eventItem.Status == EventStatus.Published && eventItem.StartDateTime > now;
 
         var existing = await db.AvailabilityResponses.AsNoTracking()
-            .SingleOrDefaultAsync(a => a.StaffingCycleId == cycle.Id && a.UserId == userId, cancellationToken);
+            .SingleOrDefaultAsync(a => a.StaffingCycleId == eventItem.CycleId && a.UserId == userId, cancellationToken);
 
         return new MyAvailabilityDto(
             EventId: eventId,
-            StaffingCycleId: cycle.Id,
+            StaffingCycleId: eventItem.CycleId,
             Response: existing?.Response,
             DeclaredAt: existing?.DeclaredAt,
             Version: existing is not null ? Convert.ToBase64String(existing.RowVersion) : null,
             IsWindowOpen: isWindowOpen,
             EventStatus: eventItem.Status.ToString(),
-            IsChiefLeaderOnEvent: isChiefLeaderOnEvent);
+            IsChiefLeaderOnEvent: isChiefLeaderOnEvent,
+            Itinerary: eventItem.Status == EventStatus.Published
+                ? new PublishedEventItinerary(eventItem.Title, eventItem.Location, eventItem.StartDateTime, eventItem.EndDateTime)
+                : null);
     }
 
     public async Task<AvailabilityDeclarationResult> DeclareAvailabilityAsync(DeclareAvailabilityCommand command, CancellationToken cancellationToken)

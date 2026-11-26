@@ -1,0 +1,16 @@
+@use '../field-pages' as field;
+:host { display:block; container-type:inline-size; }
+.cd-reading { display:grid; gap:clamp(1.1rem,2.6vw,2rem); max-inline-size:64rem; margin-inline:auto; overflow-wrap:anywhere; }
+.page-header h1 { @include field.title; }
+.page-header p, .meta-line, .meta-sub, .report-meta, .account-meta { margin:.3rem 0 0; color:var(--cd-text-secondary); }
+.meta-line, .meta-sub, .report-meta { font-size:.88rem; }
+ul { margin:0; padding:0; list-style:none; }
+.pagination-nav { display:flex; align-items:center; flex-wrap:wrap; gap:1rem; }
+form, .field { display:grid; gap:.5rem; min-inline-size:0; }
+form { gap:1.1rem; }
+label, legend { font-weight:650; }
+input,textarea,select { min-inline-size:0; inline-size:100%; }
+textarea { resize:vertical; min-block-size:6rem; }
+form button { justify-self:start; }
+:where(.account-header,.card-top,.report-top,.submitted-header) { display:flex; align-items:start; flex-wrap:wrap; justify-content:space-between; gap:.6rem; }
+h2,h3 { margin:0; }

@@ -1,5 +1,4 @@
 <div class="page-heading">
-  <p class="eyebrow">Event planning</p>
   <h1>Create Draft Event</h1>
   <p>Enter the event details. Only administrators can see this Draft.</p>
 </div>
@@ -8,18 +7,18 @@
   @else if (uncertain()) { The save outcome is uncertain. Retry to confirm this creation without making a duplicate. }
 </div>
 @if (uncertain()) {
-  <div class="retry-panel" role="alert">
+  <div class="cd-callout cd-callout--warning retry-panel" role="alert">
     <p>{{ problem()?.title }}</p>
-    <button type="button" data-testid="retry-create" (click)="retry()" [disabled]="saving()">Retry save</button>
+    <button type="button" class="cd-btn cd-btn--secondary" data-testid="retry-create" (click)="retry()" [disabled]="saving()">Retry save</button>
   </div>
 }
 @if (problem()?.code === 'unauthenticated') {
-  <section class="retry-panel" role="alert">
+  <section class="cd-callout cd-callout--danger retry-panel" role="alert">
     <p>Your session has expired. Your entered values remain here.</p>
-    <a href="/sign-in" target="_blank" rel="noopener">Open sign in</a>
+    <a href="/sign-in" target="_blank" rel="noopener" class="cd-btn cd-btn--secondary">Open sign in</a>
   </section>
 } @else if (problem()?.code === 'forbidden') {
-  <section class="retry-panel" role="alert">
+  <section class="cd-callout cd-callout--danger retry-panel" role="alert">
     <p>Draft Event access is denied. Your entered values remain here.</p>
   </section>
 }

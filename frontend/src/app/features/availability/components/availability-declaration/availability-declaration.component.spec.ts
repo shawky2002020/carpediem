@@ -1,13 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router';
+import { signal } from '@angular/core';
+import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { AvailabilityType, MyAvailabilityResponse } from '../../data/availability.model';
 import { AvailabilityService } from '../../data/availability.service';
 import { AvailabilityDeclarationComponent } from './availability-declaration.component';
+import { NotificationInboxItem, NotificationInboxService } from '../../../notifications/notification-inbox.service';
 
 describe('AvailabilityDeclarationComponent', () => {
   let component: AvailabilityDeclarationComponent;
   let fixture: ComponentFixture<AvailabilityDeclarationComponent>;
+  const inboxItems = signal<NotificationInboxItem[]>([]);
   let availabilityServiceMock: {
     getMyAvailability: ReturnType<typeof vi.fn>;
     declareAvailability: ReturnType<typeof vi.fn>;
@@ -27,6 +30,7 @@ describe('AvailabilityDeclarationComponent', () => {
   };
 
   beforeEach(async () => {
+    inboxItems.set([]);
     availabilityServiceMock = {
       getMyAvailability: vi.fn(() => of(defaultMockResponse)),
       declareAvailability: vi.fn(),
@@ -35,10 +39,13 @@ describe('AvailabilityDeclarationComponent', () => {
     await TestBed.configureTestingModule({
       imports: [AvailabilityDeclarationComponent],
       providers: [
+        provideRouter([]),
         { provide: AvailabilityService, useValue: availabilityServiceMock },
+        { provide: NotificationInboxService, useValue: { items: inboxItems } },
         {
           provide: ActivatedRoute,
           useValue: {
+            paramMap: of(convertToParamMap({eventId: mockEventId})),
             snapshot: {
               paramMap: {
                 get: (key: string) => (key === 'eventId' ? mockEventId : null),
@@ -52,6 +59,21 @@ describe('AvailabilityDeclarationComponent', () => {
     fixture = TestBed.createComponent(AvailabilityDeclarationComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  it('shows the title from a matching inbox notification', () => {
+    const item = {
+      id: 'availability-notice', eventId: mockEventId, notificationType: 'EventPublished',
+      createdAt: '2026-11-24T10:00:00Z', readAt: null,
+    };
+    inboxItems.set([
+      { ...item, eventId: 'other-event', contextPayload: '{"eventTitle":"Other event"}' },
+      { ...item, contextPayload: 'older notice' },
+      { ...item, contextPayload: '{"eventTitle":"Camp orientation"}' },
+    ]);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.availability-event-title')?.textContent).toBe('Camp orientation');
   });
 
   it('renders initial "Response Needed" status badge when no response has been declared', () => {

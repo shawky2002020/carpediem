@@ -1,24 +1,40 @@
-:host { display: block; max-inline-size: 44rem; min-inline-size: 0; }
-.back-link { display: inline-flex; align-items: center; min-block-size: var(--cd-touch-target-min); margin-block-end: var(--cd-space-3); }
-.page-heading { margin-block-end: var(--cd-space-4); }
-.eyebrow { margin: 0; color: var(--cd-text-secondary); font-size: var(--cd-font-size-sm); font-weight: var(--cd-weight-bold); letter-spacing: var(--cd-letter-spacing-caps); text-transform: uppercase; }
-h1 { margin-block: var(--cd-space-2); font: var(--cd-weight-bold) clamp(1.8rem, 6vw, 2.8rem)/var(--cd-line-tight) var(--cd-font-display); }
-.status-space { min-block-size: 1.75rem; color: var(--cd-status-success-fg); }
-.message, .appointment-detail { margin-block: var(--cd-space-4); padding: var(--cd-space-5); border: 1px solid var(--cd-border-default); border-radius: var(--cd-radius-panel); background: var(--cd-bg-surface); }
-.message.error { border-inline-start: 4px solid var(--cd-status-danger-fg); background: var(--cd-status-danger-bg); }
-.message h2, .appointment-detail h2 { margin-block-start: 0; }
-.message button, .actions button { min-block-size: var(--cd-touch-target-min); padding-inline: var(--cd-space-5); border-radius: var(--cd-radius-control); font-weight: var(--cd-weight-semibold); }
-.appointment-list { display: grid; gap: var(--cd-space-3); list-style: none; margin: 0; padding: 0; }
-.appointment-card { display: grid; gap: var(--cd-space-2); min-inline-size: 0; min-block-size: var(--cd-touch-target-min); padding: var(--cd-space-4); border: 1px solid var(--cd-border-default); border-radius: var(--cd-radius-panel); background: var(--cd-bg-surface); color: var(--cd-text-primary); text-decoration: none; overflow-wrap: anywhere; }
-.appointment-card strong { font-size: var(--cd-font-size-lg); }
-.appointment-card:focus-visible, .back-link:focus-visible, button:focus-visible { outline: 3px solid var(--cd-focus-ring); outline-offset: 3px; }
-.status-label { inline-size: fit-content; margin: 0; padding: .2rem .65rem; border-radius: var(--cd-radius-pill); background: var(--cd-status-warning-bg); color: var(--cd-status-warning-fg); font-size: var(--cd-font-size-sm); font-weight: var(--cd-weight-bold); }
-dl { display: grid; gap: var(--cd-space-3); }
-dl div { display: grid; gap: var(--cd-space-1); }
-dt { color: var(--cd-text-secondary); font-weight: var(--cd-weight-semibold); }
-dd { margin: 0; overflow-wrap: anywhere; }
-.actions { display: flex; gap: var(--cd-space-3); }
-.primary { border: 1px solid var(--cd-action-primary); background: var(--cd-action-primary); color: var(--cd-text-inverse); }
-.secondary, .message button { border: 1px solid var(--cd-border-strong); background: var(--cd-bg-surface); color: var(--cd-text-primary); }
-@media (max-width: 35rem) { .actions { flex-direction: column; } .actions button { inline-size: 100%; } }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
+@use '../field-pages' as field;
+:host { display:block; max-inline-size:60rem; margin-inline:auto; }
+h1 { @include field.title; }
+.page-heading { padding-block-end:clamp(.8rem,2vw,1.6rem); }
+.page-heading p { margin:0; color:var(--cd-text-secondary); }
+.status-space { color:var(--cd-status-success-fg); }
+.status-space:not(:empty) { margin-block:.6rem; }
+.appointment-list { list-style:none; padding:0; margin:0; border-block-start:2px solid var(--cd-text-primary); }
+.appointment-card { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:1rem; align-items:center; padding:1.25rem .4rem; border-block-end:1px solid var(--cd-border-default); text-decoration:none; color:inherit; overflow-wrap:anywhere; }
+.appointment-card:hover { background:var(--cd-bg-subtle); }
+.request-info { display:grid; gap:.35rem; justify-items:start; }
+.request-info strong { font:650 clamp(1.35rem,2.6vw,2.25rem)/1.12 var(--cd-font-display); letter-spacing:-.04em; }
+.appointment-card time { font-size:.9rem; color:var(--cd-text-secondary); }
+.request-arrow { font-size:2rem; color:var(--cd-action-primary); }
+.record-heading { padding:0; }
+.record-heading h1 { margin:.3rem 0 1.1rem; font:650 1.32rem/1.16 var(--cd-font-display); letter-spacing:-.035em; }
+.back-link { padding-inline:0; }
+.appointment-detail {
+  max-inline-size:46rem; margin-inline:auto; overflow-wrap:anywhere;
+  padding:clamp(1.05rem,4vw,2.75rem);
+  background:#f2eddb; border-block-start:3px solid #a84a2f;
+}
+.letter-heading { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:.35rem .8rem; font-size:.9rem; }
+.letter-heading > span:first-child { color:#65533a; font-weight:600; }
+.appointment-detail h2 {
+  margin:.8rem 0 1.15rem; font:600 clamp(1.9rem,4vw,3.6rem)/1.03 var(--cd-font-display);
+  letter-spacing:-.048em; max-inline-size:20ch;
+}
+dl { display:grid; gap:.55rem; margin:0 0 1rem; padding-block:.85rem; border-block:1px solid #cdc6af; }
+dl > div { display:grid; grid-template-columns:minmax(3.25rem,.22fr) minmax(0,1fr); align-items:baseline; gap:.55rem; }
+dt { color:#65533a; font-size:.86rem; }
+.zone { font-weight:400; color:#65533a; }
+dd { margin:0; font-weight:600; font-variant-numeric:tabular-nums; }
+.appointment-detail > p { max-inline-size:47ch; color:#4b4b3d; margin-block:0 .8rem; }
+.actions { display:flex; flex-wrap:wrap; gap:.3rem .55rem; align-items:center; }
+.actions .secondary { background:transparent; text-decoration:underline; text-underline-offset:.23em; }
+@media(min-width:52rem) {
+  :host:has(.appointment-detail) {max-inline-size:46rem;}
+}
+@media(max-width:42rem) { .appointment-card { grid-template-columns:minmax(0,1fr) auto; row-gap:.45rem; } .request-arrow { grid-column:2; grid-row:1/3; } .appointment-card time { grid-column:1; } }

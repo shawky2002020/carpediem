@@ -1,0 +1,64 @@
+:host { display: block; }
+.welcome {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  background: #f2efdd;
+  color: #193729;
+}
+.welcome-copy { align-self: center; padding: clamp(1.5rem, 5vw, 5.25rem); }
+.welcome-copy h1 {
+  max-inline-size: 10ch;
+  margin: 0;
+  color: inherit;
+  font-size: clamp(3.1rem, 7.45vw, 7.25rem);
+  font-weight: 600;
+  line-height: .93;
+  letter-spacing: -.027em;
+}
+.welcome-copy p { color: #465749; max-inline-size: 33ch; font-size: clamp(1.04rem, 1.55vw, 1.23rem); margin: 1.4rem 0 0; }
+.welcome-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem 1.5rem; margin-block-start: 1.75rem; }
+.welcome-actions .cd-btn { min-inline-size: 6.5rem; }
+.entry-link { display: inline-flex; align-items: center; min-block-size: 44px; text-underline-offset: .22em; font-weight: 650; }
+.welcome-brand { position: relative; min-block-size: clamp(10rem, 40vw, 18rem); overflow: hidden; }
+.orchard { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; object-fit: cover; object-position: 50% 54%; }
+.signature { position: absolute; right: 1.25rem; bottom: 1rem; width: clamp(4.5rem, 11vw, 8rem); height: auto; }
+.welcome-roles { margin-block-start: clamp(1.75rem, 4vw, 3.25rem); }
+.welcome-roles h2 { font-size: clamp(1.45rem, 2.4vw, 2.25rem); margin-block-end: 1rem; }
+.welcome-roles dl { display: grid; margin: 0; gap: 1rem; }
+.welcome-roles dl > div { padding-block-start: .7rem; border-top: 2px solid var(--cd-brand-rail); }
+.welcome-roles dt { font-size: 1.125rem; font-weight: 700; }
+.welcome-roles dd { color: var(--cd-text-secondary); margin: .3rem 0 0; max-inline-size: 33ch; }
+.workspace-heading { padding-block: .5rem clamp(1.5rem, 3vw, 2.75rem); }
+.workspace { overflow-wrap: anywhere; }
+.workspace-heading h1 { font-size: clamp(2.4rem, 5.6vw, 5rem); margin-block-end: .5rem; letter-spacing: -.028em; }
+.workspace-heading p { color: var(--cd-text-secondary); margin: 0; }
+.workspace-body { display: grid; gap: clamp(1.25rem, 3vw, 3rem); align-items: start; }
+.workspace-feature { display: grid; grid-template-columns: minmax(0, 1fr); text-decoration: none; background: #183d2f; color: #f7f3df; min-inline-size: 0; }
+.feature-art { background: url('/brand/orchard-print.webp') center 38% / cover; min-height: 6rem; }
+.feature-content { display: grid; gap: .6rem; padding: clamp(1.25rem, 2.6vw, 2.25rem); }
+.feature-content > strong { font: 600 clamp(1.85rem, 2.7vw, 2.65rem)/1.04 var(--cd-font-display); }
+.feature-content > span { max-inline-size: 32ch; }
+.feature-open { display: flex; align-items: center; gap: .6rem; margin-block-start: .6rem; text-decoration: underline; text-underline-offset: .22em; font-weight: 650; }
+.workspace-feature:hover .feature-open { color: #ffe1a5; }
+.workspace-list { list-style: none; margin: 0; padding: 0; }
+.workspace-list li { border-top: 1px solid var(--cd-border-default); }
+.workspace-list a { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .25rem 1rem; padding: 1.15rem .25rem; color: var(--cd-text-primary); text-decoration: none; }
+.workspace-list strong { font: 600 1.4rem/1.15 var(--cd-font-display); }
+.workspace-list a:hover strong { text-decoration: underline; text-underline-offset: .2em; }
+.workspace-list span:not(.arrow) { color: var(--cd-text-secondary); grid-column: 1; }
+.arrow { grid-row: 1; grid-column: 2; }
+@media (min-width: 48rem) {
+  .welcome { grid-template-columns: minmax(0, 1fr) minmax(0, .83fr); min-block-size: clamp(25rem, 38vw, 36rem); }
+  .welcome-roles dl { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem; }
+  .workspace-body { grid-template-columns: minmax(0, .94fr) minmax(0, 1fr); }
+  .feature-art { min-height: 8.5rem; }
+}
+
+@media (max-width: 47.99rem) {
+  .feature-art { background-image: url('/brand/orchard-print-small.webp'); }
+  .welcome-brand { grid-row: 1; min-block-size: clamp(8.75rem, 36vw, 12rem); }
+  .welcome-brand .orchard { object-position: 50% 40%; }
+  .welcome-brand .signature { right: .65rem; bottom: .6rem; padding: .45rem; width: 4.65rem; background: #103b2d; }
+  .welcome-copy { padding-block: 1.5rem; }
+  .welcome-copy h1 { max-inline-size: 11ch; }
+}

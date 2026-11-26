@@ -1,0 +1,19 @@
+@use 'field-pages' as field;
+.event-action-page {
+  display:grid;
+  gap:1rem;
+  max-inline-size:58rem;
+  margin-inline:auto;
+  h1 { @include field.title; }
+  p,.cd-alert { margin-block:0; }
+  > button { justify-self:start; }
+}
+.cd-notice { display:grid; gap:.5rem; align-content:start; padding:1.35rem; background:#e6eddf; border-inline-start:3px solid #768f6d; }
+.cd-notice--warning { background:var(--cd-status-warning-bg); border-color:var(--cd-status-warning-fg); }
+.cd-completion-actions,.cd-reschedule-actions { display:flex; flex-wrap:wrap; gap:.6rem; padding-block:.7rem; }
+@media(min-width:64rem) {
+  .event-action-page { grid-template-columns:minmax(0,1fr) minmax(0,1.3fr); align-items:start; column-gap:2rem; }
+  .cd-completion-header,.cd-reschedule-header,.event-action-page .cd-alert { grid-column:1/-1; }
+  .cd-notice { grid-column:1; }
+  .cd-reschedule-form,.cd-completion-summary,.cd-completion-actions { grid-column:2; }
+}

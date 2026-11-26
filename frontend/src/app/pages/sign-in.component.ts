@@ -3,125 +3,79 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { SessionService } from '../core/auth/session.service';
+import { AccountAccessComponent } from './account-access.component';
 
 @Component({
   selector: 'app-sign-in',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [AccountAccessComponent, ReactiveFormsModule, RouterLink],
   template: `
-    <section class="auth-card cd-reading">
-      <div class="auth-brand-header">
-        <img src="/logo.svg" alt="Carpediem logo" width="56" height="56" class="auth-logo" />
-        <div class="auth-title-group">
-          <p class="eyebrow">Account access</p>
-          <h1>Sign in</h1>
-        </div>
-      </div>
-      <p class="subtitle">Sign in with your Carpediem username and password to access your operational workspace.</p>
-      <form [formGroup]="form" (ngSubmit)="submit()">
-        <div class="field">
-          <label for="userName">Username</label>
-          <input id="userName" autocomplete="username" formControlName="userName">
-        </div>
-        <div class="field">
-          <label for="password">Password</label>
-          <input id="password" type="password" autocomplete="current-password" formControlName="password">
-        </div>
-        <button type="submit" [disabled]="form.invalid || saving()">{{ saving() ? 'Signing in…' : 'Sign in' }}</button>
-        @if (error()) { <p role="alert">Sign in failed. Check your details and try again.</p> }
-      </form>
-      <p class="auth-footer">Need a volunteer account? <a routerLink="/register">Register as a Leader</a></p>
-    </section>
+    <app-account-access #access>
+      <section class="account-form" aria-labelledby="sign-in-title">
+        <h1 id="sign-in-title">Sign in</h1>
+        <p class="intro">Use your Carpediem account to open your workspace.</p>
+        <form [formGroup]="form" (ngSubmit)="submit()">
+          <div class="field">
+            <label for="userName">Username</label>
+            <input id="userName" autocomplete="username" formControlName="userName" required
+              [attr.aria-invalid]="form.controls.userName.touched && form.controls.userName.invalid || null"
+              [attr.aria-describedby]="form.controls.userName.touched && form.controls.userName.invalid ? 'username-error' : null">
+            @if (form.controls.userName.touched && form.controls.userName.invalid) {
+              <p class="field-error" id="username-error">Enter your username.</p>
+            }
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="password-control">
+              <input id="password" [type]="access.passwordVisible() ? 'text' : 'password'" autocomplete="current-password" formControlName="password" required
+                [attr.aria-invalid]="form.controls.password.touched && form.controls.password.invalid || null"
+                [attr.aria-describedby]="form.controls.password.touched && form.controls.password.invalid ? 'password-error' : null">
+              <button type="button" class="password-toggle" aria-controls="password" (click)="access.togglePassword()">
+                {{ access.passwordVisible() ? 'Hide' : 'Show' }}<span class="cd-visually-hidden"> password</span>
+              </button>
+            </div>
+            @if (form.controls.password.touched && form.controls.password.invalid) {
+              <p class="field-error" id="password-error">Enter your password.</p>
+            }
+          </div>
+          @if (error(); as message) {
+            <div role="alert" class="cd-alert cd-alert--error"><p>{{ message }}</p></div>
+          }
+          <button type="submit" class="cd-btn cd-btn--primary" [disabled]="form.invalid || saving()">
+            {{ saving() ? 'Signing in…' : 'Sign in' }}
+          </button>
+        </form>
+        <p class="auth-footer">Need a Leader account? <a routerLink="/register">Register as a Leader</a></p>
+      </section>
+    </app-account-access>
   `,
-  styles: [`
-    .auth-card {
-      margin-inline: auto;
-      padding: var(--cd-space-6);
-      background: var(--cd-bg-surface);
-      border: 1px solid var(--cd-border-default);
-      border-radius: var(--cd-radius-panel);
-      box-shadow: var(--cd-shadow-raised);
-    }
-    .auth-brand-header {
-      display: flex;
-      align-items: center;
-      gap: var(--cd-space-4);
-      margin-block-end: var(--cd-space-3);
-    }
-    .auth-logo {
-      inline-size: 3.5rem;
-      block-size: 3.5rem;
-      border-radius: 50%;
-      flex-shrink: 0;
-      box-shadow: 0 4px 12px rgba(5, 45, 29, 0.15);
-    }
-    .auth-title-group h1 {
-      margin: 0;
-    }
-    .eyebrow {
-      margin: 0 0 var(--cd-space-1);
-      font-size: var(--cd-font-size-xs);
-      font-weight: var(--cd-weight-bold);
-      text-transform: uppercase;
-      letter-spacing: var(--cd-letter-spacing-caps);
-      color: var(--cd-action-primary);
-    }
-    .subtitle {
-      color: var(--cd-text-secondary);
-      margin-block-end: var(--cd-space-5);
-    }
-    form { display: grid; gap: var(--cd-space-4); }
-    .field { display: grid; gap: var(--cd-space-2); }
-    label { font-weight: var(--cd-weight-semibold); }
-    input {
-      inline-size: 100%;
-      border: 1px solid var(--cd-form-border);
-      border-radius: var(--cd-radius-control);
-      padding-inline: var(--cd-space-3);
-    }
-    button {
-      margin-block-start: var(--cd-space-2);
-      color: var(--cd-text-inverse);
-      background: var(--cd-action-primary);
-      border: 1px solid var(--cd-action-primary);
-      border-radius: var(--cd-radius-control);
-      padding-inline: var(--cd-space-4);
-      font-weight: var(--cd-weight-semibold);
-    }
-    [role=alert] {
-      margin: 0;
-      padding: var(--cd-space-3);
-      border-radius: var(--cd-radius-control);
-      background: var(--cd-status-danger-bg);
-      border-inline-start: 4px solid var(--cd-status-danger-fg);
-      color: var(--cd-status-danger-fg);
-      font-weight: var(--cd-weight-medium);
-    }
-    .auth-footer {
-      margin: var(--cd-space-5) 0 0;
-      padding-block-start: var(--cd-space-4);
-      border-block-start: 1px solid var(--cd-border-default);
-      font-size: var(--cd-font-size-sm);
-      color: var(--cd-text-secondary);
-    }
-    .auth-footer a {
-      display: inline-flex;
-      align-items: center;
-      min-block-size: var(--cd-touch-target-min);
-      padding-inline: var(--cd-space-2);
-      color: var(--cd-action-primary);
-      font-weight: var(--cd-weight-semibold);
-    }
-  `],
+  styleUrl: './account-form.scss',
 })
 export class SignInComponent {
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);
   protected readonly saving = signal(false);
-  protected readonly error = signal(false);
-  protected readonly form = new FormGroup({ userName: new FormControl('', { nonNullable: true, validators: Validators.required }), password: new FormControl('', { nonNullable: true, validators: Validators.required }) });
+  protected readonly error = signal('');
+  protected readonly form = new FormGroup({
+    userName: new FormControl('', { nonNullable: true, validators: Validators.required }),
+    password: new FormControl('', { nonNullable: true, validators: Validators.required }),
+  });
+
   protected submit(): void {
     if (this.form.invalid || this.saving()) return;
-    this.saving.set(true); this.error.set(false);
-    this.session.login(this.form.getRawValue()).pipe(finalize(() => this.saving.set(false))).subscribe({ next: () => void this.router.navigate(['/']), error: () => this.error.set(true) });
+    this.saving.set(true);
+    this.error.set('');
+    this.session.login(this.form.getRawValue()).pipe(finalize(() => this.saving.set(false))).subscribe({
+      next: () => void this.router.navigate(['/']),
+      error: failure => {
+        const status = failure.status;
+        if (status === 0 || status >= 500) {
+          this.error.set('Carpediem could not be reached. Check your connection and try again.');
+        } else if (status === 429) {
+          this.error.set('Too many attempts. Wait a moment before signing in again.');
+        } else {
+          this.error.set('Sign in failed. Check your username and password and try again.');
+        }
+      },
+    });
   }
 }

@@ -1,0 +1,10 @@
+{
+  "assignment": "Enter opens the cancellation sheet, its reason field receives focus, Escape returns focus to the original action.",
+  "rating": {
+    "choice": "3",
+    "clickableLabel": 48
+  },
+  "pendingDecision": "← My appointments\nChief Leader appointment\nSaving your response…\nInvited 23 Nov 2026\nPending\nWinter camp orientation\nWhen\n12 Dec 2026, 09:00–15:00 Cairo\nWhere\nMango Tree Campsite\n\nAccept to lead this event. It stays in draft until an administrator publishes it.\n\nAccept appointment\nDeclining…",
+  "declineRequests": 1,
+  "focusAfterDecision": "DIV:"
+}

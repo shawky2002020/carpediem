@@ -12,6 +12,7 @@ describe('AttendanceRollSheetComponent', () => {
   let attendanceServiceMock: {
     getRollSheet: ReturnType<typeof vi.fn>;
     finalizeAttendance: ReturnType<typeof vi.fn>;
+    correctAttendance: ReturnType<typeof vi.fn>;
   };
 
   const mockEventId = '11111111-1111-1111-1111-111111111111';
@@ -52,6 +53,7 @@ describe('AttendanceRollSheetComponent', () => {
     attendanceServiceMock = {
       getRollSheet: vi.fn().mockReturnValue(of(defaultMockRollSheet)),
       finalizeAttendance: vi.fn(),
+      correctAttendance: vi.fn(),
     };
 
     await TestBed.configureTestingModule({
@@ -162,5 +164,33 @@ describe('AttendanceRollSheetComponent', () => {
     component.submit();
 
     expect(component.errorMessage()).toBe('Event is cancelled');
+  });
+
+  it('preserves unsaved roll-call entries when a finalized record is corrected', () => {
+    const [first, second] = defaultMockRollSheet.entries;
+    component.rollSheet.set({
+      ...defaultMockRollSheet,
+      entries: [
+        { ...first, attendanceOutcomeId: 'record-1', outcome: 'NoShow', finalizedAt: '2026-10-15T12:00:00Z', version: 'before' },
+        second,
+      ],
+    });
+    component.setOutcome(second.teamAssignmentId, 'NoShow');
+    component.startCorrection(first.teamAssignmentId, 'NoShow');
+    component.correctionForm.controls.reason.setValue('Volunteer arrived late');
+    attendanceServiceMock.correctAttendance.mockReturnValue(of({
+      teamAssignmentId: first.teamAssignmentId,
+      newOutcome: 'Attended',
+      version: 'after',
+    }));
+
+    component.submitCorrection(first.teamAssignmentId);
+
+    expect(attendanceServiceMock.correctAttendance).toHaveBeenCalledWith(
+      'record-1', { newOutcome: 'Attended', reason: 'Volunteer arrived late' }, 'before',
+    );
+    expect(component.getEffectiveOutcome(first.teamAssignmentId)).toBe('Attended');
+    expect(component.outcomesState().get(second.teamAssignmentId)).toBe('NoShow');
+    expect(attendanceServiceMock.getRollSheet).toHaveBeenCalledTimes(1);
   });
 });

@@ -2,6 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, Page, Route, test } from '@playwright/test';
 
 const targetEventId = '70000000-0000-0000-0000-000000000001';
+test.use({ timezoneId: 'Africa/Cairo' });
 
 test('Admin views and submits valid event reschedule', async ({ page }) => {
   const api = await mockRescheduleApi(page);
@@ -30,6 +31,8 @@ test('Admin views and submits valid event reschedule', async ({ page }) => {
 
   expect(api.postCalls).toBe(1);
   expect(api.lastPayload?.justification).toBe('Venue unavailable on original date due to facility maintenance.');
+  expect(api.lastPayload?.newStartDateTime).toBe('2026-11-20T09:00:00.000Z');
+  expect(api.lastIfMatch).toBe('"test-version=="');
 });
 
 test('Validates required fields and justification length', async ({ page }) => {
@@ -115,8 +118,10 @@ interface MockRescheduleApiOptions {
 }
 
 async function mockRescheduleApi(page: Page, options: MockRescheduleApiOptions = {}) {
+  await page.clock.setFixedTime(new Date('2026-10-02T12:00:00Z'));
   let postCalls = 0;
   let lastPayload: any = null;
+  let lastIfMatch: string | null = null;
 
   await page.route('**/api/**', async (route: Route) => {
     const request = route.request();
@@ -144,9 +149,14 @@ async function mockRescheduleApi(page: Page, options: MockRescheduleApiOptions =
       });
     }
 
+    if (path === `/api/events/${targetEventId}/cancellation` && request.method() === 'GET') {
+      return route.fulfill({ json: { eventId: targetEventId, title: 'Community Gala', status: 'Published', version: 'test-version==' } });
+    }
+
     if (path === `/api/events/${targetEventId}/reschedule` && request.method() === 'POST') {
       postCalls++;
       lastPayload = request.postDataJSON();
+      lastIfMatch = request.headers()['if-match'] ?? null;
 
       if (options.conflictDetail) {
         return route.fulfill({
@@ -188,5 +198,6 @@ async function mockRescheduleApi(page: Page, options: MockRescheduleApiOptions =
   return {
     get postCalls() { return postCalls; },
     get lastPayload() { return lastPayload; },
+    get lastIfMatch() { return lastIfMatch; },
   };
 }

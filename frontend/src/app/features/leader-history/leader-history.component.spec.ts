@@ -52,8 +52,8 @@ describe('LeaderHistoryComponent', () => {
     expect(content).toContain('Events attended');
     expect(content).toContain('Self-cancellations');
     expect(content).toContain('Beach cleanup');
-    expect(content).toContain('Staffing cycle 2 (historical)');
-    expect(content).toContain('Attendance: Attended');
+    expect(content).toMatch(/Staffing cycle\s*2 \(historical\)/);
+    expect(content).toMatch(/Attendance\s*Attended/);
     expect(content).toContain('Volunteer self-cancellation recorded');
     expect(content).not.toContain('score');
   });

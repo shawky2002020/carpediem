@@ -1,7 +1,9 @@
 import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { SessionService } from '../../core/auth/session.service';
 import { NotificationInboxItem, NotificationInboxService } from './notification-inbox.service';
+import { readNotificationContext } from './notification-context';
 
 export interface NotificationGroup {
   label: string;
@@ -16,6 +18,7 @@ export interface NotificationGroup {
 })
 export class NotificationInboxComponent {
   protected readonly inbox = inject(NotificationInboxService);
+  private readonly session = inject(SessionService);
 
   readonly groupedNotifications = computed<NotificationGroup[]>(() => {
     const items = this.inbox.items();
@@ -44,13 +47,8 @@ export class NotificationInboxComponent {
 
     const groups: NotificationGroup[] = [];
     if (todayItems.length > 0) groups.push({ label: 'Today', items: todayItems });
-    if (thisWeekItems.length > 0) groups.push({ label: 'This Week', items: thisWeekItems });
+    if (thisWeekItems.length > 0) groups.push({ label: 'Last 7 days', items: thisWeekItems });
     if (olderItems.length > 0) groups.push({ label: 'Older', items: olderItems });
-
-    // Fallback if timestamps are far in the future or weird
-    if (groups.length === 0 && items.length > 0) {
-      groups.push({ label: 'Recent Notifications', items });
-    }
 
     return groups;
   });
@@ -71,13 +69,7 @@ export class NotificationInboxComponent {
   }
 
   protected details(item: NotificationInboxItem): string {
-    let payload: Record<string, unknown> = {};
-    try {
-      const value: unknown = JSON.parse(item.contextPayload ?? '{}');
-      if (value && typeof value === 'object' && !Array.isArray(value)) {
-        payload = value as Record<string, unknown>;
-      }
-    } catch { /* Older payloads may not contain JSON. */ }
+    const payload = readNotificationContext(item.contextPayload);
     const eventTitle = typeof payload['eventTitle'] === 'string' ? payload['eventTitle'] : 'this event';
     const volunteerName = typeof payload['volunteerName'] === 'string' ? payload['volunteerName'] : null;
     const justification = typeof payload['justification'] === 'string' ? payload['justification'] : null;
@@ -103,19 +95,18 @@ export class NotificationInboxComponent {
   }
 
   protected getContextualAction(item: NotificationInboxItem): { label: string; link: string[] } | null {
-    if (!item.eventId && item.notificationType !== 'ChiefLeaderAppointment') return null;
-
+    const eventId = item.eventId;
     switch (item.notificationType) {
       case 'VolunteerSelected':
       case 'DirectLeaderAssigned':
       case 'ReplacementLeaderAssigned':
-        return item.eventId ? { label: 'View Shift Details', link: ['/events', item.eventId, 'my-assignment'] } : null;
+        return this.session.isLeader() && eventId ? { label: 'View assignment', link: ['/events', eventId, 'my-assignment'] } : null;
       case 'EventRescheduled':
-        return item.eventId ? { label: 'Update Availability', link: ['/events', item.eventId, 'availability'] } : null;
+        return this.session.isLeader() && eventId ? { label: 'Update availability', link: ['/events', eventId, 'availability'] } : null;
       case 'ChiefLeaderAppointment':
-        return { label: 'View Appointment', link: item.eventId ? ['/my-appointments', item.eventId] : ['/my-appointments'] };
+        return this.session.isChiefLeader() ? { label: 'Review appointments', link: ['/my-appointments'] } : null;
       case 'EventPublished':
-        return item.eventId ? { label: 'Declare Availability', link: ['/events', item.eventId, 'availability'] } : null;
+        return this.session.isLeader() && eventId ? { label: 'Declare availability', link: ['/events', eventId, 'availability'] } : null;
       default:
         return null;
     }

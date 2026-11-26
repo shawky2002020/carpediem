@@ -1,0 +1,7 @@
+@use 'records';
+.feedback-grid { border-block-start:2px solid var(--cd-text-primary); }
+.feedback-card { display:grid; gap:.75rem; padding:1.4rem 0; border-block-end:1px solid var(--cd-border-default); }
+.rating-pill { align-self:start; display:inline-flex; align-items:baseline; gap:.25rem; color:var(--cd-action-primary); font-weight:600; }
+.rating-pill strong { font:650 2.6rem/1 var(--cd-font-display); letter-spacing:-.055em; }
+.comment-callout { margin:0; border-inline-start:3px solid #859977; padding:.3rem 1rem; }
+.comment-body { margin:0; font-size:1.1rem; max-inline-size:55ch; }

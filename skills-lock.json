@@ -1,113 +1,193 @@
 {
-  "version": 1,
+  "version": 2,
   "skills": {
     "accessibility": {
       "source": "addyosmani/web-quality-skills",
       "sourceType": "github",
       "skillPath": "skills/accessibility/SKILL.md",
-      "computedHash": "88c64dead9bb55925c7b983f5fd95cfecf30bd8c076fd384cdb17019d1becd87"
+      "computedHash": "c668809f5df57feb87cc06f1bc37fb340d1d92e26bacb6edbeab9258d22e76a5"
     },
     "angular-developer": {
       "source": "angular/skills",
       "sourceType": "github",
       "skillPath": "angular-developer/SKILL.md",
-      "computedHash": "cebee5c8c3477eb1c03452a318b9c452fa14e993d57924829cc7e0efa766658c"
+      "computedHash": "173024f083cee55ab95cb3ae327923b7fd01b5eb0d30a9af1f893a8d2b2e082d"
+    },
+    "animate": {
+      "source": "emilkowalski/skills",
+      "commit": "64eb3deb9a5fbfa041faf783e0bc3fd635872e9c",
+      "sourceType": "github",
+      "skillPath": "skills/animate/SKILL.md",
+      "computedHash": "c622e29fa956aea703dc4e2b8726d9a017d438beb284a60bc3fdb2540c602102",
+      "installMode": "copy"
+    },
+    "animation-performance": {
+      "source": "emilkowalski/skills",
+      "commit": "64eb3deb9a5fbfa041faf783e0bc3fd635872e9c",
+      "sourceType": "github",
+      "skillPath": "skills/animation-performance/SKILL.md",
+      "computedHash": "1ff92f577fc2b7781ed622fd4eb5e514c252cf5cb95c3661743cd127ee01290a",
+      "installMode": "copy"
     },
     "aspnet-core": {
       "source": "openai/skills",
       "sourceType": "github",
       "skillPath": "skills/.curated/aspnet-core/SKILL.md",
-      "computedHash": "192537b889ef60aba67db5f3c1f694e460fde9b6a45fb4c35ecab8e7710bfa67"
+      "computedHash": "5d43570aa63986051db84919b6b0dfcb8e5d51b7464021f337ef3b00e1acea4d"
+    },
+    "break-ui": {
+      "source": "emilkowalski/skills",
+      "commit": "64eb3deb9a5fbfa041faf783e0bc3fd635872e9c",
+      "sourceType": "github",
+      "skillPath": "skills/break-ui/SKILL.md",
+      "computedHash": "f089f3663e197fb4e106249df70e815a96e3236520a2e1c0919d1694816baca8",
+      "installMode": "copy"
     },
     "c4-architecture": {
       "source": "softaworks/agent-toolkit",
       "sourceType": "github",
       "skillPath": "skills/c4-architecture/SKILL.md",
-      "computedHash": "9192b5d6be529478a70d1a73f3d4ce83db12c2052c4e6df4accd445f21e906d4"
+      "computedHash": "2528e8ea65472b188f160cd95ae6737d6305b8afb6c384a3cc48fcd5284ae768"
     },
     "core-web-vitals": {
       "source": "addyosmani/web-quality-skills",
       "sourceType": "github",
       "skillPath": "skills/core-web-vitals/SKILL.md",
-      "computedHash": "ceaa3e9c9dfa6209ffe923714c0a093b950d0922213d0cf375c27f3d602cc857"
+      "computedHash": "de50c203aa9dafa8dee9dd8c06782e3fc610704b83c1c408e4c5ee2337c4cd2a"
     },
     "design-systems-frontend-architecture": {
       "source": "hueyexe/frontend-agent-skills",
       "sourceType": "github",
       "skillPath": "design-systems-frontend-architecture/SKILL.md",
-      "computedHash": "2e1f63f5799073970e208c99637f290f23d1d3e8567ce52e117725bb32e34052"
+      "computedHash": "89346110db25c85067e3ff5b542da1d251c853c20d1f3d288a89e53412e03709"
     },
     "ef-core": {
       "source": "github/awesome-copilot",
       "sourceType": "github",
       "skillPath": "skills/ef-core/SKILL.md",
-      "computedHash": "23f0a7c7e8c050337d67303f0af339da1ab8f0aa6a334f13112c3f85250c329c"
+      "computedHash": "da175ace68cad812da72bbc8222068ca07d5c8b01e840193bc91d7a5f951a2f8"
+    },
+    "emil-design-eng": {
+      "source": "emilkowalski/skills",
+      "commit": "64eb3deb9a5fbfa041faf783e0bc3fd635872e9c",
+      "sourceType": "github",
+      "skillPath": "skills/emil-design-eng/SKILL.md",
+      "computedHash": "e1b377ccde1d32743d1d3f7d8626629deb8055c9114d180c184697928cc66cc6",
+      "installMode": "copy"
     },
     "finishing-a-development-branch": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/finishing-a-development-branch/SKILL.md",
-      "computedHash": "4f571e7befb8b0946d9d7770232c818812412e9ab1dfb811f847edfba1fc6275"
+      "computedHash": "7e24d821d45b8f10773edd9f1a4be2fac90eedae4f8fc8e70e34e27e44d3f3c0"
     },
     "frontend-design": {
       "source": "anthropics/skills",
       "sourceType": "github",
       "skillPath": "skills/frontend-design/SKILL.md",
-      "computedHash": "106acf230014cbb43ca34e6410371321b56ca742f9ee0442e8ec05bf02eb0384"
+      "computedHash": "83485963700bcf11d5bf78118facb301676b69d918fee2e45a95e7f1a2840f6c"
+    },
+    "impeccable": {
+      "source": "pbakaus/impeccable",
+      "commit": "9e460a87ef338ee9d12c7beed8fedc597a5af5f7",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/impeccable/SKILL.md",
+      "computedHash": "b89bce2429b2b581d38620af9b555e2b4762b12f6f4f61fb07fba7757a284b3e",
+      "installMode": "copy"
+    },
+    "mobile-native": {
+      "source": "emilkowalski/skills",
+      "commit": "64eb3deb9a5fbfa041faf783e0bc3fd635872e9c",
+      "sourceType": "github",
+      "skillPath": "skills/mobile-native/SKILL.md",
+      "computedHash": "2f55a258f185314d585cb6a3514a66c15e9cfc8cd45c936284c4fb7374603d7e",
+      "installMode": "copy"
     },
     "performance": {
       "source": "addyosmani/web-quality-skills",
       "sourceType": "github",
       "skillPath": "skills/performance/SKILL.md",
-      "computedHash": "25074989a0bbf636fd92e9079270b262a1c63422ed72a854494a8241dea0fcc5"
+      "computedHash": "06902ebc4a8b91bfb8d1a99a03f186f0535b03d1a776ef751206104ef9b86c4c"
     },
     "playwright-best-practices": {
       "source": "currents-dev/playwright-best-practices-skill",
       "sourceType": "github",
       "skillPath": "playwright-best-practices/SKILL.md",
-      "computedHash": "88623575c97314e115f0e361a7d942e31d3b7a4e8925832257e1ad33f52096e4"
+      "computedHash": "2b333994f6aeca15b2a3f46b327d817b4a497d9f10d6100abc0e4d07b32c0b0a"
+    },
+    "playwright-snapshots": {
+      "source": "testland/qa",
+      "commit": "3f673f054ac06bb623d8710123801109205d4a77",
+      "sourceType": "github",
+      "skillPath": "plugins/qa-visual-regression/skills/playwright-snapshots/SKILL.md",
+      "computedHash": "f72dfbd6ef6ac6d892eba384ba02d69f931b581e1cbbfcf2b27a532aee020cd6",
+      "installMode": "copy"
     },
     "requesting-code-review": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/requesting-code-review/SKILL.md",
-      "computedHash": "004f340ae65811095d6a9bb0a759c87d0a8085c5e705dbb019b011626293d2e9"
+      "computedHash": "ac8e6c27013c8d8d6f72818f193e225a5bdab289e534e467851d945f10675146"
+    },
+    "review-animations": {
+      "source": "emilkowalski/skills",
+      "commit": "64eb3deb9a5fbfa041faf783e0bc3fd635872e9c",
+      "sourceType": "github",
+      "skillPath": "skills/review-animations/SKILL.md",
+      "computedHash": "50f1de2394b88bb3433eca1e30da6866a4e310963d872a66af20ca77fd77f07d",
+      "installMode": "copy"
     },
     "security-guidance": {
       "source": "owasp/secure-agent-playbook",
       "sourceType": "github",
       "skillPath": "plugins/code-security-skills/skills/security-guidance/SKILL.md",
-      "computedHash": "40ae24f8f851fee60298d840a578e0e0e2014fb3648d3010ad8abc8ecca54ec2"
+      "computedHash": "55fe61b735ae58fcebd62589861124b5c1c7d8c4658b5a78f18367aefcac0965"
     },
     "sql-optimization": {
       "source": "github/awesome-copilot",
       "sourceType": "github",
       "skillPath": "skills/sql-optimization/SKILL.md",
-      "computedHash": "47c930907f25d67454ac8c2d155785eae3dce72242960d0c0e9ebf2ced9cd231"
+      "computedHash": "10e2d74196b0ec10a4eb64e31d75f2fe1f2aecdf04310421c543a8a22dbdee5c"
     },
     "systematic-debugging": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/systematic-debugging/SKILL.md",
-      "computedHash": "a2750dfbaed1690da73b120254892c4f926b4576cb82eb16fc877783941fe39b"
+      "computedHash": "8dc186c086fecc59d5011ad462c27f6b0460d785e80734ef27620f64073d9a31"
     },
     "test-driven-development": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/test-driven-development/SKILL.md",
-      "computedHash": "a4126a9c5f17be3c228aa9e5755898ade283448b86099f56f40852e8c14532be"
+      "computedHash": "f581644041610b5a7c9c0d5cdf7142e5a7b724cfdb993b03e0f56c1145c6bfe6"
+    },
+    "ui-ux-pro-max": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "commit": "bde080f4c6d546fea1313bff76960c99045b2ae7",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
+      "computedHash": "f583fab0f9bfd86aad1baede1c4f6719d70d0b007398b5cbbd2a75936ffcecd1",
+      "installMode": "copy"
     },
     "verification-before-completion": {
       "source": "obra/superpowers",
       "sourceType": "github",
       "skillPath": "skills/verification-before-completion/SKILL.md",
-      "computedHash": "b529822bdac4b197b180fe12225cff86b930b65910435103c10622df7f041651"
+      "computedHash": "09b0e3a4689c1c38a3b8fc6ef57a1d4165aa33c0013d546dbde9dd348941a319"
     },
     "web-design-guidelines": {
       "source": "vercel-labs/agent-skills",
       "sourceType": "github",
       "skillPath": "skills/web-design-guidelines/SKILL.md",
-      "computedHash": "d8e7d3afe37dcc8a97b99ffb5afdb4d0919ae0092ea8b68f44eb201f035e33ac"
+      "computedHash": "4f68ae07187fb0d1fb78c88b503d089da4cf5a9d9625d1f2e425b1590bf96d92"
+    },
+    "webapp-testing": {
+      "source": "anthropics/skills",
+      "commit": "e4bb5d960d87126ff3b3a8af1a104b7db67560ba",
+      "sourceType": "github",
+      "skillPath": "skills/webapp-testing/SKILL.md",
+      "computedHash": "48cd9a742a59250edec6db89cf081ef5465f365e2133f6d6c5e29c380b754b7d",
+      "installMode": "copy"
     }
   }
 }

@@ -45,6 +45,8 @@ public sealed class EventAvailabilityTests(SqlServerFixture sqlServer)
         await using var scope = harness.Factory.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<CarpediemDbContext>();
 
+        var published = await db.Events.SingleAsync(item => item.Id == eventId);
+        Assert.Equal(new ItineraryBody(published.Title, published.Location, published.StartDateTime, published.EndDateTime), myInitial.Itinerary);
         var stored = await db.AvailabilityResponses.SingleAsync(a => a.EventId == eventId && a.UserId == leaderUserId);
         Assert.Equal(AvailabilityResponseType.Available, stored.Response);
 
@@ -52,6 +54,25 @@ public sealed class EventAvailabilityTests(SqlServerFixture sqlServer)
         Assert.Equal(leaderUserId, audit.ActorUserId);
         Assert.Null(audit.PreviousValue);
         Assert.Equal("Available", audit.NewValue);
+    }
+
+    [Fact]
+    public async Task LeaderCannotReadAnItineraryAfterPublicationIsWithdrawn()
+    {
+        await using var harness = await DraftApiTestHarness.StartAsync(sqlServer, role: CarpediemRoles.Admin);
+        var eventId = await SetupPublishedEventAsync(harness);
+        await using var scope = harness.Factory.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<CarpediemDbContext>();
+        await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE events.Events SET Status = 'Cancelled' WHERE Id = {eventId}");
+
+        harness.Factory.ActorUserId = await harness.SeedUserAsync("leader.record", true, CarpediemRoles.Leader);
+        harness.Factory.ActorRole = CarpediemRoles.Leader;
+        var result = await harness.Client.GetFromJsonAsync<MyAvailabilityBody>($"/api/events/{eventId}/availability/me");
+
+        Assert.NotNull(result);
+        Assert.False(result.IsWindowOpen);
+        Assert.Equal("Cancelled", result.EventStatus);
+        Assert.Null(result.Itinerary);
     }
 
     [Fact]
@@ -313,6 +334,7 @@ public sealed class EventAvailabilityTests(SqlServerFixture sqlServer)
 
     private sealed record AntiforgeryBody(string RequestToken);
     private sealed record DraftDetailsResponse(Guid Id, string Version);
+    private sealed record ItineraryBody(string Title, string Location, DateTimeOffset StartDateTime, DateTimeOffset EndDateTime);
     private sealed record MyAvailabilityBody(
         Guid EventId,
         Guid StaffingCycleId,
@@ -321,7 +343,8 @@ public sealed class EventAvailabilityTests(SqlServerFixture sqlServer)
         string? Version,
         bool IsWindowOpen,
         string EventStatus,
-        bool IsChiefLeaderOnEvent);
+        bool IsChiefLeaderOnEvent,
+        ItineraryBody? Itinerary);
     private sealed record AvailabilityResultBody(
         Guid Id,
         Guid EventId,

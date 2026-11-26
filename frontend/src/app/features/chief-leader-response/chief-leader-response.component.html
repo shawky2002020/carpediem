@@ -1,8 +1,9 @@
-<a class="back-link" routerLink="/my-appointments">← My appointments</a>
+@if (id) {
+  <a class="cd-btn cd-btn--subtle cd-btn--sm back-link" routerLink="/my-appointments">← My appointments</a>
+}
 
-<header class="page-heading">
-  <p class="eyebrow">Event leadership</p>
-  <h1 id="response-heading" tabindex="-1">{{ id ? 'Review appointment' : 'My pending appointments' }}</h1>
+<header class="page-heading" [class.record-heading]="id">
+  <h1 id="response-heading" tabindex="-1">{{ id ? 'Chief Leader appointment' : 'My pending appointments' }}</h1>
   @if (!id) { <p>Choose an appointment to review before responding.</p> }
 </header>
 
@@ -13,7 +14,7 @@
 </div>
 
 @if (problem(); as error) {
-  <section class="message error" role="alert">
+  <section class="cd-callout cd-callout--danger message error" role="alert">
     <h2>{{ error.title }}</h2>
     @if (error.code === 'appointment_not_found') {
       <p>This appointment could not be found.</p>
@@ -25,14 +26,14 @@
       <p>The outcome may be uncertain. Check the current state before responding again.</p>
     }
     @if (error.code !== 'appointment_not_found' && error.code !== 'forbidden') {
-      <button type="button" (click)="load()">Check current state</button>
+      <button type="button" class="cd-btn cd-btn--secondary" (click)="load()">Check current state</button>
     }
   </section>
 }
 
 @if (!loading() && !id && !problem()) {
   @if (pending().length === 0) {
-    <section class="message empty">
+    <section class="cd-empty-state message empty">
       <h2>No pending appointments</h2>
       <p>You have no Chief Leader appointment awaiting a response.</p>
     </section>
@@ -41,10 +42,13 @@
       @for (appointment of pending(); track appointment.id) {
         <li>
           <a class="appointment-card" [routerLink]="['/my-appointments', appointment.id]">
-            <span class="status-label">Pending</span>
-            <strong>{{ appointment.eventTitle }}</strong>
-            <span>{{ displayDate(appointment.startDateTime) }}</span>
-            <span>{{ appointment.location }}</span>
+            <span class="request-info">
+              <span class="cd-badge cd-badge--warning">Pending</span>
+              <strong>{{ appointment.eventTitle }}</strong>
+              <span>{{ appointment.location }}</span>
+            </span>
+            <time class="cd-tabular" [attr.datetime]="appointment.startDateTime">{{ displayDate(appointment.startDateTime) }}</time>
+            <span aria-hidden="true" class="request-arrow">›</span>
           </a>
         </li>
       }
@@ -54,27 +58,36 @@
 
 @if (!loading() && detail(); as appointment) {
   <section class="appointment-detail" aria-labelledby="event-title">
-    <p class="status-label">{{ appointment.status }}</p>
+    <div class="letter-heading">
+      <span>Invited <time [attr.datetime]="appointment.appointedAt">{{ invitedOn(appointment.appointedAt) }}</time></span>
+      <span class="cd-badge status-label" [class.cd-badge--warning]="appointment.status === 'Pending'" [class.cd-badge--success]="appointment.status === 'Active'" [class.cd-badge--danger]="appointment.status === 'Declined'">
+      <span class="cd-badge__dot"></span>
+      {{ appointment.status }}
+    </span>
+    </div>
     <h2 id="event-title">{{ appointment.eventTitle }}</h2>
     <dl>
-      <div><dt>Starts</dt><dd><time [attr.datetime]="appointment.startDateTime">{{ displayDate(appointment.startDateTime) }}</time></dd></div>
-      <div><dt>Ends</dt><dd><time [attr.datetime]="appointment.endDateTime">{{ displayDate(appointment.endDateTime) }}</time></dd></div>
-      <div><dt>Location</dt><dd>{{ appointment.location }}</dd></div>
+      <div><dt>When</dt><dd>{{ schedule(appointment.startDateTime, appointment.endDateTime) }} <span class="zone">Cairo</span></dd></div>
+      <div><dt>Where</dt><dd>{{ appointment.location }}</dd></div>
     </dl>
     @if (appointment.status === 'Pending') {
-      <p>Choose one response. Accepting will make you the Active Chief Leader while the Event remains a Draft.</p>
+      <p>Accept to lead this event. It stays in draft until an administrator publishes it.</p>
       <div class="actions">
-        <button class="primary" type="button" (click)="decide('accept')" [disabled]="saving() || uncertain()">
-          {{ saving() ? 'Saving…' : 'Accept appointment' }}
+        <button class="cd-btn cd-btn--primary primary" type="button" (click)="decide('accept')" [disabled]="saving() || uncertain()">
+          {{ pendingDecision() === 'accept' ? 'Accepting…' : 'Accept appointment' }}
         </button>
-        <button class="secondary" type="button" (click)="decide('decline')" [disabled]="saving() || uncertain()">
-          Decline appointment
+        <button class="cd-btn cd-btn--secondary secondary" type="button" aria-label="Decline appointment" (click)="decide('decline')" [disabled]="saving() || uncertain()">
+          {{ pendingDecision() === 'decline' ? 'Declining…' : 'Decline' }}
         </button>
       </div>
     } @else if (appointment.status === 'Active') {
-      <p>You accepted this appointment. The Event remains a Draft until an Administrator publishes it.</p>
+      <div #receipt tabindex="-1" class="cd-callout cd-callout--success">
+        <p>You accepted this appointment. The Event remains a Draft until an Administrator publishes it.</p>
+      </div>
     } @else {
-      <p>You declined this appointment. Administrators can appoint another Chief Leader.</p>
+      <div #receipt tabindex="-1" class="cd-callout cd-callout--danger">
+        <p>You declined this appointment. Administrators can appoint another Chief Leader.</p>
+      </div>
     }
   </section>
 }

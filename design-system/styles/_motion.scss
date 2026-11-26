@@ -1,17 +1,31 @@
-// Semantic patterns stay component-scoped. Transform and opacity only for movement.
-.cd-enter {
-  animation: cd-enter var(--cd-duration-normal) var(--cd-ease-enter) both;
+:root {
+  --cd-travel: 8px;
+  --cd-sheet-travel: 16px;
+  --cd-press-scale: .98;
 }
-@keyframes cd-enter {
-  from { opacity: 0; transform: translateY(0.5rem); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@media (prefers-reduced-motion: reduce) {
-  :root {
-    --cd-duration-fast: 0ms;
-    --cd-duration-normal: 0ms;
-    --cd-duration-slow: 0ms;
+@media (prefers-reduced-motion:no-preference) {
+  :where(button[aria-pressed], label:has(input:checked)) {
+    transition: background-color var(--cd-duration-fast), color var(--cd-duration-fast),
+      border-color var(--cd-duration-fast), transform var(--cd-duration-fast) var(--cd-ease-standard);
   }
-  .cd-enter { animation: none; }
-  html:focus-within { scroll-behavior: auto; }
+  :where(.cd-alert--success, .cd-callout--success, .form-error-summary) {
+    animation: cd-feedback var(--cd-duration-normal) var(--cd-ease-enter);
+  }
+  @keyframes cd-feedback { from {opacity:.68; translate:0 3px;} }
+  :where(button, .cd-btn):active:not(:disabled) { transform:scale(var(--cd-press-scale)); }
+  details[open] > :not(summary) { animation:cd-disclose var(--cd-duration-fast) var(--cd-ease-enter); }
+  @keyframes cd-disclose { from {opacity:.6; translate:0 -2px;} }
+  dialog { opacity:0; translate:0 var(--cd-sheet-travel);
+    transition:opacity var(--cd-duration-fast), translate var(--cd-duration-normal) var(--cd-ease-standard),
+      display var(--cd-duration-normal) allow-discrete, overlay var(--cd-duration-normal) allow-discrete;
+  }
+  dialog[open] { opacity:1; translate:none; }
+  @starting-style { dialog[open] { opacity:0; translate:0 var(--cd-sheet-travel); } }
+  dialog::backdrop { transition:background-color var(--cd-duration-normal); }
+  @starting-style { dialog[open]::backdrop { background-color:transparent; } }
+}
+@media (prefers-reduced-motion:reduce) {
+  :root { --cd-duration-fast:0ms; --cd-duration-normal:0ms; --cd-duration-slow:0ms; }
+  *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important;
+    transition-duration:0s !important; scroll-behavior:auto !important; }
 }

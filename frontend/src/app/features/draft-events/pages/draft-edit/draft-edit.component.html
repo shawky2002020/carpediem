@@ -1,6 +1,8 @@
-<a class="back-link" routerLink="/draft-events">← Back to Draft Events</a>
+<a class="cd-btn cd-btn--subtle cd-btn--sm back-link" routerLink="/draft-events">← Back to Draft Events</a>
 <div class="page-heading">
-  <p class="eyebrow">{{ draft()?.status === 'Published' ? 'Published Event' : 'Private Draft' }}</p>
+  <span class="cd-badge" [class.cd-badge--success]="draft()?.status === 'Published'" [class.cd-badge--neutral]="draft()?.status !== 'Published'">
+    {{ draft()?.status === 'Published' ? 'Published Event' : 'Private Draft' }}
+  </span>
   <h1>{{ draft()?.title || 'Edit Draft Event' }}</h1>
   <p>{{ draft()?.status === 'Published' ? 'This Event is published and open for volunteer Leader availability declarations.' : 'Changes keep this Event in Draft.' }}</p>
 </div>
@@ -13,29 +15,34 @@
 </div>
 
 @if (problem() && !draft()) {
-  <section class="error-panel" role="alert">
+  <section class="cd-callout cd-callout--danger error-panel" role="alert">
     <h2>{{ problem()?.title }}</h2>
     @if (problem()?.code === 'event_not_found') { <p>This Draft may have been removed or the link may be incorrect.</p> }
     @else if (problem()?.code === 'not_draft') { <p>This Event is no longer editable in the Draft workflow.</p> }
-    @else { <p>Try again. @if (problem()?.traceId) { Reference: {{ problem()?.traceId }} }</p><button type="button" (click)="load()">Retry</button> }
+    @else { <p>Try again. @if (problem()?.traceId) { Reference: {{ problem()?.traceId }} }</p><button type="button" class="cd-btn cd-btn--secondary" (click)="load()">Retry</button> }
   </section>
 } @else if (draft(); as loadedDraft) {
+  <div class="publishing-sequence">
   <section class="appointment-panel" aria-labelledby="chief-leader-title">
     <div>
-      <p class="eyebrow">Chief Leader</p>
       <h2 id="chief-leader-title">
         @if (appointmentLoading()) { Loading appointment… }
+        @else if (appointmentProblem()) { Appointment unavailable }
         @else if (chiefLeaderAppointment(); as appointment) { {{ appointment.candidate.userName }} }
         @else { No appointment yet }
       </h2>
       @if (chiefLeaderAppointment(); as appointment) {
-        <p><span class="appointment-status">{{ appointment.status }}</span> {{ appointment.status === 'Active' ? 'Chief Leader confirmed.' : 'Awaiting the candidate\'s response.' }}</p>
+        <p><span class="cd-badge appointment-status" [class.cd-badge--success]="appointment.status === 'Active'" [class.cd-badge--warning]="appointment.status !== 'Active'">{{ appointment.status }}</span> {{ appointment.status === 'Active' ? 'Chief Leader confirmed.' : 'Awaiting the candidate\'s response.' }}</p>
+      } @else if (appointmentProblem()) {
+        <p role="alert">Chief Leader details could not be loaded.</p>
       } @else if (!appointmentLoading()) {
         <p>Choose a candidate from the predefined Chief Leader group.</p>
       }
     </div>
-    @if (loadedDraft.status !== 'Published') {
-      <a class="appointment-action" [routerLink]="['/draft-events', loadedDraft.id, 'chief-leader']">
+    @if (appointmentProblem() && loadedDraft.status !== 'Published') {
+      <button type="button" (click)="loadAppointment(loadedDraft.id)">Retry appointment details</button>
+    } @else if (loadedDraft.status !== 'Published') {
+      <a class="cd-btn cd-btn--primary appointment-action" [routerLink]="['/draft-events', loadedDraft.id, 'chief-leader']">
         {{ chiefLeaderAppointment() ? 'Review appointment' : 'Appoint Chief Leader' }}
       </a>
     }
@@ -43,62 +50,64 @@
 
   <section class="publish-panel" aria-labelledby="publish-heading">
     <div>
-      <p class="eyebrow">Publication</p>
       <h2 id="publish-heading">
         @if (loadedDraft.status === 'Published') { Published Event }
         @else { Event Publication }
       </h2>
       @if (loadedDraft.status === 'Published') {
-        <p><span class="published-badge">Published</span> This Event is open to volunteer Leaders.</p>
+        <p><span class="cd-badge cd-badge--success published-badge">Published</span> This Event is open to volunteer Leaders.</p>
       } @else if (chiefLeaderAppointment()?.status === 'Active') {
         <p>Chief Leader accepted. Ready to publish.</p>
       } @else {
         <p class="prerequisite-note">An accepted Chief Leader is required before publishing.</p>
       }
+      @if (publishProblem(); as error) {
+        <div class="cd-callout cd-callout--danger" role="alert"><p>{{ error.detail || error.title }}</p></div>
+      }
     </div>
     @if (loadedDraft.status !== 'Published') {
-      @if (confirmPublish()) {
-        <div class="confirm-publish-card" role="dialog" aria-modal="true" aria-labelledby="confirm-publish-title">
+        <dialog #publishDialog class="confirm-publish-card" aria-labelledby="confirm-publish-title"
+          (cancel)="$event.preventDefault(); cancelPublish()">
           <h3 id="confirm-publish-title">Confirm Event Publication</h3>
           <p>Publishing will notify eligible volunteer Leaders and lock draft editing. Are you sure you want to publish now?</p>
           <div class="confirm-actions">
-            <button type="button" class="btn-primary" [disabled]="publishing()" (click)="publish()">
+            <button type="button" class="cd-btn cd-btn--primary btn-primary" [disabled]="publishing()" (click)="publish()">
               {{ publishing() ? 'Publishing…' : 'Yes, Publish Event' }}
             </button>
-            <button type="button" class="btn-secondary" [disabled]="publishing()" (click)="cancelPublish()">
+            <button type="button" class="cd-btn cd-btn--secondary btn-secondary" [disabled]="publishing()" (click)="cancelPublish()" autofocus>
               Cancel
             </button>
           </div>
-        </div>
-      } @else {
+        </dialog>
         <button
           type="button"
-          class="btn-publish"
+          class="cd-btn cd-btn--primary btn-publish"
           [disabled]="chiefLeaderAppointment()?.status !== 'Active' || publishing() || saving()"
           (click)="openPublishDialog()">
           Publish Event
         </button>
-      }
     }
   </section>
 
+  </div>
+
   @if (problem()?.code === 'unauthenticated') {
-    <section class="error-panel" role="alert">
+    <section class="cd-callout cd-callout--danger error-panel" role="alert">
       <h2>Your session has expired</h2>
       <p>Your unsaved values remain in this form. Sign in again before saving them.</p>
-      <a routerLink="/sign-in" target="_blank" rel="noopener">Open sign in</a>
+      <a routerLink="/sign-in" target="_blank" rel="noopener" class="cd-btn cd-btn--secondary">Open sign in</a>
     </section>
   } @else if (problem()?.code === 'forbidden') {
-    <section class="error-panel" role="alert">
+    <section class="cd-callout cd-callout--danger error-panel" role="alert">
       <h2>Draft Event access is denied</h2>
       <p>Your unsaved values remain in this form. Contact an administrator if your access should have changed.</p>
     </section>
   }
   @if (problem()?.code === 'stale_draft') {
-    <section class="conflict-panel" role="alert">
+    <section class="cd-callout cd-callout--warning conflict-panel" role="alert">
       <h2>The Draft changed since you opened it</h2>
       <p>Your unsaved values remain below. Open the latest Draft in another tab before deciding what to reapply.</p>
-      <a [routerLink]="['/draft-events', loadedDraft.id]" target="_blank" rel="noopener">Open latest Draft</a>
+      <a [routerLink]="['/draft-events', loadedDraft.id]" target="_blank" rel="noopener" class="cd-btn cd-btn--secondary">Open latest Draft</a>
     </section>
   }
 

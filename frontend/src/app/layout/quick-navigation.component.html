@@ -1,0 +1,37 @@
+<nav class="mobile-bottom" aria-label="Quick navigation">
+  @if (managesEvents()) {
+    <a routerLink="/dashboard" routerLinkActive="active" ariaCurrentWhenActive="page">
+      <app-navigation-icon name="dashboard" />
+      <span>Dashboard</span>
+    </a>
+  }
+  @if (session.isAdmin()) {
+    <a routerLink="/draft-events" routerLinkActive="active" ariaCurrentWhenActive="page">
+      <app-navigation-icon name="drafts" />
+      <span>Drafts</span>
+    </a>
+  } @else if (session.isChiefLeader()) {
+    <a routerLink="/my-appointments" routerLinkActive="active" ariaCurrentWhenActive="page">
+      <app-navigation-icon name="appointments" />
+      <span>Appointments</span>
+    </a>
+  } @else {
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page">
+      <app-navigation-icon name="home" />
+      <span>Home</span>
+    </a>
+  }
+  <a routerLink="/notifications" routerLinkActive="active" ariaCurrentWhenActive="page" [attr.aria-label]="unreadLabel()">
+    <span class="mobile-icon">
+      <app-navigation-icon name="inbox" />
+      @if (unreadLabel()) { <span class="unread-dot" aria-hidden="true"></span> }
+    </span>
+    <span>Notifications</span>
+  </a>
+  @if (session.isLeader() && !managesEvents()) {
+    <a routerLink="/profile" routerLinkActive="active" ariaCurrentWhenActive="page">
+      <app-navigation-icon name="profile" />
+      <span>Profile</span>
+    </a>
+  }
+</nav>

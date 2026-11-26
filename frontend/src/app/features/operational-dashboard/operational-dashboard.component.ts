@@ -9,6 +9,19 @@ import { SessionService } from '../../core/auth/session.service';
 
 export type DashboardFilter = 'All' | 'RequiresAction' | 'Published' | 'Drafts' | 'Concluded';
 
+const eventFilters = [
+  { id: 'All', label: 'All', matches: () => true },
+  { id: 'RequiresAction', label: 'Needs attention', matches: (event: OperationalEvent) => event.pendingAttendance || (event.status === 'Published' && event.activeRosterCount === 0) },
+  { id: 'Published', label: 'Published', matches: (event: OperationalEvent) => event.status === 'Published' },
+  { id: 'Drafts', label: 'Drafts', matches: (event: OperationalEvent) => event.status === 'Draft' },
+  { id: 'Concluded', label: 'Closed', matches: (event: OperationalEvent) => event.status === 'Completed' || event.status === 'Cancelled' },
+] as const;
+
+const dateFormats = {
+  date: new Intl.DateTimeFormat('en', { timeZone: 'Africa/Cairo', dateStyle: 'full' }),
+  time: new Intl.DateTimeFormat('en', { timeZone: 'Africa/Cairo', timeStyle: 'short' }),
+};
+
 @Component({
   selector: 'app-operational-dashboard',
   imports: [CommonModule, RouterLink],
@@ -21,34 +34,29 @@ export class OperationalDashboardComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private timer?: ReturnType<typeof setInterval>;
-  private pending = false;
-
   readonly events = signal<OperationalEvent[]>([]);
   readonly loading = signal(true);
+  readonly refreshing = signal(false);
   readonly error = signal<string | null>(null);
   readonly activeFilter = signal<DashboardFilter>('All');
 
-  // Executive KPI Status Ribbon Metrics
-  readonly draftCount = computed(() => this.events().filter(e => e.status === 'Draft').length);
-  readonly activeStaffingCount = computed(() => this.events().filter(e => e.status === 'Published' && !e.inProgress).length);
-  readonly pendingAttendanceCount = computed(() => this.events().filter(e => e.pendingAttendance).length);
-  readonly concludedCount = computed(() => this.events().filter(e => e.status === 'Completed').length);
+  private readonly eventGroups = computed(() => {
+    const events = this.events();
+    return eventFilters.map(({ id, label, matches }) => ({ id, label, events: events.filter(matches) }));
+  });
 
-  // Filtered Events
-  readonly filteredEvents = computed(() => {
-    const list = this.events();
-    switch (this.activeFilter()) {
-      case 'RequiresAction':
-        return list.filter(e => e.pendingAttendance || (e.status === 'Published' && e.activeRosterCount === 0));
-      case 'Published':
-        return list.filter(e => e.status === 'Published');
-      case 'Drafts':
-        return list.filter(e => e.status === 'Draft');
-      case 'Concluded':
-        return list.filter(e => e.status === 'Completed' || e.status === 'Cancelled');
-      default:
-        return list;
+  readonly filters = computed(() => this.eventGroups().map(({ id, label, events }) => ({ id, label, count: events.length })));
+  readonly filteredEvents = computed(() => this.eventGroups().find(group => group.id === this.activeFilter())?.events ?? []);
+
+  readonly dateGroups = computed(() => {
+    const groups: { date: string; firstId: string; events: OperationalEvent[] }[] = [];
+    for (const event of this.filteredEvents()) {
+      const date = this.formatDate(event.startDateTime, 'date');
+      const previous = groups.at(-1);
+      if (previous?.date === date) previous.events.push(event);
+      else groups.push({ date, firstId: event.eventId, events: [event] });
     }
+    return groups;
   });
 
   setFilter(filterName: DashboardFilter): void {
@@ -72,27 +80,25 @@ export class OperationalDashboardComponent implements OnInit {
   }
 
   refresh(): void {
-    if (this.pending) return;
-    this.pending = true;
+    if (this.refreshing()) return;
+    this.refreshing.set(true);
     this.service.getEvents().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: events => {
         this.events.set(events);
         this.loading.set(false);
         this.error.set(null);
-        this.pending = false;
+        this.refreshing.set(false);
       },
       error: error => {
         this.loading.set(false);
         this.error.set(toApiProblem(error, 'Dashboard could not be refreshed.').title);
-        this.pending = false;
+        this.refreshing.set(false);
       },
     });
   }
 
-  formatDate(value: string): string {
-    return new Intl.DateTimeFormat('en', {
-      timeZone: 'Africa/Cairo', dateStyle: 'medium', timeStyle: 'short',
-    }).format(new Date(value)) + ' Cairo';
+  formatDate(value: string, part: keyof typeof dateFormats): string {
+    return dateFormats[part].format(new Date(value));
   }
 
   private readonly onVisibility = () => {

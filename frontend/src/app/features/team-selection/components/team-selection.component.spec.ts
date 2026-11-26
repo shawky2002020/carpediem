@@ -117,7 +117,15 @@ describe('TeamSelectionComponent', () => {
     expect(candidate?.textContent?.trim()).toBe('ahmed_leader');
     const historyLinks = fixture.nativeElement.querySelectorAll('a[href$="/history"]');
     expect(historyLinks.length).toBe(4);
-    expect(historyLinks[0]?.getAttribute('href')).toBe(`/events/${mockEventId}/leaders/${defaultMockContext.activeTeam[0].userId}/history`);
+    const members = [
+      ...defaultMockContext.activeTeam,
+      ...defaultMockContext.availableCandidates,
+      ...defaultMockDirectCandidates.candidates,
+    ];
+    for (const member of members) {
+      const link = fixture.nativeElement.querySelector(`a[aria-label="View history for ${member.userName}"]`);
+      expect(link?.getAttribute('href')).toBe(`/events/${mockEventId}/leaders/${member.userId}/history`);
+    }
 
     const directItems = fixture.nativeElement.querySelectorAll('.direct-candidates-list .candidate-item');
     expect(directItems.length).toBe(2);
@@ -148,9 +156,25 @@ describe('TeamSelectionComponent', () => {
 
     const emptyStates = fixture.nativeElement.querySelectorAll('.empty-state');
     expect(emptyStates.length).toBe(3);
-    expect(emptyStates[0]?.textContent).toContain('No team members selected yet');
-    expect(emptyStates[1]?.textContent).toContain('No available volunteers found');
-    expect(emptyStates[2]?.textContent).toContain('No leaders available for direct drafting');
+    const emptyText = (region: string) => fixture.nativeElement.querySelector(`${region} .empty-state`)?.textContent;
+    expect(emptyText('.roster-section')).toContain('No team members selected yet');
+    expect(emptyText('.candidates-section')).toContain('No available volunteers found');
+    expect(emptyText('.direct-assignment-section')).toContain('No leaders available for direct drafting');
+  });
+
+  it('keeps roster and available candidates usable when direct candidates fail to load', () => {
+    teamSelectionServiceMock.getDirectAssignmentCandidates.mockReturnValueOnce(throwError(() => ({ status: 0 })));
+    component.load();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.btn-select').disabled).toBe(false);
+    expect(fixture.nativeElement.querySelector('.direct-assignment-section').textContent).toContain('Retry candidate list');
+
+    const retry = fixture.nativeElement.querySelector('.direct-assignment-section button') as HTMLButtonElement;
+    retry.click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelectorAll('.direct-candidates-list .candidate-item')).toHaveLength(2);
   });
 
   it('renders warning alert and disables selection and direct assign buttons when window is closed', () => {

@@ -1,0 +1,11 @@
+@use '../engagement/records';
+.accounts { border-block-start:2px solid var(--cd-text-primary); }
+.account-card { display:grid; gap:1rem; align-items:start; padding-block:1.25rem; border-block-end:1px solid var(--cd-border-default); }
+.account-header { gap:.7rem; flex-direction:column; }
+.account-actions, .roles-grid,.deactivation-actions { display:flex; flex-wrap:wrap; gap:.45rem; }
+.roles-fieldset { min-inline-size:0; margin:0; padding:0; border:0; }
+.roles-fieldset legend { margin-block-end:.3rem; }
+.role-option { display:inline-flex; align-items:center; gap:.45rem; min-block-size:44px; padding:.4rem .65rem; background:var(--cd-bg-surface); border:1px solid var(--cd-border-default); cursor:pointer; }
+.role-option:has(:checked) { background:#e2edda; border-color:#6c8563; }
+.role-option input { inline-size:1.05rem; block-size:1.05rem; margin:0; }
+@container(min-width:48rem) { .account-card { grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) auto; } }

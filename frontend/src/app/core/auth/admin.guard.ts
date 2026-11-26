@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateFn, RedirectCommand, Router } from '@angular/router';
 import { map } from 'rxjs';
 import { SessionService } from './session.service';
 
@@ -9,6 +9,8 @@ export const adminGuard: CanActivateFn = () => {
   return session.ensureLoaded().pipe(
     map(() => session.isAdmin()
       ? true
-      : router.createUrlTree([session.isAuthenticated() ? '/access-denied' : '/sign-in'])),
+      : session.isAuthenticated()
+        ? new RedirectCommand(router.createUrlTree(['/access-denied']), { state: { adminRequired: true } })
+        : router.createUrlTree(['/sign-in'])),
   );
 };

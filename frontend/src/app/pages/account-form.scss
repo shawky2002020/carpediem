@@ -1,0 +1,30 @@
+.account-form {
+  h1 { font: 600 clamp(2.6rem, 5vw, 4.3rem)/.98 var(--cd-font-display); letter-spacing: -.04em; max-inline-size: 13ch; margin: 0; }
+  p { color: var(--cd-text-secondary); }
+  .intro { max-inline-size: 37ch; margin: 1rem 0 1.9rem; }
+  form, .field { display: grid; }
+  form { gap: 1.1rem; }
+  .field { gap: .35rem; }
+  label { font-weight: 650; }
+  input { min-block-size: 3rem; inline-size: 100%; }
+  .hint, .field-error { margin: 0; font-size: var(--cd-font-size-sm); }
+  .field-error { color: var(--cd-status-danger-fg); }
+  [aria-invalid='true'] { border-color: var(--cd-status-danger-fg); }
+  button[type='submit'] { margin-block-start: .35rem; justify-self: start; min-inline-size: 8.25rem; }
+  .cd-alert { margin-block: 0; }
+  .cd-alert p { color: inherit; margin: 0; }
+  .auth-footer {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 0 .45rem;
+    padding-block-start: .6rem; margin: 1.75rem 0 0; border-block-start: 1px solid var(--cd-border-default);
+    a { display: inline-flex; align-items: center; min-block-size: 44px; color: var(--cd-action-primary); font-weight: 650; text-underline-offset: .2em; }
+  }
+}
+@media (max-width: 47.99rem) { .account-form { max-inline-size: 30rem; margin-inline: auto; padding-block: 1rem; } }
+
+.password-control { position: relative; }
+.password-control input { padding-inline-end: 4.5rem; }
+.password-toggle {
+  position: absolute; top: 50%; right: .2rem; transform: translateY(-50%); min-width: 3.7rem; min-height: 44px;
+  background: transparent; border: 0; color: var(--cd-action-primary); font: 650 .9rem/1 var(--cd-font-ui);
+}
+.password-toggle:hover { text-decoration: underline; }

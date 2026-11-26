@@ -20,6 +20,9 @@ Carpediem uses Vercel for the Angular SPA and MonsterASP.NET's free Windows host
    | `ASPNETCORE_ENVIRONMENT` | `Production` |
    | `ConnectionStrings__Carpediem` | MonsterASP MSSQL connection string |
    | `ReverseProxy__TrustedNetworks__0` | `10.0.0.0/8` |
+   | `DataProtection__KeyPath` | `..\private\dataprotection` (writable, outside `wwwroot`) |
+
+   Keep this directory across deployments and restrict access to the application identity: it contains the keys used for authentication and antiforgery cookies. Replacing or deleting the keys invalidates existing sessions.
 
 6. Apply the EF Core migrations to the newly created MSSQL database, then verify `https://<api-name>.runasp.net/healthz` returns `200`.
 

@@ -7,11 +7,18 @@ test('Draft authoring fits the viewport and keeps primary actions touch sized', 
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
-  const buttons = page.locator('button');
+  const buttons = page.getByRole('button');
   for (let index = 0; index < await buttons.count(); index += 1) {
     const box = await buttons.nth(index).boundingBox();
     expect(box?.height).toBeGreaterThanOrEqual(44);
     expect(box?.width).toBeGreaterThanOrEqual(44);
   }
-  await expect(page.getByRole('button', { name: 'Create Draft' })).toBeInViewport();
+  const save = page.getByRole('button', { name: 'Create Draft' });
+  await expect(save).toBeInViewport({ ratio: 1 });
+  const quickNavigation = page.getByRole('navigation', { name: 'Quick navigation' });
+  if (await quickNavigation.isVisible()) {
+    const saveBounds = (await save.boundingBox())!;
+    const navBounds = (await quickNavigation.boundingBox())!;
+    expect(saveBounds.y + saveBounds.height).toBeLessThanOrEqual(navBounds.y);
+  }
 });

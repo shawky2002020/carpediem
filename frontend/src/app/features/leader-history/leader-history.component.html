@@ -5,7 +5,6 @@
     </a>
   }
   <header class="profile-header">
-    <p class="eyebrow">Factual participation history</p>
     <h1 id="history-title">{{ isOwn() ? 'My profile' : 'Leader history' }}</h1>
   </header>
 
@@ -17,35 +16,17 @@
       <button type="button" class="cd-btn cd-btn--secondary cd-btn--sm" (click)="load()">Try again</button>
     </div>
   } @else if (history(); as profile) {
-    <div class="leader-identity-hero">
-      <div class="identity-title-row">
+    <div class="profile-summary">
+      <div class="profile-identity">
+        <span class="initial" aria-hidden="true">{{ profile.userName.slice(0, 1).toLocaleUpperCase() }}</span>
         <h2>{{ profile.userName }}</h2>
-        <span class="cd-badge cd-badge--success cd-tabular">{{ reliabilityRate() }}% Reliability · {{ profile.eventsAttended }} Shift{{ profile.eventsAttended === 1 ? '' : 's' }} Completed</span>
       </div>
-
-      <!-- Qualifications and Badges -->
-      <div class="qualification-tags" aria-label="Volunteer qualifications">
-        <span class="cd-badge cd-badge--info">Verified Leader</span>
-        <span class="cd-badge cd-badge--neutral">Field First Aid</span>
-        <span class="cd-badge cd-badge--neutral">Logistics Specialist</span>
-      </div>
-
-      <!-- Total Hours Showcase -->
-      <div class="hours-showcase">
-        <div class="hours-card">
-          <span class="hours-label">Total Hours Contributed</span>
-          <span class="hours-value cd-tabular">{{ totalHours() }}h</span>
-          <span class="hours-sub">Dedicated community service</span>
-        </div>
-      </div>
+      <dl class="counts" aria-label="Participation counts">
+        <div><dt>Events attended</dt><dd class="cd-tabular">{{ profile.eventsAttended }}</dd></div>
+        <div><dt>No-shows</dt><dd class="cd-tabular">{{ profile.noShows }}</dd></div>
+        <div><dt>Self-cancellations</dt><dd class="cd-tabular">{{ profile.selfCancellations }}</dd></div>
+      </dl>
     </div>
-
-    <dl class="counts" aria-label="Participation counts">
-      <div><dt>Events attended</dt><dd class="cd-tabular">{{ profile.eventsAttended }}</dd></div>
-      <div><dt>No-shows</dt><dd class="cd-tabular">{{ profile.noShows }}</dd></div>
-      <div><dt>Self-cancellations</dt><dd class="cd-tabular">{{ profile.selfCancellations }}</dd></div>
-    </dl>
-    <p class="count-note">Counts reflect recorded attendance and volunteer-initiated cancellations.</p>
 
     <h2>Event history</h2>
     @if (profile.events.length === 0) {
@@ -55,17 +36,23 @@
         @for (entry of profile.events; track entry.assignmentId) {
           <li class="event-history-card">
             <h3>{{ entry.eventTitle }}</h3>
-            <p>Event date: <time [attr.datetime]="entry.effectiveEventDate">{{ effectiveDate(entry) }}</time></p>
-            <p>Staffing cycle {{ entry.staffingCycleNumber }}@if (!entry.isCurrentCycle) { (historical) }</p>
-            <p>Assignment: <span class="cd-badge" [class.cd-badge--success]="entry.assignmentStatus === 'Active'" [class.cd-badge--neutral]="entry.assignmentStatus !== 'Active'">{{ entry.assignmentStatus }}</span></p>
-            <p>Assigned: <time [attr.datetime]="entry.assignedAt">{{ dateTime(entry.assignedAt) }}</time></p>
-            @if (entry.cancelledAt) {
-              <p>Cancelled: <time [attr.datetime]="entry.cancelledAt">{{ dateTime(entry.cancelledAt) }}</time></p>
-            }
-            <p>Attendance: {{ entry.attendanceOutcome ?? 'No attendance recorded' }}</p>
-            @if (entry.selfCancelled) { <p class="cancellation-alert">Volunteer self-cancellation recorded</p> }
+            <p class="event-date"><time [attr.datetime]="entry.effectiveEventDate">{{ effectiveDate(entry) }}</time></p>
+            <dl class="event-facts">
+              <div><dt>Assignment</dt><dd>{{ entry.assignmentStatus }}</dd></div>
+              <div><dt>Attendance</dt><dd>{{ entry.attendanceOutcome === 'NoShow' ? 'No show' : entry.attendanceOutcome ?? 'Unrecorded' }}</dd></div>
+              <div><dt>Staffing cycle</dt><dd>{{ entry.staffingCycleNumber }}@if (!entry.isCurrentCycle) { (historical) }</dd></div>
+            </dl>
+            <details>
+              <summary [attr.aria-label]="'Assignment history for ' + entry.eventTitle">Assignment history</summary>
+              <p>Assigned <time [attr.datetime]="entry.assignedAt">{{ dateTime(entry.assignedAt) }}</time></p>
+              @if (entry.cancelledAt) {
+                <p>Cancelled <time [attr.datetime]="entry.cancelledAt">{{ dateTime(entry.cancelledAt) }}</time></p>
+              }
+              @if (entry.selfCancelled) { <p>Volunteer self-cancellation recorded.</p> }
+            </details>
             @if (isOwn() && entry.isCurrentCycle && entry.assignmentStatus === 'Active') {
               <div class="history-actions">
+                <a class="cd-btn cd-btn--secondary cd-btn--sm" [routerLink]="['/events', entry.eventId, 'my-assignment']">View assignment</a>
                 <a class="cd-btn cd-btn--secondary cd-btn--sm" [routerLink]="['/events', entry.eventId, 'feedback']">Event feedback</a>
                 <a class="cd-btn cd-btn--secondary cd-btn--sm" [routerLink]="['/events', entry.eventId, 'incidents']">Incidents</a>
               </div>

@@ -1,142 +1,133 @@
 <section class="dashboard" aria-labelledby="dashboard-title">
   <header class="dashboard-header">
-    <div class="dashboard-header-intro">
-      <p class="eyebrow">Event operations</p>
+    <div>
       <h1 id="dashboard-title">Operational dashboard</h1>
+      <p>{{ session.isAdmin() ? 'Plan events, review staffing, and close out attendance.' : 'Review your events, open team rosters, and record attendance.' }}</p>
     </div>
-    <div class="dashboard-header-actions">
-      <button type="button" class="cd-btn cd-btn--secondary" (click)="refresh()">Refresh</button>
-    </div>
+    @if (session.isAdmin()) {
+      <a class="cd-btn cd-btn--primary" routerLink="/draft-events/new">Create draft event</a>
+    } @else {
+      <a class="cd-btn cd-btn--secondary" routerLink="/my-appointments">My appointments</a>
+    }
   </header>
 
-  <!-- Executive KPI Status Ribbon -->
-  <section class="kpi-ribbon" aria-label="Executive operational vitals">
-    <button type="button" class="kpi-card" [class.active]="activeFilter() === 'Drafts'" (click)="setFilter('Drafts')">
-      <span class="kpi-label">Draft Planning</span>
-      <span class="kpi-value cd-tabular">{{ draftCount() }}</span>
-      <span class="kpi-sub">Events being scheduled</span>
-    </button>
-    <button type="button" class="kpi-card" [class.active]="activeFilter() === 'Published'" (click)="setFilter('Published')">
-      <span class="kpi-label">Active Staffing</span>
-      <span class="kpi-value cd-tabular">{{ activeStaffingCount() }}</span>
-      <span class="kpi-sub">Open roster cycles</span>
-    </button>
-    <button type="button" class="kpi-card kpi-card--attention" [class.active]="activeFilter() === 'RequiresAction'" (click)="setFilter('RequiresAction')">
-      <span class="kpi-label">Pending Roll Call</span>
-      <span class="kpi-value cd-tabular">{{ pendingAttendanceCount() }}</span>
-      <span class="kpi-sub">Field roll call required</span>
-    </button>
-    <button type="button" class="kpi-card" [class.active]="activeFilter() === 'Concluded'" (click)="setFilter('Concluded')">
-      <span class="kpi-label">Completed</span>
-      <span class="kpi-value cd-tabular">{{ concludedCount() }}</span>
-      <span class="kpi-sub">Safely delivered</span>
-    </button>
-  </section>
+  <div class="schedule-layout">
+    <div class="queue-index">
+      <div class="queue-bar">
+        <h2 id="event-list-title">Events</h2>
+        <button type="button" class="refresh-button" (click)="refresh()" [disabled]="refreshing()">
+          {{ refreshing() ? 'Refreshing…' : 'Refresh' }}
+        </button>
+      </div>
 
-  <!-- Interactive Filter Chips -->
-  <nav class="filter-chip-bar" aria-label="Filter events by operational state">
-    <button type="button" class="filter-chip" [class.active]="activeFilter() === 'All'" (click)="setFilter('All')">
-      All ({{ events().length }})
-    </button>
-    <button type="button" class="filter-chip" [class.active]="activeFilter() === 'RequiresAction'" (click)="setFilter('RequiresAction')">
-      Requires Action ({{ pendingAttendanceCount() }})
-    </button>
-    <button type="button" class="filter-chip" [class.active]="activeFilter() === 'Published'" (click)="setFilter('Published')">
-      Published ({{ activeStaffingCount() }})
-    </button>
-    <button type="button" class="filter-chip" [class.active]="activeFilter() === 'Drafts'" (click)="setFilter('Drafts')">
-      Drafts ({{ draftCount() }})
-    </button>
-    <button type="button" class="filter-chip" [class.active]="activeFilter() === 'Concluded'" (click)="setFilter('Concluded')">
-      Concluded ({{ concludedCount() }})
-    </button>
-  </nav>
-
-  @if (error(); as message) {
-    <p role="alert" class="alert-error">{{ message }}</p>
-  }
-  @if (loading()) {
-    <p role="status">Loading events…</p>
-  } @else if (filteredEvents().length === 0) {
-    <p class="empty-state">No events match the selected operational filter.</p>
-  } @else {
-    <ul class="event-grid">
-      @for (event of filteredEvents(); track event.eventId) {
-        <li class="event-card"
-            [class.card--attention]="event.pendingAttendance"
-            [class.card--live]="event.inProgress"
-            [class.card--draft]="event.status === 'Draft'">
-          <div class="event-heading">
-            <h2>{{ event.title }}</h2>
-            <span class="status cd-badge" [attr.data-status]="event.status"
-                  [class.cd-badge--info]="event.status === 'Published'"
-                  [class.cd-badge--success]="event.status === 'Completed'"
-                  [class.cd-badge--danger]="event.status === 'Cancelled'"
-                  [class.cd-badge--neutral]="event.status === 'Draft'">
-              {{ event.status }}
-            </span>
-          </div>
-
-          <p class="event-meta"><time [attr.datetime]="event.startDateTime">{{ formatDate(event.startDateTime) }}</time></p>
-          <p class="event-meta">{{ event.location }}</p>
-
-          <div class="condition-group">
-            @if (event.inProgress) {
-              <p class="condition condition--live cd-badge cd-badge--success">
-                <span class="cd-pulse-dot" aria-hidden="true"></span>
-                In Progress
-              </p>
-            }
-            @if (event.pendingAttendance) {
-              <p class="condition attention cd-badge cd-badge--warning">Pending Attendance</p>
-            }
-          </div>
-
-          <dl class="counts">
-            <div>
-              <dt>Active team</dt>
-              <dd class="cd-tabular">{{ event.activeRosterCount }}</dd>
-            </div>
-            <div>
-              <dt>Available, unassigned</dt>
-              <dd class="cd-tabular">{{ event.availableUnassignedCount }}</dd>
-            </div>
-          </dl>
-
-          <!-- Prioritized Action Section -->
-          <div class="card-actions">
-            <!-- Primary Next Action -->
-            <div class="primary-action-group">
-              @if (event.pendingAttendance) {
-                <a class="action-link primary cd-btn cd-btn--primary" [routerLink]="['/events', event.eventId, 'attendance']">Open roll sheet</a>
-              } @else if (session.isAdmin() && event.status === 'Draft') {
-                <a class="action-link primary cd-btn cd-btn--primary" [routerLink]="['/draft-events', event.eventId]">Edit draft</a>
-              } @else if (event.status === 'Published') {
-                <a class="action-link primary cd-btn cd-btn--primary" [routerLink]="['/events', event.eventId, 'team-selection']">Team selection</a>
-              } @else if (event.status === 'Completed' && session.isChiefLeader()) {
-                <a class="action-link primary cd-btn cd-btn--primary" [routerLink]="['/events', event.eventId, 'feedback']">Rate Leaders</a>
-              }
-            </div>
-
-            <!-- Secondary Utilities Row -->
-            <div class="secondary-actions-group">
-              @if (event.status === 'Published') {
-                <a class="action-link cd-btn cd-btn--subtle cd-btn--sm" [routerLink]="['/events', event.eventId, 'replacement-assignment']">Replacements</a>
-              }
-              @if (session.isAdmin() && event.status === 'Published') {
-                <a class="action-link cd-btn cd-btn--subtle cd-btn--sm" [routerLink]="['/events', event.eventId, 'reschedule']">Reschedule</a>
-                <a class="action-link cd-btn cd-btn--subtle cd-btn--sm" [routerLink]="['/events', event.eventId, 'complete']">Complete event</a>
-              }
-              @if (event.status === 'Published' || event.status === 'Completed') {
-                <a class="action-link cd-btn cd-btn--subtle cd-btn--sm" [routerLink]="['/events', event.eventId, 'incidents']">Incidents</a>
-              }
-              @if (session.isAdmin() && (event.status === 'Draft' || event.status === 'Published')) {
-                <a class="action-link danger cd-btn cd-btn--danger cd-btn--sm" [routerLink]="['/events', event.eventId, 'cancel']">Cancel event</a>
-              }
-            </div>
-          </div>
-        </li>
+      @if (!loading() && (events().length || !error())) {
+        <div class="event-filters" aria-label="Filter events by status" role="group">
+          @for (filter of filters(); track filter.id) {
+            <button type="button" [attr.aria-pressed]="activeFilter() === filter.id" (click)="setFilter(filter.id)">
+              {{ filter.label }} <span class="filter-count">{{ filter.count }}</span>
+            </button>
+          }
+        </div>
       }
-    </ul>
-  }
+
+    </div>
+    <div class="schedule-content">
+      @if (error(); as message) {
+        <div role="alert" class="cd-alert cd-alert--error">
+          <p>{{ message }}</p>
+          @if (events().length) { <p>Showing the last loaded events.</p> }
+        </div>
+      }
+
+      @if (loading()) {
+        <p class="queue-state" role="status">Loading events…</p>
+      } @else {
+        <span class="cd-visually-hidden" role="status">{{ filteredEvents().length }} events shown</span>
+        @if (!filteredEvents().length && !error()) {
+          <div class="queue-state">
+            @if (events().length) {
+              <h3>No events in this view</h3>
+              <button type="button" (click)="setFilter('All')">Show all events</button>
+            } @else {
+              <h3>No events to show</h3>
+              @if (session.isAdmin()) { <p>Create a draft to start planning.</p> }
+              @else { <p>Events appear here when they are assigned to you.</p> }
+            }
+          </div>
+        }
+        @if (filteredEvents().length) {
+          @for (group of dateGroups(); track group.firstId) {
+            <section class="schedule-day">
+              <header class="day-heading">
+                <h3>{{ group.date }}</h3>
+                <span>Cairo time</span>
+              </header>
+              <ul class="event-list" [attr.aria-label]="group.date">
+                @for (event of group.events; track event.eventId) {
+                  <li class="event-row">
+                    <time class="event-time" [attr.datetime]="event.startDateTime">
+                      {{ formatDate(event.startDateTime, 'time') }}
+                    </time>
+                    <div class="event-info">
+                      <h4>{{ event.title }}</h4>
+                      <p>{{ event.location }}</p>
+                      <div class="event-state">
+                        <span class="cd-badge"
+                          [class.cd-badge--info]="event.status === 'Published'"
+                          [class.cd-badge--success]="event.status === 'Completed'"
+                          [class.cd-badge--danger]="event.status === 'Cancelled'"
+                          [class.cd-badge--neutral]="event.status === 'Draft'">{{ event.status }}</span>
+                        @if (event.inProgress) { <span class="cd-badge cd-badge--success">In progress</span> }
+                        @if (event.pendingAttendance) { <span class="cd-badge cd-badge--warning">Pending Attendance</span> }
+                      </div>
+                    </div>
+                    @if (event.status === 'Published' || event.status === 'Completed') {
+                      <dl class="event-counts">
+                        <div><dt>Active team</dt><dd>{{ event.activeRosterCount }}</dd></div>
+                        @if (event.status === 'Published') { <div><dt>Available</dt><dd>{{ event.availableUnassignedCount }}</dd></div> }
+                      </dl>
+                    }
+                    <div class="event-actions">
+                      @if (event.pendingAttendance) {
+                        <a class="cd-btn cd-btn--primary" [routerLink]="['/events', event.eventId, 'attendance']">Open roll sheet</a>
+                      } @else if (session.isAdmin() && event.status === 'Draft') {
+                        <a class="cd-btn cd-btn--secondary" [routerLink]="['/draft-events', event.eventId]">Edit draft</a>
+                      } @else if (event.status === 'Published') {
+                        <a class="cd-btn cd-btn--secondary" [routerLink]="['/events', event.eventId, 'team-selection']">Team selection</a>
+                      } @else if (event.status === 'Completed' && session.isChiefLeader()) {
+                        <a class="cd-btn cd-btn--secondary" [routerLink]="['/events', event.eventId, 'feedback']">Rate Leaders</a>
+                      }
+                      @if (event.status === 'Published' || event.status === 'Completed' || (session.isAdmin() && event.status === 'Draft')) {
+                        <details class="event-details">
+                          <summary>More actions<span class="cd-visually-hidden"> for {{ event.title }}</span></summary>
+                          <div class="secondary-actions">
+                            @if (event.status === 'Published') {
+                              @if (event.pendingAttendance) {
+                                <a [routerLink]="['/events', event.eventId, 'team-selection']">Team selection</a>
+                              }
+                              <a [routerLink]="['/events', event.eventId, 'replacement-assignment']">Replacements</a>
+                            }
+                            @if (session.isAdmin() && event.status === 'Published') {
+                              <a [routerLink]="['/events', event.eventId, 'reschedule']">Reschedule</a>
+                              <a [routerLink]="['/events', event.eventId, 'complete']">Complete event</a>
+                            }
+                            @if (event.status === 'Published' || event.status === 'Completed') {
+                              <a [routerLink]="['/events', event.eventId, 'incidents']">Incidents</a>
+                            }
+                            @if (session.isAdmin() && (event.status === 'Draft' || event.status === 'Published')) {
+                              <a class="cancel-event" [routerLink]="['/events', event.eventId, 'cancel']">Cancel event</a>
+                            }
+                          </div>
+                        </details>
+                      }
+                    </div>
+                  </li>
+                }
+            </ul>
+            </section>
+          }
+        }
+      }
+    </div>
+  </div>
 </section>

@@ -8,6 +8,10 @@ test('Leader declares Available, sees updated badge and live region confirmation
   const api = await mockAvailabilityApi(page);
   await page.goto(`/events/${targetEventId}/availability`);
 
+  await expect(page.getByRole('heading', { name: 'Overnight camp' })).toBeVisible();
+  await expect(page.getByText('Mango Tree Campsite', { exact:true })).toBeVisible();
+  await expect(page.locator('.time-range')).toContainText('23:30');
+  await expect(page.locator('.time-range')).toContainText('13 Dec 2026, 01:00');
   await expect(page.locator('.status-badge')).toContainText('Response Needed');
   const btnAvailable = page.getByRole('button', { name: 'Mark Available' });
   await expect(btnAvailable).toBeEnabled();
@@ -140,6 +144,8 @@ async function mockAvailabilityApi(page: Page, options: MockAvailabilityOptions 
         body: JSON.stringify({
           eventId: targetEventId,
           staffingCycleId,
+          itinerary: { title:'Overnight camp', location:'Mango Tree Campsite',
+            startDateTime:'2026-12-12T21:30:00Z', endDateTime:'2026-12-12T23:00:00Z' },
           response: currentResponse,
           declaredAt: currentResponse ? '2026-10-01T20:00:00Z' : null,
           version: currentVersion,

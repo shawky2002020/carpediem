@@ -13,7 +13,7 @@ test.describe('Admin Attendance Correction', () => {
     // The roster item should say Finalized and have a Correct button
     const rosterItem = page.locator('[data-assignment-id="30000000-0000-0000-0000-000000000001"]');
     await expect(rosterItem.locator('.cd-finalized-text')).toContainText('Finalized');
-    await expect(rosterItem.locator('.cd-current-status')).toHaveText('NoShow');
+    await expect(rosterItem.locator('.cd-current-status')).toHaveText('No show');
     
     const correctBtn = rosterItem.getByRole('button', { name: 'Correct attendance for Alice Smith' });
     await expect(correctBtn).toBeVisible();
@@ -37,6 +37,7 @@ test.describe('Admin Attendance Correction', () => {
     
     // Wait for success
     await expect(page.locator('.cd-alert--success')).toContainText('Attendance corrected successfully.');
+    await expect(rosterItem.locator('.cd-current-status')).toHaveText('Attended');
     expect(api.postCalls).toBe(1);
   });
 

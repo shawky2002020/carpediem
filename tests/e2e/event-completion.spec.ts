@@ -9,7 +9,7 @@ test('Admin views and submits valid event closeout', async ({ page }) => {
 
   await expect(page.locator('#completion-dialog-title')).toBeVisible();
   await expect(page.getByText('Complete Event')).toBeVisible();
-  await expect(page.locator('.cd-notice--info')).toBeVisible();
+  await expect(page.getByRole('note')).toContainText('This sets the event status to Completed.');
   await expect(page.getByText('Active team assignments will remain active')).toBeVisible();
 
   const submitBtn = page.getByRole('button', { name: 'Confirm Closeout' });
@@ -96,18 +96,6 @@ async function mockCompletionApi(page: Page, options: MockCompletionApiOptions =
   let postCalls = 0;
   let lastIfMatch: string | null = null;
 
-  await page.addInitScript(() => {
-    Object.defineProperty(globalThis.history, 'state', {
-      value: {
-        eventTitle: 'Community Gala',
-        version: 'test-version==',
-        end: '2026-10-01 17:00 UTC',
-      },
-      writable: true,
-      configurable: true,
-    });
-  });
-
   await page.route('**/api/**', async (route: Route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -132,6 +120,10 @@ async function mockCompletionApi(page: Page, options: MockCompletionApiOptions =
         contentType: 'application/json',
         body: JSON.stringify({ requestToken: 'test-token' }),
       });
+    }
+
+    if (path === `/api/events/${targetEventId}/cancellation` && request.method() === 'GET') {
+      return route.fulfill({ json: { eventId: targetEventId, title: 'Community Gala', status: 'Published', version: 'test-version==' } });
     }
 
     if (path === `/api/events/${targetEventId}/complete` && request.method() === 'POST') {

@@ -4,6 +4,7 @@ import { of, throwError } from 'rxjs';
 import { vi, describe, beforeEach, it, expect } from 'vitest';
 import { CompleteEventDialogComponent } from './complete-event-dialog.component';
 import { EventCompletionService } from '../../data/event-completion.service';
+import { EventCancellationService } from '../../../event-cancellation/event-cancellation.service';
 import { CompleteEventResponse } from '../../data/event-completion.model';
 
 describe('CompleteEventDialogComponent', () => {
@@ -35,6 +36,7 @@ describe('CompleteEventDialogComponent', () => {
       providers: [
         provideRouter([]),
         { provide: EventCompletionService, useValue: serviceMock },
+        { provide: EventCancellationService, useValue: { getContext: vi.fn() } },
       ],
     }).compileComponents();
 

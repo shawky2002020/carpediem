@@ -15,6 +15,9 @@ import { ApiProblem, toApiProblem } from '../../../core/http/api.interceptor';
 import { MyAssignmentResponse } from '../data/volunteer-assignment.model';
 import { VolunteerAssignmentService } from '../data/volunteer-assignment.service';
 
+const cairoClock = new Intl.DateTimeFormat('en-GB', { timeZone: 'Africa/Cairo', timeStyle: 'short' });
+const cairoDay = new Intl.DateTimeFormat('en-GB', { timeZone: 'Africa/Cairo', weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+
 @Component({
   selector: 'app-volunteer-assignment',
   imports: [],
@@ -27,6 +30,8 @@ export class VolunteerAssignmentComponent implements OnInit {
 
   @Input() eventId?: string;
   @ViewChild('reasonInput') reasonInput?: ElementRef<HTMLTextAreaElement>;
+  @ViewChild('cancelDialog') cancelDialog?: ElementRef<HTMLDialogElement>;
+  @ViewChild('assignmentTitle') assignmentTitle?: ElementRef<HTMLHeadingElement>;
 
   readonly effectiveEventId = computed(() =>
     this.eventId ?? this.route.snapshot.paramMap.get('eventId') ?? ''
@@ -75,15 +80,13 @@ export class VolunteerAssignmentComponent implements OnInit {
     this.justification.set('');
     this.validationError.set(null);
     this.modalOpen.set(true);
-    setTimeout(() => {
-      this.reasonInput?.nativeElement.focus();
-    }, 0);
+    this.cancelDialog?.nativeElement.showModal?.();
   }
 
   closeCancelModal(): void {
     if (this.submitting()) return;
-    this.modalOpen.set(false);
     this.validationError.set(null);
+    this.dismissDialog();
   }
 
   onJustificationChange(event: Event): void {
@@ -130,14 +133,15 @@ export class VolunteerAssignmentComponent implements OnInit {
             cancellationReason: response.cancellationReason,
             version: response.version,
           });
-          this.modalOpen.set(false);
+          this.dismissDialog();
+          this.assignmentTitle?.nativeElement.focus();
           this.statusMessage.set('Assignment successfully cancelled.');
         },
         error: error => {
           const apiProblem = toApiProblem(error, 'Assignment cancellation could not be processed.');
           this.problem.set(apiProblem);
           if (error.status === 409 || error.status === 412) {
-            this.modalOpen.set(false);
+            this.dismissDialog();
             this.load(true);
           }
         },
@@ -150,6 +154,14 @@ export class VolunteerAssignmentComponent implements OnInit {
       this.closeCancelModal();
     }
   }
+
+  private dismissDialog(): void {
+    this.cancelDialog?.nativeElement.close?.();
+    this.modalOpen.set(false);
+  }
+
+  clock(value: string): string { return cairoClock.format(new Date(value)); }
+  day(value: string): string { return cairoDay.format(new Date(value)); }
 
   formatDate(value: string | null | undefined): string {
     if (!value) return '';

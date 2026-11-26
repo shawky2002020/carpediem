@@ -11,6 +11,7 @@ test('Chief Leader views staffing gaps and active team roster on replacement pag
   await expect(page.locator('#replacement-title')).toBeVisible();
   await expect(page.locator('.event-title')).toContainText('Cairo Tech Summit 2026');
   await expect(page.locator('.event-meta')).toContainText('New Cairo Convention Center');
+  await page.getByText('Linked to tarek_cancelled').click();
 
   // Verify counts
   const gapsCount = page.locator('.gaps-section .count-badge');
@@ -42,6 +43,7 @@ test('Chief Leader assigns replacement candidate and verifies active roster upda
   await page.goto(`/events/${targetEventId}/replacement-assignment`);
 
   // Fill justification
+  await page.getByText('Linked to tarek_cancelled').click();
   const justificationInput = page.locator('#replacement-justification');
   await justificationInput.fill('Replacing tarek with salma for morning track coordination.');
 
@@ -94,6 +96,7 @@ test('Replacement assignment UI meets WCAG 2.2 AA, 44px touch targets, and 200% 
   await mockReplacementApi(page);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(`/events/${targetEventId}/replacement-assignment`);
+  await page.getByText('Linked to tarek_cancelled').click();
 
   // WCAG 2.2 AA accessibility audit
   const axeResults = await new AxeBuilder({ page })

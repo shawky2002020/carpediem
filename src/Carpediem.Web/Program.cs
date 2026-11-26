@@ -14,9 +14,20 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.DataProtection;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var keyPath = builder.Configuration["DataProtection:KeyPath"];
+if (!string.IsNullOrWhiteSpace(keyPath))
+{
+    var keyDirectory = Path.GetFullPath(keyPath, builder.Environment.ContentRootPath);
+    Directory.CreateDirectory(keyDirectory);
+    builder.Services.AddDataProtection()
+        .SetApplicationName("Carpediem")
+        .PersistKeysToFileSystem(new DirectoryInfo(keyDirectory));
+}
 
 builder.AddCarpediemObservability();
 builder.Services.AddProblemDetails();

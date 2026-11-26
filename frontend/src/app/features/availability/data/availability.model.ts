@@ -1,5 +1,12 @@
 export type AvailabilityType = 'Available' | 'NotAvailable';
 
+export interface PublishedEventItinerary {
+  title: string;
+  location: string;
+  startDateTime: string;
+  endDateTime: string;
+}
+
 export interface MyAvailabilityResponse {
   eventId: string;
   staffingCycleId: string;
@@ -9,6 +16,7 @@ export interface MyAvailabilityResponse {
   isWindowOpen: boolean;
   eventStatus: string;
   isChiefLeaderOnEvent: boolean;
+  itinerary?: PublishedEventItinerary | null;
 }
 
 export interface DeclareAvailabilityRequest {

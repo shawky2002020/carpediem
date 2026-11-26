@@ -9,6 +9,8 @@ public record DeclareAvailabilityCommand(
     byte[]? RowVersion,
     Guid CorrelationId);
 
+public sealed record PublishedEventItinerary(string Title, string Location, DateTimeOffset StartDateTime, DateTimeOffset EndDateTime);
+
 public record MyAvailabilityDto(
     Guid EventId,
     Guid StaffingCycleId,
@@ -17,7 +19,8 @@ public record MyAvailabilityDto(
     string? Version,
     bool IsWindowOpen,
     string EventStatus,
-    bool IsChiefLeaderOnEvent);
+    bool IsChiefLeaderOnEvent,
+    PublishedEventItinerary? Itinerary);
 
 public record AvailabilityDeclarationResult(
     Guid Id,

@@ -1,10 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, HostListener, Input, OnInit, Output, inject, signal } from '@angular/core';
+import { Component, DestroyRef, EventEmitter, HostListener, Input, OnInit, Output, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { EventRescheduleService } from '../../data/event-reschedule.service';
 import { RescheduleEventRequest, RescheduleEventResponse } from '../../data/event-reschedule.model';
+import { EventCancellationService } from '../../../event-cancellation/event-cancellation.service';
+import { toApiProblem } from '../../../../core/http/api.interceptor';
 
 @Component({
   selector: 'app-reschedule-dialog',
@@ -18,6 +21,8 @@ export class RescheduleDialogComponent implements OnInit {
   private readonly rescheduleService = inject(EventRescheduleService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly eventContext = inject(EventCancellationService);
 
   @Input() eventId = '';
   @Input() eventTitle = '';
@@ -38,6 +43,7 @@ export class RescheduleDialogComponent implements OnInit {
   readonly errorMessage = signal<string | null>(null);
   readonly successMessage = signal<string | null>(null);
   readonly liveStatus = signal<string>('');
+  readonly loadingContext = signal(false);
 
   ngOnInit(): void {
     if (!this.eventId) {
@@ -50,6 +56,22 @@ export class RescheduleDialogComponent implements OnInit {
       if (!this.currentStart && state.start) this.currentStart = state.start;
       if (!this.currentEnd && state.end) this.currentEnd = state.end;
     }
+    if (this.eventId && !this.currentVersion) this.loadContext();
+  }
+
+  loadContext(): void {
+    this.errorMessage.set(null);
+    this.loadingContext.set(true);
+    this.eventContext.getContext(this.eventId).pipe(
+      takeUntilDestroyed(this.destroyRef),
+      finalize(() => this.loadingContext.set(false)),
+    ).subscribe({
+      next: event => {
+        this.eventTitle = event.title;
+        this.currentVersion = event.version;
+      },
+      error: failure => this.errorMessage.set(toApiProblem(failure, 'Event details could not be loaded.').title),
+    });
   }
 
   @HostListener('keydown.escape')
@@ -62,11 +84,12 @@ export class RescheduleDialogComponent implements OnInit {
   cancel(): void {
     this.cancelled.emit();
     if (this.route.snapshot.paramMap.get('eventId')) {
-      this.router.navigate(['/']);
+      this.router.navigate(['/dashboard']);
     }
   }
 
   submitReschedule(): void {
+    if (this.isSubmitting() || this.successMessage() || !this.currentVersion) return;
     this.errorMessage.set(null);
     this.successMessage.set(null);
 
@@ -79,17 +102,17 @@ export class RescheduleDialogComponent implements OnInit {
 
     const { newStartDateTime, newEndDateTime, justification } = this.form.value;
 
-    const startDate = new Date(newStartDateTime);
-    const endDate = new Date(newEndDateTime);
+    const startDate = new Date(newStartDateTime + 'Z');
+    const endDate = new Date(newEndDateTime + 'Z');
     const now = new Date();
 
-    if (startDate <= now) {
+    if (!Number.isFinite(startDate.getTime()) || startDate <= now) {
       this.errorMessage.set('New start date and time must be in the future.');
       this.liveStatus.set('Error: New start time must be in the future.');
       return;
     }
 
-    if (endDate <= startDate) {
+    if (!Number.isFinite(endDate.getTime()) || endDate <= startDate) {
       this.errorMessage.set('New end date and time must be after the start time.');
       this.liveStatus.set('Error: New end time must be after the start time.');
       return;
@@ -113,10 +136,12 @@ export class RescheduleDialogComponent implements OnInit {
           this.liveStatus.set('Success: Event rescheduled and staffing cycle rotated.');
           this.rescheduled.emit(response);
           if (this.route.snapshot.paramMap.get('eventId')) {
-            setTimeout(() => this.router.navigate(['/']), 1000);
+            const redirect = setTimeout(() => this.router.navigate(['/dashboard']), 1000);
+            this.destroyRef.onDestroy(() => clearTimeout(redirect));
           }
         },
         error: (err) => {
+          if (err.status === 412) this.currentVersion = '';
           const detail = err?.error?.detail ?? err?.error?.title ?? 'Failed to reschedule event. Please try again.';
           this.errorMessage.set(detail);
           this.liveStatus.set(`Error: ${detail}`);

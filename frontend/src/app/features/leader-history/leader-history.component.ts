@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { finalize } from 'rxjs';
@@ -21,20 +21,6 @@ export class LeaderHistoryComponent implements OnInit {
   readonly problem = signal<ApiProblem | null>(null);
   readonly eventId = signal<string | null>(null);
   readonly isOwn = signal(true);
-
-  readonly totalHours = computed(() => {
-    const h = this.history();
-    if (!h) return 0;
-    return h.eventsAttended * 6;
-  });
-
-  readonly reliabilityRate = computed(() => {
-    const h = this.history();
-    if (!h) return 100;
-    const total = h.eventsAttended + h.noShows;
-    if (total === 0) return 100;
-    return Math.round((h.eventsAttended / total) * 100);
-  });
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
@@ -59,10 +45,11 @@ export class LeaderHistoryComponent implements OnInit {
   }
 
   effectiveDate(entry: LeaderHistoryEntry): string {
-    const [year, month, day] = entry.effectiveEventDate.split('-').map(Number);
+    const day = new Date(entry.effectiveEventDate.slice(0, 10) + 'T12:00:00Z');
+    if (Number.isNaN(day.getTime())) return entry.effectiveEventDate;
     return new Intl.DateTimeFormat('en', {
       timeZone: 'Africa/Cairo', dateStyle: 'medium',
-    }).format(new Date(Date.UTC(year, month - 1, day, 12)));
+    }).format(day);
   }
 
   dateTime(value: string): string {
