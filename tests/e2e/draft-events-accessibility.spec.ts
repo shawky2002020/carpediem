@@ -39,3 +39,14 @@ test('text scaling reflows and reduced motion removes entry animation', async ({
   const animationName = await page.evaluate(() => getComputedStyle(document.body).animationName);
   expect(animationName).toBe('none');
 });
+
+test('invalid form submission moves keyboard focus to the rendered error summary', async ({ page }) => {
+  await mockDraftApi(page);
+  await page.goto('/draft-events/new');
+  await page.getByRole('button', { name: 'Create Draft' }).press('Enter');
+  const summary = page.getByRole('alert').filter({ hasText: 'Review the highlighted fields.' });
+  await expect(summary).toBeFocused();
+  await expect(summary).toHaveText('Review the highlighted fields.');
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#title')).toBeFocused();
+});

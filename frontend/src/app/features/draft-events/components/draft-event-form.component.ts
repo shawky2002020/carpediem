@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { afterNextRender, Component, ElementRef, EventEmitter, inject, Injector, Input, OnChanges, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiProblem } from '../../../core/http/api.interceptor';
@@ -40,6 +40,7 @@ export class DraftEventFormComponent implements OnChanges {
   @Output() readonly cancel = new EventEmitter<void>();
   @Output() readonly formChanged = new EventEmitter<void>();
   @ViewChild('errorSummary') private errorSummary?: ElementRef<HTMLElement>;
+  private readonly injector = inject(Injector);
 
   readonly form = new FormGroup({
     title: new FormControl('', { nonNullable: true, validators: [requiredText, Validators.maxLength(200)] }),
@@ -86,7 +87,7 @@ export class DraftEventFormComponent implements OnChanges {
     if (changes['serverProblem']) {
       this.serverErrors = { ...(this.serverProblem?.errors ?? {}) };
       if (Object.keys(this.serverErrors).length > 0) {
-        queueMicrotask(() => this.errorSummary?.nativeElement.focus());
+        this.focusSummary();
       }
     }
   }
@@ -116,7 +117,7 @@ export class DraftEventFormComponent implements OnChanges {
     this.submitted = true;
     this.form.markAllAsTouched();
     if (this.form.invalid || this.saving || this.locked) {
-      if (this.form.invalid) queueMicrotask(() => this.errorSummary?.nativeElement.focus());
+      if (this.form.invalid) this.focusSummary();
       return;
     }
     const raw = this.form.getRawValue();
@@ -132,6 +133,10 @@ export class DraftEventFormComponent implements OnChanges {
   }
 
   markSaved(): void { this.form.markAsPristine(); }
+
+  private focusSummary(): void {
+    afterNextRender(() => this.errorSummary?.nativeElement.focus(), { injector: this.injector });
+  }
 
   private clearServerError(field: string): void {
     if (!this.serverErrors[field]) return;
