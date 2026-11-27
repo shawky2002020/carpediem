@@ -79,6 +79,11 @@
             </fieldset>
             @if (!draft().length) { <p class="section-note">Choose at least one role to save.</p> }
             @if (isOwnAccount()) { <p class="section-note">Your own Admin role is required.</p> }
+            <div class="reason-field">
+              <label for="roles-reason">Reason for changing roles</label>
+              <textarea id="roles-reason" #roleReasonInput rows="2" required [maxLength]="maxReasonLength"
+                [value]="rolesReason()" (input)="rolesReason.set(roleReasonInput.value)" [disabled]="!!saving() || loading()"></textarea>
+            </div>
             <div class="detail-actions">
               <button type="submit" class="cd-btn cd-btn--primary" [disabled]="!canSave()">Save changes</button>
               <button type="button" class="cd-btn cd-btn--secondary" [disabled]="!!saving() || loading()" (click)="cancelRoles()">Cancel</button>
@@ -133,12 +138,18 @@
       <h2 id="deactivation-title">Deactivate {{ accountName(current) }}?</h2>
       @if (secondaryEmail(current); as email) { <p class="identity-email">{{ email }}</p> }
       <p>This account will be blocked from signing in until an Admin reactivates it.</p>
-      <div class="detail-actions">
-        <button type="button" class="cd-btn cd-btn--secondary" autofocus (click)="deactivation.close()">Keep account active</button>
-        <button type="button" class="cd-btn cd-btn--danger" (click)="deactivation.close(); changeAccess(current, 'deactivate')">
-          Confirm deactivation
-        </button>
-      </div>
+      <form (submit)="$event.preventDefault(); confirmDeactivation(current, deactivation)">
+        <div class="reason-field">
+          <label for="deactivation-reason">Reason for deactivating</label>
+          <textarea id="deactivation-reason" #deactivationReasonInput rows="2" required [maxLength]="maxReasonLength"
+            [value]="deactivationReason()" (input)="deactivationReason.set(deactivationReasonInput.value)"></textarea>
+        </div>
+        <div class="detail-actions">
+          <button type="button" class="cd-btn cd-btn--secondary" autofocus
+            (click)="deactivationReason.set(''); deactivation.close()">Keep account active</button>
+          <button type="submit" class="cd-btn cd-btn--danger" [disabled]="!canConfirmDeactivation()">Confirm deactivation</button>
+        </div>
+      </form>
     </dialog>
   }
 </section>

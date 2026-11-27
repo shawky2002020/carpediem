@@ -95,15 +95,15 @@ public static class AccountEndpoints
     private static Task<IResult> ApproveAsync(
         Guid userId, HttpContext context, IAntiforgery antiforgery,
         UserManager<CarpediemUser> users, CarpediemDbContext db, TimeProvider clock) =>
-        ChangeActiveAsync(userId, true, context, antiforgery, users, db, clock);
+        ChangeActiveAsync(userId, true, null, context, antiforgery, users, db, clock);
 
     private static Task<IResult> DeactivateAsync(
-        Guid userId, HttpContext context, IAntiforgery antiforgery,
+        Guid userId, DeactivateAccountRequest? request, HttpContext context, IAntiforgery antiforgery,
         UserManager<CarpediemUser> users, CarpediemDbContext db, TimeProvider clock) =>
-        ChangeActiveAsync(userId, false, context, antiforgery, users, db, clock);
+        ChangeActiveAsync(userId, false, request?.Reason, context, antiforgery, users, db, clock);
 
     private static async Task<IResult> ChangeActiveAsync(
-        Guid userId, bool active, HttpContext context, IAntiforgery antiforgery,
+        Guid userId, bool active, string? requestedReason, HttpContext context, IAntiforgery antiforgery,
         UserManager<CarpediemUser> users, CarpediemDbContext db, TimeProvider clock)
     {
         if (!await ValidAntiforgeryAsync(context, antiforgery)) return BadAntiforgery(context);
@@ -114,6 +114,8 @@ public static class AccountEndpoints
         if (user is null) return NotFound(context);
         if (HasStaleVersion(context, user)) return AccountConflict(context);
         if (user.IsActive == active) return Results.Ok(new AccountStateResponse(user.Id, active));
+        var reason = requestedReason?.Trim();
+        if (!active && !IsValidReason(reason)) return InvalidReason(context);
 
         return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
         {
@@ -124,7 +126,7 @@ public static class AccountEndpoints
             var sessionUpdate = await users.UpdateSecurityStampAsync(user);
             if (!sessionUpdate.Succeeded) return UpdateFailed(context, sessionUpdate, "Account session could not be updated.");
             db.AuditLogs.Add(AuditLog.AccountChanged(user.Id, adminId, Guid.NewGuid(), clock.GetUtcNow(),
-                active ? AuditLog.AccountApproved : AuditLog.AccountDeactivated, (!active).ToString(), active.ToString()));
+                active ? AuditLog.AccountApproved : AuditLog.AccountDeactivated, (!active).ToString(), active.ToString(), reason));
             await db.SaveChangesAsync();
             await transaction.CommitAsync();
             return Results.Ok(new AccountStateResponse(user.Id, active));
@@ -147,6 +149,11 @@ public static class AccountEndpoints
         if (user is null) return NotFound(context);
         if (HasStaleVersion(context, user)) return AccountConflict(context);
         var current = await users.GetRolesAsync(user);
+        var remove = current.Except(desired).ToArray();
+        var add = desired.Except(current).ToArray();
+        if (remove.Length == 0 && add.Length == 0) return Results.Ok(new AccountRolesResponse(user.Id, desired));
+        var reason = request?.Reason?.Trim();
+        if (!IsValidReason(reason)) return InvalidReason(context);
         foreach (var role in desired)
         {
             if (!await roles.RoleExistsAsync(role))
@@ -156,8 +163,6 @@ public static class AccountEndpoints
                     return ApiProblemDetailsService.Problem(context, 503, "account_update_failed", "Roles are temporarily unavailable.");
             }
         }
-        var remove = current.Except(desired).ToArray();
-        var add = desired.Except(current).ToArray();
         return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
         {
             await using var transaction = await db.Database.BeginTransactionAsync();
@@ -171,14 +176,11 @@ public static class AccountEndpoints
                 var added = await users.AddToRolesAsync(user, add);
                 if (!added.Succeeded) return UpdateFailed(context, added, "Roles could not be updated.");
             }
-            if (remove.Length > 0 || add.Length > 0)
-            {
-                var sessionUpdate = await users.UpdateSecurityStampAsync(user);
-                if (!sessionUpdate.Succeeded) return UpdateFailed(context, sessionUpdate, "Account session could not be updated.");
-                db.AuditLogs.Add(AuditLog.AccountChanged(user.Id, adminId, Guid.NewGuid(), clock.GetUtcNow(),
-                    AuditLog.AccountRolesChanged, string.Join(',', current.Order()), string.Join(',', desired.Order())));
-                await db.SaveChangesAsync();
-            }
+            var sessionUpdate = await users.UpdateSecurityStampAsync(user);
+            if (!sessionUpdate.Succeeded) return UpdateFailed(context, sessionUpdate, "Account session could not be updated.");
+            db.AuditLogs.Add(AuditLog.AccountChanged(user.Id, adminId, Guid.NewGuid(), clock.GetUtcNow(),
+                AuditLog.AccountRolesChanged, string.Join(',', current.Order()), string.Join(',', desired.Order()), reason));
+            await db.SaveChangesAsync();
             await transaction.CommitAsync();
             return Results.Ok(new AccountRolesResponse(user.Id, desired));
         });
@@ -212,7 +214,12 @@ public static class AccountEndpoints
     { message = "Registration received. An Admin must approve the account before sign-in." });
 
     private sealed record RegisterRequest(string UserName, string Email, string Password);
-    private sealed record SetRolesRequest(string[] Roles);
+    private static bool IsValidReason(string? reason) => reason is { Length: > 0 and <= 1000 };
+    private static IResult InvalidReason(HttpContext context) => ApiProblemDetailsService.Problem(context, 400,
+        "invalid_account_reason", "Enter a reason of 1 to 1,000 characters.");
+
+    private sealed record SetRolesRequest(string[] Roles, string? Reason);
+    private sealed record DeactivateAccountRequest(string? Reason);
     private sealed record AccountStateResponse(Guid UserId, bool IsActive);
     private sealed record AccountRolesResponse(Guid UserId, string[] Roles);
 }

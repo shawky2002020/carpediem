@@ -95,12 +95,12 @@ export class AccountDirectoryService {
     return this.http.get<AccountDetail>(`${this.baseUrl}/${userId}`);
   }
 
-  saveRoles(account: AccountDetail, roles: string[]) {
-    return this.http.put<{ roles: string[] }>(`${this.baseUrl}/${account.userId}/roles`, { roles }, { headers: this.versionHeader(account) });
+  saveRoles(account: AccountDetail, roles: string[], reason: string) {
+    return this.http.put<{ roles: string[] }>(`${this.baseUrl}/${account.userId}/roles`, { roles, reason }, { headers: this.versionHeader(account) });
   }
 
-  changeAccess(account: AccountDetail, action: AccessAction) {
-    return this.http.post<{ isActive: boolean }>(`${this.baseUrl}/${account.userId}/${action}`, {}, { headers: this.versionHeader(account) });
+  changeAccess(account: AccountDetail, action: AccessAction, reason?: string) {
+    return this.http.post<{ isActive: boolean }>(`${this.baseUrl}/${account.userId}/${action}`, reason ? { reason } : {}, { headers: this.versionHeader(account) });
   }
 
   private versionHeader(account: AccountDetail): HttpHeaders {

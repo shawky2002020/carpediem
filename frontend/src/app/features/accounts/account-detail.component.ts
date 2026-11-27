@@ -46,6 +46,10 @@ export class AccountDetailComponent implements OnInit, HasPendingChanges {
   protected readonly actionError = signal('');
   protected readonly conflict = signal(false);
   protected readonly success = signal('');
+  protected readonly rolesReason = signal('');
+  protected readonly deactivationReason = signal('');
+  protected readonly maxReasonLength = 1000;
+  protected readonly canConfirmDeactivation = computed(() => this.reasonIsValid(this.deactivationReason()));
   protected readonly draft = toSignal(this.editor.valueChanges, { initialValue: this.editor.value });
   protected readonly isOwnAccount = computed(() => this.account()?.userId === this.session.session()?.userId);
   protected readonly dirty = computed(() => {
@@ -54,7 +58,7 @@ export class AccountDetailComponent implements OnInit, HasPendingChanges {
     return this.editing() && (roles.length !== draft.length || roles.some(role => !draft.includes(role)));
   });
   protected readonly unavailable = computed(() => this.loading() || !!this.saving() || !!this.loadError() || this.conflict());
-  protected readonly canSave = computed(() => this.dirty() && !this.unavailable() && this.draft().length > 0);
+  protected readonly canSave = computed(() => this.dirty() && !this.unavailable() && this.draft().length > 0 && this.reasonIsValid(this.rolesReason()));
 
   protected readonly accountName = accountName;
   protected readonly secondaryEmail = secondaryEmail;
@@ -113,6 +117,7 @@ export class AccountDetailComponent implements OnInit, HasPendingChanges {
 
   protected editRoles(account: AccountDetail): void {
     this.editor.setValue([...account.roles]);
+    this.rolesReason.set('');
     this.editing.set(true);
     this.actionError.set('');
     this.success.set('');
@@ -125,6 +130,7 @@ export class AccountDetailComponent implements OnInit, HasPendingChanges {
   }
 
   protected cancelRoles(): void {
+    this.rolesReason.set('');
     this.editing.set(false);
     if (!this.conflict()) this.actionError.set('');
     this.success.set('');
@@ -134,9 +140,10 @@ export class AccountDetailComponent implements OnInit, HasPendingChanges {
   protected saveRoles(account: AccountDetail): void {
     if (!this.canSave()) return;
     this.start('roles');
-    this.directory.saveRoles(account, this.draft()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.directory.saveRoles(account, this.draft(), this.rolesReason().trim()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: result => {
         this.account.set({ ...account, roles: result.roles });
+        this.rolesReason.set('');
         this.editing.set(false);
         this.completed('Roles saved.', '#account-roles-heading');
       },
@@ -144,12 +151,19 @@ export class AccountDetailComponent implements OnInit, HasPendingChanges {
     });
   }
 
-  protected changeAccess(account: AccountDetail, action: AccessAction): void {
+  protected confirmDeactivation(account: AccountDetail, dialog: HTMLDialogElement): void {
+    if (!this.canConfirmDeactivation()) return;
+    dialog.close();
+    this.changeAccess(account, 'deactivate', this.deactivationReason().trim());
+  }
+
+  protected changeAccess(account: AccountDetail, action: AccessAction, reason?: string): void {
     if (this.unavailable() || this.editing()) return;
     this.start(action);
-    this.directory.changeAccess(account, action).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.directory.changeAccess(account, action, reason).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: result => {
         this.account.set({ ...account, status: result.isActive ? 'active' : 'inactive', pendingSince: null });
+        this.deactivationReason.set('');
         const message = action === 'deactivate' ? 'Account deactivated.'
           : account.status === 'pending' ? 'Registration approved.' : 'Account reactivated.';
         this.completed(message, '#account-access-heading');
@@ -164,6 +178,11 @@ export class AccountDetailComponent implements OnInit, HasPendingChanges {
 
   protected beforeUnload(event: BeforeUnloadEvent): void {
     if (this.saving() || this.dirty()) event.preventDefault();
+  }
+
+  private reasonIsValid(value: string): boolean {
+    const length = value.trim().length;
+    return length > 0 && length <= this.maxReasonLength;
   }
 
   private start(action: 'roles' | AccessAction): void {
