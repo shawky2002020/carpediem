@@ -1,23 +1,51 @@
 using Carpediem.Modules.Notifications.Application;
+using Carpediem.Modules.Notifications.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace Carpediem.Infrastructure.Persistence;
 
 public sealed class EfNotificationInboxStore(CarpediemDbContext db) : INotificationInboxStore
 {
+    private const int UnreadPageSize = 30;
+
     public async Task<IReadOnlyList<NotificationInboxItem>> GetLatestAsync(Guid recipientUserId, CancellationToken cancellationToken) =>
-        await db.InPlatformNotifications.AsNoTracking()
-            .Where(item => item.RecipientUserId == recipientUserId)
+        await GetItemsAsync(OwnedBy(recipientUserId), 100, cancellationToken);
+
+    public async Task<NotificationUnreadPage?> GetUnreadAsync(Guid recipientUserId, Guid? beforeId, CancellationToken cancellationToken)
+    {
+        var owned = OwnedBy(recipientUserId);
+        var unread = owned.Where(item => item.ReadAt == null);
+        if (beforeId is { } id)
+        {
+            // The cursor remains usable after its notification is marked as read.
+            var cursor = await owned.Where(item => item.Id == id)
+                .Select(item => new { item.CreatedAt, item.Id }).SingleOrDefaultAsync(cancellationToken);
+            if (cursor is null) return null;
+            unread = unread.Where(item => item.CreatedAt < cursor.CreatedAt ||
+                (item.CreatedAt == cursor.CreatedAt && item.Id.CompareTo(cursor.Id) < 0));
+        }
+
+        var items = await GetItemsAsync(unread, UnreadPageSize + 1, cancellationToken);
+        if (items.Count <= UnreadPageSize) return new NotificationUnreadPage(items, null);
+        items.RemoveAt(UnreadPageSize);
+        return new NotificationUnreadPage(items, items[^1].Id);
+    }
+
+    private IQueryable<InPlatformNotification> OwnedBy(Guid recipientUserId) =>
+        db.InPlatformNotifications.AsNoTracking().Where(item => item.RecipientUserId == recipientUserId);
+
+    private static Task<List<NotificationInboxItem>> GetItemsAsync(IQueryable<InPlatformNotification> source,
+        int limit, CancellationToken cancellationToken) =>
+        source
             .OrderByDescending(item => item.CreatedAt)
             .ThenByDescending(item => item.Id)
-            .Take(100)
+            .Take(limit)
             .Select(item => new NotificationInboxItem(item.Id, item.EventId, item.NotificationType,
                 item.ContextPayload, item.CreatedAt, item.ReadAt))
             .ToListAsync(cancellationToken);
 
     public Task<int> GetUnreadCountAsync(Guid recipientUserId, CancellationToken cancellationToken) =>
-        db.InPlatformNotifications.AsNoTracking()
-            .CountAsync(item => item.RecipientUserId == recipientUserId && item.ReadAt == null, cancellationToken);
+        OwnedBy(recipientUserId).CountAsync(item => item.ReadAt == null, cancellationToken);
 
     public async Task<bool> MarkReadAsync(Guid recipientUserId, Guid notificationId, DateTimeOffset readAt, CancellationToken cancellationToken)
     {

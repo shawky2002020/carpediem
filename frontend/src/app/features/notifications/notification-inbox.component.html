@@ -11,17 +11,46 @@
     }
   </div>
 
-  @if (inbox.error()) {
+  <div class="inbox-controls" role="group" aria-label="Notification view">
+    <button type="button" class="cd-btn cd-btn--secondary cd-btn--sm"
+      [attr.aria-pressed]="!unreadOnly()" (click)="selectView(false)">Recent</button>
+    <button #unreadView type="button" class="cd-btn cd-btn--secondary cd-btn--sm"
+      [attr.aria-pressed]="unreadOnly()" (click)="selectView(true)">Unread</button>
+  </div>
+
+  @if (unreadOnly() && unreadPage.error()) {
+    <div role="alert" class="inbox-error cd-callout cd-callout--danger">
+      <span class="error-msg">Unread notifications could not be loaded.</span>
+      <button type="button" class="cd-btn cd-btn--secondary cd-btn--sm" (click)="unreadView.focus(); unreadPage.reload()">Try again</button>
+    </div>
+  } @else if (inbox.error()) {
     <div role="alert" class="inbox-error cd-callout cd-callout--danger">
       <span class="error-msg">Notifications could not be refreshed.</span>
       <button type="button" class="cd-btn cd-btn--secondary cd-btn--sm" (click)="inbox.refreshAll()">Try again</button>
     </div>
   }
 
-  @if (inbox.loading() && inbox.items().length === 0) {
+  @if (unreadOnly() && (hasNewerUnread() || olderUnread())) {
+    <nav class="inbox-controls" aria-label="Unread notification pages">
+      @if (hasNewerUnread()) {
+        <button type="button" class="cd-btn cd-btn--secondary cd-btn--sm"
+          (click)="unreadView.focus(); browseUnread()">Newer unread</button>
+      }
+      @if (olderUnread(); as beforeId) {
+        <button type="button" class="cd-btn cd-btn--secondary cd-btn--sm"
+          (click)="unreadView.focus(); browseUnread(beforeId)">Older unread</button>
+      }
+    </nav>
+  }
+
+  @if (listLoading() && displayedItems().length === 0) {
     <p role="status" class="loading-state">Loading notifications…</p>
-  } @else if (inbox.items().length === 0 && !inbox.error()) {
-    <p class="empty-state">You have no notifications yet.</p>
+  } @else if (displayedItems().length === 0 && !inbox.error() && !(unreadOnly() && unreadPage.error())) {
+    <p class="empty-state" role="status">
+      @if (!unreadOnly()) { You have no notifications yet. }
+      @else if (hasNewerUnread()) { No unread notifications on this page. }
+      @else { You’re caught up. No unread notifications. }
+    </p>
   } @else {
     <div class="grouped-notifications">
       @for (group of groupedNotifications(); track group.label) {
@@ -53,7 +82,7 @@
                       <button
                         type="button"
                         class="cd-btn cd-btn--secondary cd-btn--sm"
-                        (click)="notificationTitle.focus(); inbox.markRead(item.id)"
+                        (click)="(unreadOnly() ? unreadView : notificationTitle).focus(); inbox.markRead(item.id)"
                         [disabled]="inbox.savingId() === item.id">
                         Mark as read
                       </button>
@@ -67,4 +96,5 @@
       }
     </div>
   }
+
 </section>

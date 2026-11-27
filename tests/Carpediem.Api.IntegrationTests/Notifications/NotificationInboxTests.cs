@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Carpediem.Api.IntegrationTests.Infrastructure;
 using Carpediem.Infrastructure.Persistence;
+using Carpediem.Modules.Identity.Authorization;
 using Carpediem.Modules.Notifications.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -93,6 +94,64 @@ public sealed class NotificationInboxTests(SqlServerFixture sqlServer)
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    [Theory]
+    [InlineData(CarpediemRoles.Admin)]
+    [InlineData(CarpediemRoles.ChiefLeader)]
+    [InlineData(CarpediemRoles.Leader)]
+    public async Task UnreadInboxReachesPastRecentHistoryAndOnlyReturnsTheRecipientsItems(string role)
+    {
+        await using var harness = await DraftApiTestHarness.StartAsync(sqlServer);
+        var eventId = await harness.CreateDefaultDraftAsync();
+        var otherUserId = await harness.SeedUserAsync("other.notification.user", true);
+        var now = DateTimeOffset.UtcNow.AddMinutes(-1);
+        var unread = Enumerable.Range(0, 101).Select(_ => InPlatformNotification.EventPublished(
+            harness.ActorUserId, eventId, now.AddDays(-2), "{}")).ToArray();
+        var newerRead = Enumerable.Range(0, 100).Select(_ =>
+        {
+            var item = InPlatformNotification.EventPublished(harness.ActorUserId, eventId, now, "{}");
+            item.MarkRead(now);
+            return item;
+        }).ToArray();
+        var theirs = InPlatformNotification.EventPublished(otherUserId, eventId, now, "{}");
+        await using (var scope = harness.Factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<CarpediemDbContext>();
+            db.InPlatformNotifications.AddRange(unread.Concat(newerRead).Append(theirs));
+            await db.SaveChangesAsync();
+        }
+        harness.Factory.ActorRole = role;
+
+        var recent = (await harness.Client.GetFromJsonAsync<InboxItem[]>("/api/notifications"))!;
+        Assert.Equal(100, recent.Length);
+        Assert.DoesNotContain(recent, item => item.ReadAt is null);
+        Assert.Equal(unread.Length, (await harness.Client.GetFromJsonAsync<CountBody>("/api/notifications/unread-count"))!.Count);
+
+        var firstResponse = await harness.Client.GetAsync("/api/notifications/unread");
+        Assert.Equal(HttpStatusCode.OK, firstResponse.StatusCode);
+        Assert.Equal("no-store", firstResponse.Headers.CacheControl?.ToString());
+        var page = (await firstResponse.Content.ReadFromJsonAsync<UnreadPage>())!;
+        Assert.NotNull(page.NextBeforeId);
+        var firstCursor = page.NextBeforeId!.Value;
+        Assert.Equal(page.Items.Last().Id, firstCursor);
+        Assert.Equal(HttpStatusCode.NoContent, (await PostAsync(harness, $"/api/notifications/{firstCursor}/read")).StatusCode);
+        Assert.Equal(unread.Length - 1, (await harness.Client.GetFromJsonAsync<CountBody>("/api/notifications/unread-count"))!.Count);
+
+        var pages = 1;
+        var seen = new HashSet<Guid>();
+        while (true)
+        {
+            Assert.All(page.Items, item => Assert.Null(item.ReadAt));
+            Assert.All(page.Items, item => Assert.True(seen.Add(item.Id), "A notification crossed the page boundary twice."));
+            if (page.NextBeforeId is not { } next) break;
+            Assert.True(++pages <= unread.Length);
+            page = (await harness.Client.GetFromJsonAsync<UnreadPage>($"/api/notifications/unread?beforeId={next}"))!;
+        }
+        Assert.Equal(unread.Select(item => item.Id).Order(), seen.Order());
+        Assert.Equal(HttpStatusCode.NotFound, (await harness.Client.GetAsync($"/api/notifications/unread?beforeId={theirs.Id}")).StatusCode);
+        harness.Factory.ActorUserId = null;
+        Assert.Equal(HttpStatusCode.Unauthorized, (await harness.Client.GetAsync("/api/notifications/unread")).StatusCode);
+    }
+
     private static async Task<HttpResponseMessage> PostAsync(DraftApiTestHarness harness, string path)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, path) { Content = JsonContent.Create(new { }) };
@@ -100,7 +159,8 @@ public sealed class NotificationInboxTests(SqlServerFixture sqlServer)
         return await harness.Client.SendAsync(request);
     }
 
-    private sealed record InboxItem(Guid Id);
+    private sealed record InboxItem(Guid Id, DateTimeOffset? ReadAt);
+    private sealed record UnreadPage(InboxItem[] Items, Guid? NextBeforeId);
     private sealed record EventBody(Guid Id);
     private sealed record CountBody(int Count);
     private sealed record UpdatedBody(int Updated);
