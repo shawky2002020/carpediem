@@ -1,5 +1,5 @@
-import { afterNextRender, Component, computed, inject, Injector, Input, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { afterNextRender, Component, computed, effect, ElementRef, inject, Injector, Input, OnInit, signal, viewChild, viewChildren } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 import { ApiProblem, toApiProblem } from '../../../core/http/api.interceptor';
 import {
@@ -9,6 +9,7 @@ import {
   TeamSelectionContext,
 } from '../data/team-selection.model';
 import { TeamSelectionService } from '../data/team-selection.service';
+import { CandidateHistoryReturnService } from '../data/candidate-history-return.service';
 import { OperationalSpineComponent } from '../../../shared/components/operational-spine/operational-spine.component';
 
 const cairoDateTime = new Intl.DateTimeFormat('en-GB', {
@@ -24,7 +25,12 @@ const cairoDateTime = new Intl.DateTimeFormat('en-GB', {
 export class TeamSelectionComponent implements OnInit {
   private readonly service = inject(TeamSelectionService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly injector = inject(Injector);
+  private readonly historyReturn = inject(CandidateHistoryReturnService);
+  private readonly candidateFilter = viewChild<ElementRef<HTMLInputElement>>('candidateFilter');
+  private readonly teamHeading = viewChild<ElementRef<HTMLHeadingElement>>('teamHeading');
+  private readonly historyLinks = viewChildren<ElementRef<HTMLAnchorElement>>('historyLink');
 
   @Input() eventId?: string;
 
@@ -54,12 +60,45 @@ export class TeamSelectionComponent implements OnInit {
   readonly filteredAvailableCandidates = computed(() => this.filterByName(this.availableCandidates()));
   readonly filteredDirectCandidates = computed(() => this.filterByName(this.directCandidates()));
 
+  constructor() {
+    const previousPath = this.router.currentNavigation()?.previousNavigation?.finalUrl?.toString();
+    const review = this.historyReturn.take(this.effectiveEventId(), previousPath);
+    if (!review) return;
+
+    this.candidateSearch.set(review.search);
+    this.rosterExpanded.set(review.rosterExpanded);
+    const restore = effect(() => {
+      if (this.loading() || this.directLoading()) return;
+
+      // The shell moves focus and scroll on NavigationEnd. Wait for the rebuilt pools.
+      afterNextRender(() => this.restoreHistoryFocus(review.controlKey, review.controlTop), { injector: this.injector });
+      restore.destroy();
+    });
+  }
+
   ngOnInit(): void {
     this.load();
   }
 
   toggleRoster(): void {
     this.rosterExpanded.update(expanded => !expanded);
+  }
+
+  rememberHistory(event: MouseEvent, userId: string): void {
+    if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    const link = event.currentTarget as HTMLAnchorElement;
+    const controlKey = link.dataset['historyControl'];
+    if (!controlKey) return;
+
+    const eventId = this.effectiveEventId();
+    this.historyReturn.remember({
+      eventId,
+      historyPath: this.router.createUrlTree(['/events', eventId, 'leaders', userId, 'history']).toString(),
+      search: this.candidateSearch(),
+      controlKey,
+      controlTop: link.getBoundingClientRect().top,
+      rosterExpanded: this.rosterExpanded(),
+    });
   }
 
   load(preserveProblem = false): void {
@@ -165,6 +204,23 @@ export class TeamSelectionComponent implements OnInit {
   private filterByName<T extends { userName: string }>(candidates: T[]): T[] {
     const query = this.normalizedSearch();
     return query ? candidates.filter(candidate => candidate.userName.toLowerCase().includes(query)) : candidates;
+  }
+
+  private restoreHistoryFocus(controlKey: string, previousTop: number): void {
+    const link = this.historyLinks().map(ref => ref.nativeElement)
+      .find(item => item.dataset['historyControl'] === controlKey);
+    if (!link) {
+      (this.candidateFilter()?.nativeElement ?? this.teamHeading()?.nativeElement)?.focus();
+      return;
+    }
+
+    const bounds = link.getBoundingClientRect();
+    if (previousTop >= 0 && previousTop + bounds.height <= window.innerHeight) {
+      window.scrollBy({ top: bounds.top - previousTop, behavior: 'instant' });
+    } else {
+      link.scrollIntoView({ block: 'center', behavior: 'instant' });
+    }
+    link.focus({ preventScroll: true });
   }
 
   private keepPoolFocus(action: HTMLButtonElement | undefined, selector: string): void {

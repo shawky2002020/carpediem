@@ -23,6 +23,7 @@ public sealed record LeaderHistoryEntry(
     Guid AssignmentId,
     Guid EventId,
     string EventTitle,
+    string EventStatus,
     int StaffingCycleNumber,
     DateOnly EffectiveEventDate,
     bool IsCurrentCycle,

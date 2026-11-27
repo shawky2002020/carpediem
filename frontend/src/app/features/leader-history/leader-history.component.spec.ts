@@ -29,8 +29,8 @@ describe('LeaderHistoryComponent', () => {
     }],
   };
 
-  async function render(params: Record<string, string> = {}): Promise<void> {
-    service = { getOwn: vi.fn(() => of(history)), getLeader: vi.fn(() => of(history)) };
+  async function render(params: Record<string, string> = {}, result: LeaderHistory = history): Promise<void> {
+    service = { getOwn: vi.fn(() => of(result)), getLeader: vi.fn(() => of(result)) };
     const paramMap = convertToParamMap(params);
     await TestBed.configureTestingModule({
       imports: [LeaderHistoryComponent],
@@ -63,6 +63,27 @@ describe('LeaderHistoryComponent', () => {
     expect(service.getLeader).toHaveBeenCalledWith(history.userId, history.events[0].eventId);
     expect(fixture.nativeElement.textContent).toContain('Leader history');
     expect(fixture.nativeElement.querySelector('a')?.getAttribute('href')).toBe(`/events/${history.events[0].eventId}/team-selection`);
+  });
+
+  it('shows completed assignment facts without linking to the published assignment route', async () => {
+    const archived = {
+      ...history.events[0], eventTitle: 'Completed event', eventStatus: 'Completed' as const,
+      isCurrentCycle: true, assignmentStatus: 'Active', cancelledAt: null, selfCancelled: false,
+    };
+    const current = {
+      ...archived, assignmentId: '22222222-2222-2222-2222-222222222223',
+      eventId: '33333333-3333-3333-3333-333333333334', eventTitle: 'Published event', eventStatus: 'Published' as const,
+    };
+    await render({}, { ...history, events: [archived, current] });
+    const [pastCard, currentCard] = fixture.nativeElement.querySelectorAll('.event-history-card') as NodeListOf<HTMLElement>;
+    expect(pastCard.textContent).toContain('Completed');
+    expect(pastCard.textContent).toMatch(/Attendance\s*Attended/);
+    expect(pastCard.querySelector('a[href$="/my-assignment"]')).toBeNull();
+    expect(pastCard.querySelector('summary')).not.toBeNull();
+    expect(pastCard.querySelector('a[href$="/feedback"]')).not.toBeNull();
+    expect(pastCard.querySelector('a[href$="/incidents"]')).not.toBeNull();
+    expect(currentCard.querySelector('a[href$="/my-assignment"]')?.getAttribute('href'))
+      .toBe(`/events/${current.eventId}/my-assignment`);
   });
 
   it('does not display stale history after a rejected request', async () => {

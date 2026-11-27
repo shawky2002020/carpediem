@@ -36,7 +36,10 @@
         @for (entry of profile.events; track entry.assignmentId) {
           <li class="event-history-card">
             <h3>{{ entry.eventTitle }}</h3>
-            <p class="event-date"><time [attr.datetime]="entry.effectiveEventDate">{{ effectiveDate(entry) }}</time></p>
+            <p class="event-date">
+              <time [attr.datetime]="entry.effectiveEventDate">{{ effectiveDate(entry) }}</time>
+              @if (entry.eventStatus) { <span class="cd-badge cd-badge--neutral">{{ entry.eventStatus }}</span> }
+            </p>
             <dl class="event-facts">
               <div><dt>Assignment</dt><dd>{{ entry.assignmentStatus }}</dd></div>
               <div><dt>Attendance</dt><dd>{{ entry.attendanceOutcome === 'NoShow' ? 'No show' : entry.attendanceOutcome ?? 'Unrecorded' }}</dd></div>
@@ -52,7 +55,9 @@
             </details>
             @if (isOwn() && entry.isCurrentCycle && entry.assignmentStatus === 'Active') {
               <div class="history-actions">
-                <a class="cd-btn cd-btn--secondary cd-btn--sm" [routerLink]="['/events', entry.eventId, 'my-assignment']">View assignment</a>
+                @if (entry.eventStatus === 'Published') {
+                  <a class="cd-btn cd-btn--secondary cd-btn--sm" [routerLink]="['/events', entry.eventId, 'my-assignment']">View assignment</a>
+                }
                 <a class="cd-btn cd-btn--secondary cd-btn--sm" [routerLink]="['/events', entry.eventId, 'feedback']">Event feedback</a>
                 <a class="cd-btn cd-btn--secondary cd-btn--sm" [routerLink]="['/events', entry.eventId, 'incidents']">Incidents</a>
               </div>
