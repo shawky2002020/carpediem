@@ -116,3 +116,12 @@
 
 .deactivation-dialog { overflow-wrap: anywhere; overscroll-behavior: contain; }
 .deactivation-dialog .identity-email { margin-block-end: .7rem; }
+
+.reason-field {
+  display: grid;
+  gap: .25rem;
+  margin-block-start: .6rem;
+
+  label { font-weight: 650; }
+  textarea { width: 100%; min-block-size: var(--cd-touch-target-min); resize: vertical; }
+}

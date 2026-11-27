@@ -241,9 +241,9 @@ public sealed class AuditLog
 
     public static AuditLog AccountChanged(
         Guid userId, Guid adminId, Guid correlationId, DateTimeOffset occurredAt,
-        string action, string? previousValue, string? newValue) =>
+        string action, string? previousValue, string? newValue, string? reason = null) =>
         Create(adminId, action, userId, correlationId, occurredAt,
-            previousValue, newValue, "User", "AdminAccountManagement");
+            previousValue, newValue, "User", "AdminAccountManagement", mandatoryReason: reason);
 
     public static AuditLog IncidentReviewed(Guid incidentId, Guid adminId, DateTimeOffset occurredAt) =>
         Create(adminId, "IncidentReviewed", incidentId, Guid.NewGuid(), occurredAt,

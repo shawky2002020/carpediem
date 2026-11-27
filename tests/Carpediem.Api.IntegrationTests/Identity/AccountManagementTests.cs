@@ -122,6 +122,43 @@ public sealed class AccountManagementTests(SqlServerFixture sqlServer)
     }
 
     [Fact]
+    public async Task RoleChangesAndDeactivationRequireAnAuditedReason()
+    {
+        await using var harness = await DraftApiTestHarness.StartAsync(sqlServer);
+        var target = await harness.SeedUserAsync("reason.required", true, "Leader");
+        var url = $"/api/admin/accounts/{target}";
+
+        using var missingRoleReason = await SendAsync(harness, HttpMethod.Put, $"{url}/roles", new { roles = PromotedRoles });
+        Assert.Equal(HttpStatusCode.BadRequest, missingRoleReason.StatusCode);
+        using var blankDeactivationReason = await SendAsync(harness, HttpMethod.Post, $"{url}/deactivate", new { reason = "  " });
+        Assert.Equal(HttpStatusCode.BadRequest, blankDeactivationReason.StatusCode);
+        using var longDeactivationReason = await SendAsync(harness, HttpMethod.Post, $"{url}/deactivate", new { reason = new string('a', 1001) });
+        Assert.Equal(HttpStatusCode.BadRequest, longDeactivationReason.StatusCode);
+        var untouched = await harness.Client.GetFromJsonAsync<AccountDetail>(url);
+        Assert.NotNull(untouched);
+        Assert.True(untouched.IsActive);
+        Assert.Equal(LeaderOnlyRoles, untouched.Roles);
+        Assert.Empty(untouched.History);
+
+        using var changed = await SendAsync(harness, HttpMethod.Put, $"{url}/roles",
+            new { roles = PromotedRoles, reason = "  Assign shift lead  " }, version: untouched.Version);
+        Assert.Equal(HttpStatusCode.OK, changed.StatusCode);
+        var afterRoleChange = await harness.Client.GetFromJsonAsync<AccountDetail>(url);
+        Assert.NotNull(afterRoleChange);
+        using var deactivated = await SendAsync(harness, HttpMethod.Post, $"{url}/deactivate",
+            new { reason = "Access review completed" }, version: afterRoleChange.Version);
+        Assert.Equal(HttpStatusCode.OK, deactivated.StatusCode);
+
+        await using var scope = harness.Factory.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<CarpediemDbContext>();
+        var audit = await db.AuditLogs.Where(log => log.ResourceId == target).ToListAsync();
+        Assert.Equal(2, audit.Count);
+        Assert.All(audit, log => Assert.Equal(harness.ActorUserId, log.ActorUserId));
+        Assert.Equal("Assign shift lead", Assert.Single(audit, log => log.Action == AuditLog.AccountRolesChanged).MandatoryReason);
+        Assert.Equal("Access review completed", Assert.Single(audit, log => log.Action == AuditLog.AccountDeactivated).MandatoryReason);
+    }
+
+    [Fact]
     public async Task StaleDetailsCannotOverwriteRoleOrAccessChanges()
     {
         await using var harness = await DraftApiTestHarness.StartAsync(sqlServer);
@@ -129,7 +166,7 @@ public sealed class AccountManagementTests(SqlServerFixture sqlServer)
         var url = $"/api/admin/accounts/{target}";
         var before = (await harness.Client.GetFromJsonAsync<AccountDetail>(url))!;
         Assert.Equal(HttpStatusCode.OK, (await SendAsync(harness, HttpMethod.Put,
-            $"{url}/roles", new { roles = PromotedRoles }, version: before.Version)).StatusCode);
+            $"{url}/roles", new { roles = PromotedRoles, reason = "Shift leadership" }, version: before.Version)).StatusCode);
         var staleRoles = await SendAsync(harness, HttpMethod.Put, $"{url}/roles", new { roles = LeaderOnlyRoles }, version: before.Version);
         Assert.Equal(HttpStatusCode.Conflict, staleRoles.StatusCode);
         Assert.Equal("account_conflict", (await staleRoles.Content.ReadFromJsonAsync<ProblemBody>())!.Code);
@@ -196,10 +233,10 @@ public sealed class AccountManagementTests(SqlServerFixture sqlServer)
         harness.Factory.ActorUserId = harness.ActorUserId;
         adminToken = (await harness.Client.GetFromJsonAsync<AntiforgeryBody>("/api/session/antiforgery"))!.RequestToken;
         var promoted = await SendAsync(harness, HttpMethod.Put,
-            $"/api/admin/accounts/{registered.UserId}/roles", new { roles = PromotedRoles }, adminToken);
+            $"/api/admin/accounts/{registered.UserId}/roles", new { roles = PromotedRoles, reason = "Shift leadership" }, adminToken);
         Assert.Equal(HttpStatusCode.OK, promoted.StatusCode);
         var deactivated = await SendAsync(harness, HttpMethod.Post,
-            $"/api/admin/accounts/{registered.UserId}/deactivate", new { }, adminToken);
+            $"/api/admin/accounts/{registered.UserId}/deactivate", new { reason = "Access review" }, adminToken);
         Assert.Equal(HttpStatusCode.OK, deactivated.StatusCode);
         harness.Factory.ActorUserId = null;
         var inactiveToken = (await harness.Client.GetFromJsonAsync<AntiforgeryBody>("/api/session/antiforgery"))!.RequestToken;
