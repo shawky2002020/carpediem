@@ -91,7 +91,9 @@ public static class EventReplacementAssignmentEndpoints
                     m.UserName,
                     m.Status,
                     m.CancelledAt,
-                    m.CancellationReason)).ToList(),
+                    m.CancellationReason,
+                    m.LinkedReplacements.Select(link => new ReplacementLinkedMemberItemResponse(
+                        link.AssignmentId, link.UserName, link.Status)).ToList())).ToList(),
                 Candidates: result.Candidates.Select(c => new ReplacementCandidateItemResponse(
                     c.UserId,
                     c.UserName,
@@ -238,7 +240,10 @@ public sealed record ReplacementCancelledMemberItemResponse(
     string UserName,
     string Status,
     DateTimeOffset CancelledAt,
-    string CancellationReason);
+    string CancellationReason,
+    IReadOnlyList<ReplacementLinkedMemberItemResponse> LinkedReplacements);
+
+public sealed record ReplacementLinkedMemberItemResponse(Guid AssignmentId, string UserName, string Status);
 
 public sealed record ReplacementCandidateItemResponse(
     Guid UserId,

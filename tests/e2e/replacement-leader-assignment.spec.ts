@@ -11,7 +11,7 @@ test('Chief Leader views staffing gaps and active team roster on replacement pag
   await expect(page.locator('#replacement-title')).toBeVisible();
   await expect(page.locator('.event-title')).toContainText('Cairo Tech Summit 2026');
   await expect(page.locator('.event-meta')).toContainText('New Cairo Convention Center');
-  await page.getByText('Linked to tarek_cancelled').click();
+  await page.getByText('Link to cancellation for tarek_cancelled').click();
 
   // Verify counts
   const gapsCount = page.locator('.gaps-section .count-badge');
@@ -43,7 +43,7 @@ test('Chief Leader assigns replacement candidate and verifies active roster upda
   await page.goto(`/events/${targetEventId}/replacement-assignment`);
 
   // Fill justification
-  await page.getByText('Linked to tarek_cancelled').click();
+  await page.getByText('Link to cancellation for tarek_cancelled').click();
   const justificationInput = page.locator('#replacement-justification');
   await justificationInput.fill('Replacing tarek with salma for morning track coordination.');
 
@@ -55,7 +55,9 @@ test('Chief Leader assigns replacement candidate and verifies active roster upda
   // Verify update in counts and lists
   await expect(page.locator('.roster-section .count-badge')).toContainText('2');
   await expect(page.locator('.candidates-section .count-badge')).toContainText('1');
-  await expect(page.locator('.live-region')).toContainText('Volunteer salma_replacement assigned as replacement');
+  await expect(page.locator('.live-region')).toContainText('Volunteer salma_replacement is on the active roster');
+  await expect(page.getByText('salma_replacement · Active')).toBeVisible();
+  await expect(page.getByRole('radio', { name: 'Assign without linking a cancellation' })).toBeChecked();
 
   const activeMembers = page.locator('.team-item .member-name');
   await expect(activeMembers).toContainText(['ahmed_leader', 'salma_replacement']);
@@ -77,6 +79,43 @@ test('Disables replacement assign buttons when selection window is closed', asyn
   await expect(assignBtn).toBeDisabled();
 });
 
+test('reopening a covered cancellation exposes active and historical replacements without selecting it', async ({ page }) => {
+  await mockReplacementApi(page, { covered: true });
+  await page.goto(`/events/${targetEventId}/replacement-assignment`);
+
+  await expect(page.getByText('1 covered cancellation', { exact: false })).toBeVisible();
+  await page.getByText('Link a cancellation or add a note', { exact: false }).click();
+  const cancellation = page.getByRole('radio', { name: 'tarek_cancelled' });
+  await expect(cancellation).not.toBeChecked();
+  await expect(page.getByText('laila_previous · Cancelled')).toBeVisible();
+  await expect(page.getByText('ahmed_leader · Active')).toBeVisible();
+  await expect(page.getByRole('radio', { name: 'Assign without linking a cancellation' })).toBeChecked();
+
+  await cancellation.check();
+  await expect(cancellation).toBeChecked();
+});
+
+test('an older context response never presents unknown linkage as an unfilled cancellation', async ({ page }) => {
+  await mockReplacementApi(page, { omitLineage: true });
+  await page.goto(`/events/${targetEventId}/replacement-assignment`);
+
+  await page.getByText('Link a cancellation or add a note').click();
+  await expect(page.getByText('Replacement history unavailable')).toBeVisible();
+  await expect(page.getByRole('radio', { name: 'tarek_cancelled' })).not.toBeChecked();
+});
+
+test('a failed post-assignment refresh keeps further assignments paused until recovery', async ({ page }) => {
+  await mockReplacementApi(page, { failRefresh: true });
+  await page.goto(`/events/${targetEventId}/replacement-assignment`);
+
+  await page.getByRole('button', { name: 'Assign salma_replacement as replacement' }).click();
+  await expect(page.getByRole('alert')).toContainText('Roster unavailable');
+  const nextCandidate = page.getByRole('button', { name: 'Assign hassan_replacement as replacement' });
+  await expect(nextCandidate).toBeDisabled();
+  await page.getByRole('button', { name: 'Refresh roster' }).click();
+  await expect(nextCandidate).toBeEnabled();
+});
+
 test('Displays error alert when replacement assignment returns 409 conflict', async ({ page }) => {
   await mockReplacementApi(page, {
     conflictCode: 'chief_leader_conflict',
@@ -96,7 +135,7 @@ test('Replacement assignment UI meets WCAG 2.2 AA, 44px touch targets, and 200% 
   await mockReplacementApi(page);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(`/events/${targetEventId}/replacement-assignment`);
-  await page.getByText('Linked to tarek_cancelled').click();
+  await page.getByText('Link to cancellation for tarek_cancelled').click();
 
   // WCAG 2.2 AA accessibility audit
   const axeResults = await new AxeBuilder({ page })
@@ -128,6 +167,9 @@ test('Replacement assignment UI meets WCAG 2.2 AA, 44px touch targets, and 200% 
 
 interface MockReplacementApiOptions {
   isWindowOpen?: boolean;
+  covered?: boolean;
+  omitLineage?: boolean;
+  failRefresh?: boolean;
   conflictCode?: string;
   conflictTitle?: string;
   conflictDetail?: string;
@@ -158,6 +200,10 @@ async function mockReplacementApi(page: Page, options: MockReplacementApiOptions
       assignedAt: '2026-10-01T09:00:00Z',
       cancelledAt: '2026-10-01T15:30:00Z',
       cancellationReason: 'Medical emergency conflict',
+      linkedReplacements: options.omitLineage ? undefined : options.covered ? [
+        { assignmentId: '30000000-0000-0000-0000-000000000000', userName: 'laila_previous', status: 'Cancelled' },
+        { assignmentId: '30000000-0000-0000-0000-000000000001', userName: 'ahmed_leader', status: 'Active' },
+      ] : [],
       version: 'BAUGCAkLCww=',
     },
   ];
@@ -204,6 +250,9 @@ async function mockReplacementApi(page: Page, options: MockReplacementApiOptions
 
     if (path === `/api/events/${targetEventId}/replacement-assignment` && request.method() === 'GET') {
       getCalls++;
+      if (options.failRefresh && getCalls === 2) {
+        return route.fulfill({ status: 503, json: { title: 'Roster unavailable', status: 503, code: 'roster_unavailable' } });
+      }
       return route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -239,11 +288,25 @@ async function mockReplacementApi(page: Page, options: MockReplacementApiOptions
         });
       }
 
+      const candidateIndex = mockCandidates.findIndex(candidate => candidate.userId === lastPayload?.candidateUserId);
+      const [candidate] = mockCandidates.splice(candidateIndex, 1);
+      const member = {
+        assignmentId: '12345678-1234-1234-1234-1234567890ab',
+        userId: candidate.userId,
+        userName: candidate.userName,
+        status: 'Active',
+        assignedAt: '2026-10-02T08:30:00Z',
+        version: 'AQAAAAAAAAA=',
+      };
+      mockActiveTeam.push(member);
+      mockCancelledAssignments.find(item => item.assignmentId === lastPayload?.replacedAssignmentId)
+        ?.linkedReplacements?.push({ assignmentId: member.assignmentId, userName: member.userName, status: member.status });
+
       return route.fulfill({
         status: 201,
         contentType: 'application/json',
         body: JSON.stringify({
-          id: '12345678-1234-1234-1234-1234567890ab',
+          id: member.assignmentId,
           eventId: targetEventId,
           userId: lastPayload?.candidateUserId,
           status: 'Active',

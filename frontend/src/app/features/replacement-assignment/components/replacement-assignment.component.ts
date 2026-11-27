@@ -5,6 +5,7 @@ import { ApiProblem, toApiProblem } from '../../../core/http/api.interceptor';
 import {
   ReplacementAssignmentContextResponse,
   ReplacementCandidateItem,
+  ReplacementCancelledMemberItem,
 } from '../data/replacement-assignment.model';
 import { ReplacementAssignmentService } from '../data/replacement-assignment.service';
 import { OperationalSpineComponent } from '../../../shared/components/operational-spine/operational-spine.component';
@@ -12,6 +13,10 @@ import { OperationalSpineComponent } from '../../../shared/components/operationa
 const cairoDateTime = new Intl.DateTimeFormat('en-GB', {
   dateStyle: 'medium', timeStyle: 'short', timeZone: 'Africa/Cairo',
 });
+
+function isKnownUncovered(cancellation: ReplacementCancelledMemberItem): boolean {
+  return cancellation.linkedReplacements?.every(replacement => replacement.status === 'Cancelled') === true;
+}
 
 @Component({
   selector: 'app-replacement-assignment',
@@ -27,8 +32,11 @@ export class ReplacementAssignmentComponent implements OnInit {
 
   readonly context = signal<ReplacementAssignmentContextResponse | null>(null);
   readonly loading = signal(true);
+  readonly loadFailed = signal(false);
   readonly submittingId = signal<string | null>(null);
   readonly submitting = computed(() => this.submittingId() !== null);
+  readonly canAssign = computed(() => this.context()?.isWindowOpen === true &&
+    !this.loading() && !this.loadFailed() && !this.submitting());
   readonly selectedReplacedAssignmentId = signal<string | null>(null);
   readonly linkedCancellation = computed(() =>
     this.context()?.cancelledAssignments.find(item => item.assignmentId === this.selectedReplacedAssignmentId())
@@ -40,6 +48,8 @@ export class ReplacementAssignmentComponent implements OnInit {
 
   readonly activeCount = computed(() => this.context()?.activeTeam.length ?? 0);
   readonly cancelledCount = computed(() => this.context()?.cancelledAssignments.length ?? 0);
+  readonly coveredCount = computed(() => this.context()?.cancelledAssignments
+    .filter(item => item.linkedReplacements?.some(replacement => replacement.status === 'Active')).length ?? 0);
   readonly candidates = computed(() => this.context()?.candidates ?? []);
   readonly filteredCandidates = computed(() => {
     const query = this.candidateSearch().trim().toLowerCase();
@@ -50,7 +60,7 @@ export class ReplacementAssignmentComponent implements OnInit {
     this.load();
   }
 
-  load(): void {
+  load(candidateSection?: HTMLElement | null): void {
     const eventId = this.route.snapshot.paramMap.get('eventId');
     if (!eventId) {
       this.problem.set({
@@ -72,13 +82,19 @@ export class ReplacementAssignmentComponent implements OnInit {
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: data => {
-          const selected = this.selectedReplacedAssignmentId();
-          if (!this.context() || (selected && !data.cancelledAssignments.some(item => item.assignmentId === selected))) {
-            this.selectedReplacedAssignmentId.set(data.cancelledAssignments[0]?.assignmentId ?? null);
+          const selectedId = this.selectedReplacedAssignmentId();
+          if (!data.isWindowOpen) {
+            this.selectedReplacedAssignmentId.set(null);
+          } else if (!this.context() || (selectedId && !data.cancelledAssignments.some(item =>
+            item.assignmentId === selectedId && isKnownUncovered(item)))) {
+            this.selectedReplacedAssignmentId.set(data.cancelledAssignments.find(isKnownUncovered)?.assignmentId ?? null);
           }
           this.context.set(data);
+          this.loadFailed.set(false);
+          this.keepCandidateFocus(candidateSection);
         },
         error: error => {
+          this.loadFailed.set(true);
           this.problem.set(toApiProblem(error, 'Unable to load replacement staffing context.'));
         },
       });
@@ -95,7 +111,7 @@ export class ReplacementAssignmentComponent implements OnInit {
 
   assignReplacement(candidate: ReplacementCandidateItem, event?: MouseEvent): void {
     const curr = this.context();
-    if (!curr?.isWindowOpen || this.loading() || this.submitting()) return;
+    if (!curr || !this.canAssign()) return;
     const section = (event?.currentTarget as HTMLElement | undefined)?.closest('section');
 
     this.submittingId.set(candidate.userId);
@@ -111,42 +127,11 @@ export class ReplacementAssignmentComponent implements OnInit {
     this.service.assignReplacementLeader(curr.eventId, payload)
       .pipe(finalize(() => this.submittingId.set(null)))
       .subscribe({
-        next: response => {
-          this.statusMessage.set(`Volunteer ${candidate.userName} assigned as replacement.`);
-
-          const newActiveTeam = [
-            ...curr.activeTeam.filter(member => member.assignmentId !== response.id),
-            {
-              assignmentId: response.id,
-              userId: candidate.userId,
-              userName: candidate.userName,
-              status: 'Active',
-              assignedAt: response.assignedAt,
-              version: response.version,
-            },
-          ];
-
-          const remainingCandidates = curr.candidates.filter(c => c.userId !== candidate.userId);
-
-          let remainingCancelled = curr.cancelledAssignments;
-          if (payload.replacedAssignmentId) {
-            remainingCancelled = curr.cancelledAssignments.filter(
-              c => c.assignmentId !== payload.replacedAssignmentId
-            );
-          }
-
-          this.context.set({
-            ...curr,
-            activeTeam: newActiveTeam,
-            candidates: remainingCandidates,
-            cancelledAssignments: remainingCancelled,
-          });
-
-          if (payload.replacedAssignmentId) {
-            this.selectedReplacedAssignmentId.set(remainingCancelled[0]?.assignmentId ?? null);
-          }
+        next: () => {
+          this.statusMessage.set(`Volunteer ${candidate.userName} is on the active roster.`);
           this.justification.set('');
-          this.keepCandidateFocus(section);
+          // A replay can return an existing assignment. Read its actual links from the server.
+          this.load(section);
         },
         error: error => {
           this.problem.set(toApiProblem(error, 'Replacement assignment could not be completed.'));

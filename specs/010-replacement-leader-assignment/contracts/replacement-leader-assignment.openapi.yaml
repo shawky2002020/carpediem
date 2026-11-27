@@ -214,6 +214,7 @@ components:
         - status
         - cancelledAt
         - cancellationReason
+        - linkedReplacements
       properties:
         assignmentId:
           type: string
@@ -231,6 +232,24 @@ components:
           format: date-time
         cancellationReason:
           type: string
+        linkedReplacements:
+          type: array
+          description: Existing audit links to active or cancelled replacements in the event's current staffing cycle.
+          items:
+            $ref: '#/components/schemas/LinkedReplacement'
+
+    LinkedReplacement:
+      type: object
+      required: [assignmentId, userName, status]
+      properties:
+        assignmentId:
+          type: string
+          format: uuid
+        userName:
+          type: string
+        status:
+          type: string
+          enum: [Active, Cancelled]
 
     ReplacementCandidateItem:
       type: object

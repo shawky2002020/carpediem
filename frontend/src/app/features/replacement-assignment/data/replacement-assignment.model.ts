@@ -14,6 +14,13 @@ export interface ReplacementCancelledMemberItem {
   status: string;
   cancelledAt: string;
   cancellationReason: string;
+  linkedReplacements?: LinkedReplacement[];
+}
+
+export interface LinkedReplacement {
+  assignmentId: string;
+  userName: string;
+  status: 'Active' | 'Cancelled';
 }
 
 export interface ReplacementCandidateItem {

@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Carpediem.Api.IntegrationTests.Infrastructure;
 using Carpediem.Infrastructure.Persistence;
 using Carpediem.Modules.Events.Domain.ChiefLeaderAssignments;
@@ -55,6 +56,80 @@ public sealed class EventReplacementAssignmentTests(SqlServerFixture sqlServer)
         Assert.Equal("Exam conflict", body.CancelledAssignments[0].CancellationReason);
 
         Assert.Contains(body.Candidates, c => c.UserId == candidateLeaderId && c.AvailabilityStatus == "Available");
+    }
+
+    [Fact]
+    public async Task GetReplacementContext_ReopensAllLinkedAssignmentsWithTheirCurrentStatus()
+    {
+        await using var harness = await DraftApiTestHarness.StartAsync(sqlServer, role: CarpediemRoles.Admin);
+        var (eventId, chiefLeaderId) = await SetupPublishedEventWithChiefLeaderIdAsync(harness);
+        var originalUser = await harness.SeedUserAsync("history.original", true, CarpediemRoles.Leader);
+        var firstUser = await harness.SeedUserAsync("history.first", true, CarpediemRoles.Leader);
+        var secondUser = await harness.SeedUserAsync("history.second", true, CarpediemRoles.Leader);
+        var unlinkedUser = await harness.SeedUserAsync("history.unlinked", true, CarpediemRoles.Leader);
+        var cancelledId = await SeedCancelledTeamAssignmentAsync(harness, eventId, originalUser, chiefLeaderId, "Schedule change");
+        harness.Factory.ActorUserId = chiefLeaderId;
+        harness.Factory.ActorRole = CarpediemRoles.ChiefLeader;
+
+        var first = await PostReplacementAssignmentAsync(harness, eventId, new(firstUser, cancelledId));
+        var second = await PostReplacementAssignmentAsync(harness, eventId, new(secondUser, cancelledId));
+        var unlinked = await PostReplacementAssignmentAsync(harness, eventId, new(unlinkedUser));
+        Assert.Equal(HttpStatusCode.Created, first.StatusCode);
+        Assert.Equal(HttpStatusCode.Created, second.StatusCode);
+        Assert.Equal(HttpStatusCode.Created, unlinked.StatusCode);
+        var firstId = (await first.Content.ReadFromJsonAsync<TeamAssignmentResponse>())!.Id;
+        await using (var scope = harness.Factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<CarpediemDbContext>();
+            var firstAssignment = await db.TeamAssignments.SingleAsync(a => a.Id == firstId);
+            var activeEvent = await db.Events.SingleAsync(item => item.Id == eventId);
+            firstAssignment.Cancel("Travel delay", DateTimeOffset.UtcNow, activeEvent.StartDateTime);
+            await db.SaveChangesAsync();
+        }
+
+        using var response = await harness.Client.GetAsync($"/api/events/{eventId}/replacement-assignment");
+        response.EnsureSuccessStatusCode();
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>();
+        var original = payload.GetProperty("cancelledAssignments").EnumerateArray()
+            .Single(item => item.GetProperty("assignmentId").GetGuid() == cancelledId);
+        Assert.True(original.TryGetProperty("linkedReplacements", out var links));
+        Assert.Collection(links.EnumerateArray(),
+            link => AssertLink(link, "history.first", "Cancelled"),
+            link => AssertLink(link, "history.second", "Active"));
+    }
+
+    [Fact]
+    public async Task AssignReplacementLeader_ConcurrentRetriesKeepOneAssignmentAndOneLink()
+    {
+        await using var harness = await DraftApiTestHarness.StartAsync(sqlServer, role: CarpediemRoles.Admin);
+        var (eventId, chiefLeaderId) = await SetupPublishedEventWithChiefLeaderIdAsync(harness);
+        var originalUser = await harness.SeedUserAsync("concurrent.original", true, CarpediemRoles.Leader);
+        var candidateUser = await harness.SeedUserAsync("concurrent.candidate", true, CarpediemRoles.Leader);
+        var cancelledId = await SeedCancelledTeamAssignmentAsync(harness, eventId, originalUser, chiefLeaderId, "Schedule change");
+        harness.Factory.ActorUserId = chiefLeaderId;
+        harness.Factory.ActorRole = CarpediemRoles.ChiefLeader;
+        var token = await GetFreshAntiforgeryTokenAsync(harness);
+        var requests = Enumerable.Range(0, 4).Select(_ =>
+            PostReplacementAssignmentAsync(harness, eventId, new(candidateUser, cancelledId), token));
+
+        var responses = await Task.WhenAll(requests);
+        var created = Assert.Single(responses, response => response.StatusCode == HttpStatusCode.Created);
+        var createdBody = await created.Content.ReadFromJsonAsync<TeamAssignmentResponse>();
+        Assert.NotNull(createdBody);
+        foreach (var replay in responses.Where(response => response != created))
+        {
+            Assert.Equal(HttpStatusCode.OK, replay.StatusCode);
+            Assert.True(replay.Headers.Contains("Idempotent-Replay"));
+            var replayBody = await replay.Content.ReadFromJsonAsync<TeamAssignmentResponse>();
+            Assert.Equal(createdBody.Id, replayBody!.Id);
+        }
+
+        await using var scope = harness.Factory.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<CarpediemDbContext>();
+        Assert.Equal(1, await db.TeamAssignments.CountAsync(item => item.EventId == eventId && item.UserId == candidateUser));
+        Assert.Equal(1, await db.AuditLogs.CountAsync(item => item.Action == "ReplacementLeaderAssigned" && item.ResourceId == createdBody.Id));
+        Assert.Equal(1, await db.InPlatformNotifications.CountAsync(item => item.EventId == eventId && item.RecipientUserId == candidateUser &&
+            item.NotificationType == InPlatformNotification.ReplacementLeaderAssignedType));
     }
 
     [Fact]
@@ -257,15 +332,22 @@ public sealed class EventReplacementAssignmentTests(SqlServerFixture sqlServer)
     private static async Task<HttpResponseMessage> PostReplacementAssignmentAsync(
         DraftApiTestHarness harness,
         Guid eventId,
-        AssignReplacementLeaderRequest request)
+        AssignReplacementLeaderRequest request,
+        string? antiforgeryToken = null)
     {
-        var afToken = await GetFreshAntiforgeryTokenAsync(harness);
+        var afToken = antiforgeryToken ?? await GetFreshAntiforgeryTokenAsync(harness);
         using var postRequest = new HttpRequestMessage(HttpMethod.Post, $"/api/events/{eventId}/replacement-assignment")
         {
             Content = JsonContent.Create(request),
         };
         postRequest.Headers.Add("X-XSRF-TOKEN", afToken);
         return await harness.Client.SendAsync(postRequest);
+    }
+
+    private static void AssertLink(JsonElement link, string userName, string status)
+    {
+        Assert.Equal(userName, link.GetProperty("userName").GetString());
+        Assert.Equal(status, link.GetProperty("status").GetString());
     }
 
     private static async Task<string> GetFreshAntiforgeryTokenAsync(DraftApiTestHarness harness)

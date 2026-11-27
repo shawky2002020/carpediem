@@ -44,6 +44,7 @@ describe('ReplacementAssignmentComponent', () => {
         status: 'Cancelled',
         cancelledAt: '2026-10-02T08:00:00Z',
         cancellationReason: 'Academic conflict',
+        linkedReplacements: [],
       },
     ],
     candidates: [
@@ -113,7 +114,7 @@ describe('ReplacementAssignmentComponent', () => {
     expect(component.selectedReplacedAssignmentId()).toBeNull();
   });
 
-  it('drafts replacement candidate successfully and updates roster', () => {
+  it('refreshes the authoritative roster and links after assigning a replacement', () => {
     const candidate = mockContext.candidates[0];
     const mockCreated: TeamAssignmentResponse = {
       id: '88888888-8888-8888-8888-888888888888',
@@ -127,6 +128,17 @@ describe('ReplacementAssignmentComponent', () => {
     };
 
     serviceMock.assignReplacementLeader.mockReturnValue(of(mockCreated));
+    serviceMock.getReplacementContext.mockReturnValueOnce(of({
+      ...mockContext,
+      activeTeam: [...mockContext.activeTeam, {
+        assignmentId: mockCreated.id, userId: candidate.userId, userName: candidate.userName, status: mockCreated.status,
+        assignedAt: mockCreated.assignedAt, version: mockCreated.version,
+      }],
+      candidates: [],
+      cancelledAssignments: mockContext.cancelledAssignments.map(item => ({
+        ...item, linkedReplacements: [{ assignmentId: mockCreated.id, userName: candidate.userName, status: 'Active' }],
+      })),
+    }));
 
     component.assignReplacement(candidate);
     fixture.detectChanges();
@@ -139,7 +151,9 @@ describe('ReplacementAssignmentComponent', () => {
 
     expect(component.activeCount()).toBe(2);
     expect(component.candidates().length).toBe(0);
-    expect(component.statusMessage()).toContain('tarek_leader assigned as replacement');
+    expect(component.selectedReplacedAssignmentId()).toBeNull();
+    expect(component.cancelledCount()).toBe(1);
+    expect(component.statusMessage()).toContain('tarek_leader is on the active roster');
   });
 
   it('displays problem details alert on error', () => {

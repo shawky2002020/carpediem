@@ -47,6 +47,9 @@
           <p>{{ error.detail || 'Check your connection and try again.' }}</p>
         }
       }
+      @if (loadFailed() && context()) {
+        <p>Refresh the roster before assigning another replacement.</p>
+      }
       <button type="button" class="cd-btn cd-btn--secondary" (click)="load()" [disabled]="loading() || submitting()">Refresh roster</button>
     </section>
   }
@@ -63,19 +66,24 @@
       <div class="assignment-flow">
         <details class="assignment-options">
           <summary>
-            @if (linkedCancellation(); as linked) {
-              Linked to {{ linked.userName }}
+            @if (!ctx.isWindowOpen) {
+              Review cancellation history
+            } @else if (linkedCancellation(); as linked) {
+              Link to cancellation for {{ linked.userName }}
             } @else {
               Link a cancellation or add a note
             }
+            @if (coveredCount()) {
+              <span class="coverage-summary meta-text">{{ coveredCount() }} covered {{ coveredCount() === 1 ? 'cancellation' : 'cancellations' }}</span>
+            }
           </summary>
           @if (cancelledCount() > 0) {
-          <fieldset class="gaps-section" [disabled]="!ctx.isWindowOpen || loading() || submitting()">
+          <fieldset class="gaps-section" [disabled]="!canAssign()">
             <legend>
               Cancelled assignments
               <span class="count-badge cd-tabular">{{ cancelledCount() }}</span>
             </legend>
-            <p class="section-hint">Choose a cancellation to link it to this assignment.</p>
+            <p class="section-hint">Review existing replacements, then choose which cancellation to link to this assignment.</p>
 
             @for (cancelled of ctx.cancelledAssignments; track cancelled.assignmentId) {
               <label class="gap-item" [class.selected]="selectedReplacedAssignmentId() === cancelled.assignmentId">
@@ -92,6 +100,18 @@
                   <span class="meta-text" [id]="'cancellation-details-' + cancelled.assignmentId">
                     <span>Cancelled <time [attr.datetime]="cancelled.cancelledAt">{{ formatDate(cancelled.cancelledAt) }}</time></span>
                     <span class="reason-text">{{ cancelled.cancellationReason || 'No reason provided' }}</span>
+                    @if (cancelled.linkedReplacements; as replacements) {
+                      @if (replacements.length) {
+                        <span class="replacement-links">
+                          <strong>Linked replacements</strong>
+                          @for (replacement of replacements; track replacement.assignmentId) {
+                            <span>{{ replacement.userName }} · {{ replacement.status }}</span>
+                          }
+                        </span>
+                      }
+                    } @else {
+                      <span>Replacement history unavailable</span>
+                    }
                   </span>
                 </span>
               </label>
@@ -114,7 +134,7 @@
             id="replacement-justification"
             type="text"
             [value]="justification()"
-            [disabled]="!ctx.isWindowOpen || loading() || submitting()"
+            [disabled]="!canAssign()"
             (input)="onJustificationChange($event)"
           />
         </div>
@@ -161,7 +181,7 @@
                   <button
                     type="button"
                     class="btn-select-replacement cd-btn cd-btn--primary"
-                    [disabled]="!ctx.isWindowOpen || loading() || submitting()"
+                    [disabled]="!canAssign()"
                     [attr.aria-label]="'Assign ' + candidate.userName + ' as replacement'"
                     (click)="assignReplacement(candidate, $event)"
                   >{{ submittingId() === candidate.userId ? 'Assigning…' : 'Assign Replacement' }}</button>

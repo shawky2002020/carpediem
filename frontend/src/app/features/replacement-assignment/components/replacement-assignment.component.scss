@@ -100,7 +100,8 @@ legend {
 }
 
 .gap-details,
-.gap-details .meta-text {
+.gap-details .meta-text,
+.replacement-links {
   display: grid;
   gap: var(--cd-space-1);
   min-inline-size: 0;
@@ -116,6 +117,8 @@ legend {
 .meta-text {
   margin: 0;
 }
+
+.coverage-summary { display: block; }
 
 .section-header {
   display: flex;
