@@ -15,6 +15,8 @@
 .event-filters button[aria-pressed='true'] { background: var(--cd-brand-rail); color: var(--cd-brand-on-rail); }
 .filter-count, .event-counts dd, .event-time { font-variant-numeric: tabular-nums; }
 .filter-count { font-weight: 400; }
+.queue-section + .queue-section { margin-block-start: 1.25rem; }
+.queue-section-title { margin: 0 0 .5rem; font-weight: 700; color: var(--cd-text-primary); }
 .day-heading { gap: .15rem 1rem; padding: .65rem 1rem; background: #e3e9dd; color: #25432e; }
 .day-heading h3 { font-size: 1.05rem; color: inherit; margin: 0; }
 .day-heading span { font-size: .82rem; }

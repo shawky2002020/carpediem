@@ -21,7 +21,7 @@
       </div>
 
       @if (!loading() && (events().length || !error())) {
-        <div class="event-filters" aria-label="Filter events by status" role="group">
+        <div #filterGroup class="event-filters" aria-label="Event views" role="group">
           @for (filter of filters(); track filter.id) {
             <button type="button" [attr.aria-pressed]="activeFilter() === filter.id" (click)="setFilter(filter.id)">
               {{ filter.label }} <span class="filter-count">{{ filter.count }}</span>
@@ -56,74 +56,81 @@
           </div>
         }
         @if (filteredEvents().length) {
-          @for (group of dateGroups(); track group.firstId) {
-            <section class="schedule-day">
-              <header class="day-heading">
-                <h3>{{ group.date }}</h3>
-                <span>Cairo time</span>
-              </header>
-              <ul class="event-list" [attr.aria-label]="group.date">
-                @for (event of group.events; track event.eventId) {
-                  <li class="event-row">
-                    <time class="event-time" [attr.datetime]="event.startDateTime">
-                      {{ formatDate(event.startDateTime, 'time') }}
-                    </time>
-                    <div class="event-info">
-                      <h4>{{ event.title }}</h4>
-                      <p>{{ event.location }}</p>
-                      <div class="event-state">
-                        <span class="cd-badge"
-                          [class.cd-badge--info]="event.status === 'Published'"
-                          [class.cd-badge--success]="event.status === 'Completed'"
-                          [class.cd-badge--danger]="event.status === 'Cancelled'"
-                          [class.cd-badge--neutral]="event.status === 'Draft'">{{ event.status }}</span>
-                        @if (event.inProgress) { <span class="cd-badge cd-badge--success">In progress</span> }
-                        @if (event.pendingAttendance) { <span class="cd-badge cd-badge--warning">Pending Attendance</span> }
-                      </div>
-                    </div>
-                    @if (event.status === 'Published' || event.status === 'Completed') {
-                      <dl class="event-counts">
-                        <div><dt>Active team</dt><dd>{{ event.activeRosterCount }}</dd></div>
-                        @if (event.status === 'Published') { <div><dt>Available</dt><dd>{{ event.availableUnassignedCount }}</dd></div> }
-                      </dl>
-                    }
-                    <div class="event-actions">
-                      @if (event.pendingAttendance) {
-                        <a class="cd-btn cd-btn--primary" [routerLink]="['/events', event.eventId, 'attendance']">Open roll sheet</a>
-                      } @else if (session.isAdmin() && event.status === 'Draft') {
-                        <a class="cd-btn cd-btn--secondary" [routerLink]="['/draft-events', event.eventId]">Edit draft</a>
-                      } @else if (event.status === 'Published') {
-                        <a class="cd-btn cd-btn--secondary" [routerLink]="['/events', event.eventId, 'team-selection']">Team selection</a>
-                      } @else if (event.status === 'Completed' && session.isChiefLeader()) {
-                        <a class="cd-btn cd-btn--secondary" [routerLink]="['/events', event.eventId, 'feedback']">Rate Leaders</a>
-                      }
-                      @if (event.status === 'Published' || event.status === 'Completed' || (session.isAdmin() && event.status === 'Draft')) {
-                        <details class="event-details">
-                          <summary>More actions<span class="cd-visually-hidden"> for {{ event.title }}</span></summary>
-                          <div class="secondary-actions">
-                            @if (event.status === 'Published') {
-                              @if (event.pendingAttendance) {
-                                <a [routerLink]="['/events', event.eventId, 'team-selection']">Team selection</a>
-                              }
-                              <a [routerLink]="['/events', event.eventId, 'replacement-assignment']">Replacements</a>
-                            }
-                            @if (session.isAdmin() && event.status === 'Published') {
-                              <a [routerLink]="['/events', event.eventId, 'reschedule']">Reschedule</a>
-                              <a [routerLink]="['/events', event.eventId, 'complete']">Complete event</a>
-                            }
-                            @if (event.status === 'Published' || event.status === 'Completed') {
-                              <a [routerLink]="['/events', event.eventId, 'incidents']">Incidents</a>
-                            }
-                            @if (session.isAdmin() && (event.status === 'Draft' || event.status === 'Published')) {
-                              <a class="cancel-event" [routerLink]="['/events', event.eventId, 'cancel']">Cancel event</a>
-                            }
+          @for (section of queueSections(); track section.name) {
+            <section class="queue-section" [attr.aria-label]="section.name">
+              @if (section.name) {
+                <p class="queue-section-title" aria-hidden="true">{{ section.name }}</p>
+              }
+              @for (group of section.dates; track group.date) {
+                <section class="schedule-day">
+                  <header class="day-heading">
+                    <h3>{{ group.date }}</h3>
+                    <span>Cairo time</span>
+                  </header>
+                  <ul class="event-list" [attr.aria-label]="group.date">
+                    @for (event of group.events; track event.eventId) {
+                      <li #eventRow class="event-row" [attr.data-event-id]="event.eventId" tabindex="-1">
+                        <time class="event-time" [attr.datetime]="event.startDateTime">
+                          {{ formatDate(event.startDateTime, 'time') }}
+                        </time>
+                        <div class="event-info">
+                          <h4>{{ event.title }}</h4>
+                          <p>{{ event.location }}</p>
+                          <div class="event-state">
+                            <span class="cd-badge"
+                              [class.cd-badge--info]="event.status === 'Published'"
+                              [class.cd-badge--success]="event.status === 'Completed'"
+                              [class.cd-badge--danger]="event.status === 'Cancelled'"
+                              [class.cd-badge--neutral]="event.status === 'Draft'">{{ event.status }}</span>
+                            @if (event.inProgress) { <span class="cd-badge cd-badge--success">In progress</span> }
+                            @if (event.pendingAttendance) { <span class="cd-badge cd-badge--warning">Pending Attendance</span> }
                           </div>
-                        </details>
-                      }
-                    </div>
-                  </li>
-                }
-            </ul>
+                        </div>
+                        @if (event.status === 'Published' || event.status === 'Completed') {
+                          <dl class="event-counts">
+                            <div><dt>Active team</dt><dd>{{ event.activeRosterCount }}</dd></div>
+                            @if (event.status === 'Published') { <div><dt>Available</dt><dd>{{ event.availableUnassignedCount }}</dd></div> }
+                          </dl>
+                        }
+                        <div class="event-actions" (click)="rememberPosition($event, event.eventId)">
+                          @if (event.pendingAttendance) {
+                            <a class="cd-btn cd-btn--primary" [routerLink]="['/events', event.eventId, 'attendance']">Open roll sheet</a>
+                          } @else if (session.isAdmin() && event.status === 'Draft') {
+                            <a class="cd-btn cd-btn--secondary" [routerLink]="['/draft-events', event.eventId]">Edit draft</a>
+                          } @else if (event.status === 'Published') {
+                            <a class="cd-btn cd-btn--secondary" [routerLink]="['/events', event.eventId, 'team-selection']">Team selection</a>
+                          } @else if (event.status === 'Completed' && session.isChiefLeader()) {
+                            <a class="cd-btn cd-btn--secondary" [routerLink]="['/events', event.eventId, 'feedback']">Rate Leaders</a>
+                          }
+                          @if (event.status === 'Published' || event.status === 'Completed' || (session.isAdmin() && event.status === 'Draft')) {
+                            <details class="event-details">
+                              <summary>More actions<span class="cd-visually-hidden"> for {{ event.title }}</span></summary>
+                              <div class="secondary-actions">
+                                @if (event.status === 'Published') {
+                                  @if (event.pendingAttendance) {
+                                    <a [routerLink]="['/events', event.eventId, 'team-selection']">Team selection</a>
+                                  }
+                                  <a [routerLink]="['/events', event.eventId, 'replacement-assignment']">Replacements</a>
+                                }
+                                @if (session.isAdmin() && event.status === 'Published') {
+                                  <a [routerLink]="['/events', event.eventId, 'reschedule']">Reschedule</a>
+                                  <a [routerLink]="['/events', event.eventId, 'complete']">Complete event</a>
+                                }
+                                @if (event.status === 'Published' || event.status === 'Completed') {
+                                  <a [routerLink]="['/events', event.eventId, 'incidents']">Incidents</a>
+                                }
+                                @if (session.isAdmin() && (event.status === 'Draft' || event.status === 'Published')) {
+                                  <a class="cancel-event" [routerLink]="['/events', event.eventId, 'cancel']">Cancel event</a>
+                                }
+                              </div>
+                            </details>
+                          }
+                        </div>
+                      </li>
+                    }
+                </ul>
+                </section>
+              }
             </section>
           }
         }
