@@ -280,6 +280,80 @@ public sealed class AttendanceRecordingTests(SqlServerFixture sqlServer)
     }
 
     [Fact]
+    public async Task GuardedSubmission_ReplayIsHarmlessAndStaleBatchDoesNotOverwriteOrPartiallySave()
+    {
+        await using var harness = await DraftApiTestHarness.StartAsync(sqlServer, role: CarpediemRoles.Admin);
+        var (eventId, chiefLeaderId) = await SetupPublishedEventWithChiefLeaderAsync(harness);
+        var volunteerA = await harness.SeedUserAsync("volunteer.guard1", true, CarpediemRoles.Leader);
+        var volunteerB = await harness.SeedUserAsync("volunteer.guard2", true, CarpediemRoles.Leader);
+        var assignmentA = await SeedTeamAssignmentAsync(harness, eventId, volunteerA, chiefLeaderId);
+        var assignmentB = await SeedTeamAssignmentAsync(harness, eventId, volunteerB, chiefLeaderId);
+        harness.Factory.ActorUserId = chiefLeaderId;
+        harness.Factory.ActorRole = CarpediemRoles.ChiefLeader;
+        var token = await GetFreshAntiforgeryTokenAsync(harness);
+
+        using var first = await SendGuardedAsync(new AttendanceOutcomeSubmission(assignmentA, "NoShow"));
+        Assert.Equal(HttpStatusCode.OK, first.StatusCode);
+        using var replay = await SendGuardedAsync(new AttendanceOutcomeSubmission(assignmentA, "NoShow"));
+        Assert.Equal(HttpStatusCode.OK, replay.StatusCode);
+        using var stale = await SendGuardedAsync(
+            new AttendanceOutcomeSubmission(assignmentB, "Attended"),
+            new AttendanceOutcomeSubmission(assignmentA, "Attended"));
+        Assert.Equal(HttpStatusCode.Conflict, stale.StatusCode);
+
+        await using var scope = harness.Factory.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<CarpediemDbContext>();
+        var saved = await db.AttendanceOutcomes.SingleAsync(x => x.TeamAssignmentId == assignmentA || x.TeamAssignmentId == assignmentB);
+        Assert.Equal(assignmentA, saved.TeamAssignmentId);
+        Assert.Equal("NoShow", saved.Outcome.ToString());
+        Assert.Equal(1, await db.AuditLogs.CountAsync(x => x.ResourceId == eventId && x.Action == "AttendanceFinalized"));
+
+        async Task<HttpResponseMessage> SendGuardedAsync(params AttendanceOutcomeSubmission[] entries)
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, $"/api/events/{eventId}/attendance");
+            request.Headers.Add("X-XSRF-TOKEN", token);
+            request.Content = JsonContent.Create(new { entries, requireUnrecorded = true });
+            return await harness.Client.SendAsync(request);
+        }
+    }
+
+    [Fact]
+    public async Task GuardedSubmission_ConcurrentDifferentOutcomesKeepTheFirstWrite()
+    {
+        await using var harness = await DraftApiTestHarness.StartAsync(sqlServer, role: CarpediemRoles.Admin);
+        var (eventId, chiefLeaderId) = await SetupPublishedEventWithChiefLeaderAsync(harness);
+        var volunteer = await harness.SeedUserAsync("volunteer.concurrent", true, CarpediemRoles.Leader);
+        var assignment = await SeedTeamAssignmentAsync(harness, eventId, volunteer, chiefLeaderId);
+        harness.Factory.ActorUserId = chiefLeaderId;
+        harness.Factory.ActorRole = CarpediemRoles.ChiefLeader;
+        var token = await GetFreshAntiforgeryTokenAsync(harness);
+
+        var responses = await Task.WhenAll(SendGuardedAsync("NoShow"), SendGuardedAsync("Attended"));
+        using var noShow = responses[0];
+        using var attended = responses[1];
+        Assert.Single(responses, x => x.StatusCode == HttpStatusCode.OK);
+        Assert.Single(responses, x => x.StatusCode == HttpStatusCode.Conflict);
+
+        await using var scope = harness.Factory.Services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<CarpediemDbContext>();
+        var saved = await db.AttendanceOutcomes.SingleAsync(x => x.TeamAssignmentId == assignment);
+        Assert.Equal(noShow.StatusCode == HttpStatusCode.OK ? "NoShow" : "Attended", saved.Outcome.ToString());
+        Assert.Equal(1, await db.AuditLogs.CountAsync(x => x.ResourceId == eventId && x.Action == "AttendanceFinalized"));
+
+        async Task<HttpResponseMessage> SendGuardedAsync(string outcome)
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, $"/api/events/{eventId}/attendance");
+            request.Headers.Add("X-XSRF-TOKEN", token);
+            request.Content = JsonContent.Create(new
+            {
+                entries = new[] { new AttendanceOutcomeSubmission(assignment, outcome) },
+                requireUnrecorded = true,
+            });
+            return await harness.Client.SendAsync(request);
+        }
+    }
+
+    [Fact]
     public async Task FinalizeAttendance_WithInvalidTeamAssignmentId_Returns409Conflict()
     {
         await using var harness = await DraftApiTestHarness.StartAsync(sqlServer, role: CarpediemRoles.Admin);

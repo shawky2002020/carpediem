@@ -1,3 +1,4 @@
+using System.Data;
 using Carpediem.Infrastructure.Audit;
 using Carpediem.Modules.Attendance.Application;
 using Carpediem.Modules.Attendance.Domain;
@@ -110,6 +111,7 @@ public sealed class EfAttendanceStore(
         Guid actorUserId,
         Guid correlationId,
         DateTimeOffset utcNow,
+        bool requireUnrecorded = false,
         CancellationToken cancellationToken = default)
     {
         var strategy = db.Database.CreateExecutionStrategy();
@@ -117,6 +119,10 @@ public sealed class EfAttendanceStore(
         {
             db.ChangeTracker.Clear();
 
+            // Hold the relevant roster and outcome reads until the guarded write commits.
+            await using var transaction = requireUnrecorded
+                ? await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken)
+                : null;
             var eventItem = await db.Events
                 .SingleOrDefaultAsync(e => e.Id == eventId, cancellationToken)
                 ?? throw new KeyNotFoundException($"Event {eventId} was not found.");
@@ -176,16 +182,28 @@ public sealed class EfAttendanceStore(
 
             var existingByAssignmentId = existingOutcomes.ToDictionary(o => o.TeamAssignmentId);
 
+            var changed = !requireUnrecorded;
             foreach (var sub in submissions)
             {
                 Enum.TryParse<AttendanceOutcomeValue>(sub.Outcome, ignoreCase: true, out var outcomeVal);
                 if (existingByAssignmentId.TryGetValue(sub.TeamAssignmentId, out var existing))
                 {
+                    if (requireUnrecorded)
+                    {
+                        if (existing.Outcome != outcomeVal)
+                        {
+                            throw new InvalidOperationException(
+                                "Attendance changed while this roll sheet was open. Reload it to review the recorded outcomes.");
+                        }
+                        continue;
+                    }
+
                     existing.UpdateOutcome(outcomeVal, actorUserId, utcNow);
                 }
                 else
                 {
                     var newOutcome = AttendanceOutcome.Create(sub.TeamAssignmentId, outcomeVal, actorUserId, utcNow);
+                    changed = true;
                     db.AttendanceOutcomes.Add(newOutcome);
                     existingByAssignmentId[sub.TeamAssignmentId] = newOutcome;
                 }
@@ -200,21 +218,29 @@ public sealed class EfAttendanceStore(
                 unrecordedCount = 0;
             }
 
-            var audit = AuditLog.AttendanceFinalized(
-                eventId: eventId,
-                actorUserId: actorUserId,
-                correlationId: correlationId,
-                occurredAt: utcNow,
-                attendedCount: attendedCount,
-                noShowCount: noShowCount);
+            if (changed)
+            {
+                var audit = AuditLog.AttendanceFinalized(
+                    eventId: eventId,
+                    actorUserId: actorUserId,
+                    correlationId: correlationId,
+                    occurredAt: utcNow,
+                    attendedCount: attendedCount,
+                    noShowCount: noShowCount);
 
-            db.AuditLogs.Add(audit);
+                db.AuditLogs.Add(audit);
 
-            await db.SaveChangesAsync(cancellationToken);
+                await db.SaveChangesAsync(cancellationToken);
+            }
+
+            if (transaction is not null)
+            {
+                await transaction.CommitAsync(cancellationToken);
+            }
 
             return new FinalizeAttendanceResult(
                 EventId: eventId,
-                FinalizedAt: utcNow,
+                FinalizedAt: changed ? utcNow : submissions.Max(sub => existingByAssignmentId[sub.TeamAssignmentId].FinalizedAt),
                 TotalActiveAssignments: totalActive,
                 AttendedCount: attendedCount,
                 NoShowCount: noShowCount,

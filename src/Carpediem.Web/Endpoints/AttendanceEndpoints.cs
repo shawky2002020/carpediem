@@ -170,6 +170,7 @@ public static class AttendanceEndpoints
                 actorUserId,
                 correlationId,
                 utcNow,
+                request.RequireUnrecorded,
                 cancellationToken);
 
             AttendanceTelemetry.Record(activity, "FinalizeAttendance", "success");
@@ -361,7 +362,8 @@ public sealed record AttendanceRollSheetEntryResponse(
     string? Version);
 
 public sealed record FinalizeAttendanceRequest(
-    IReadOnlyList<AttendanceOutcomeSubmission> Entries);
+    IReadOnlyList<AttendanceOutcomeSubmission> Entries,
+    bool RequireUnrecorded = false);
 
 public sealed record AttendanceOutcomeSubmission(
     Guid TeamAssignmentId,

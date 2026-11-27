@@ -30,6 +30,7 @@ export interface AttendanceOutcomeSubmission {
 
 export interface FinalizeAttendanceRequest {
   entries: AttendanceOutcomeSubmission[];
+  requireUnrecorded?: boolean;
 }
 
 export interface FinalizeAttendanceResponse {
