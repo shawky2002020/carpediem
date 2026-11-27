@@ -32,7 +32,10 @@ public sealed record ReplacementCancelledMemberItem(
     string UserName,
     string Status,
     DateTimeOffset CancelledAt,
-    string CancellationReason);
+    string CancellationReason,
+    IReadOnlyList<ReplacementLinkedMemberItem> LinkedReplacements);
+
+public sealed record ReplacementLinkedMemberItem(Guid AssignmentId, string UserName, string Status);
 
 public sealed record ReplacementCandidateItem(
     Guid UserId,

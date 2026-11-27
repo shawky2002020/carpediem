@@ -7,6 +7,7 @@ using Carpediem.Modules.Notifications.Application;
 using Carpediem.Modules.Staffing.Application.ReplacementAssignment;
 using Carpediem.Modules.Staffing.Domain.Availability;
 using Carpediem.Modules.Staffing.Domain.TeamSelection;
+using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -56,6 +57,8 @@ public sealed class EfReplacementAssignmentStore(
             .Where(u => assignmentUserIds.Contains(u.Id))
             .ToDictionaryAsync(u => u.Id, u => u.UserName ?? string.Empty, cancellationToken);
 
+        var linkedReplacements = await ReadLinkedReplacementsAsync(assignments, assignedUsers, cancellationToken);
+
         var activeTeam = assignments
             .Where(t => t.Status == TeamAssignmentStatus.Active)
             .OrderBy(t => t.AssignedAt)
@@ -77,7 +80,8 @@ public sealed class EfReplacementAssignmentStore(
                 assignedUsers.GetValueOrDefault(t.UserId, string.Empty),
                 t.Status.ToString(),
                 t.CancelledAt ?? t.AssignedAt,
-                t.CancellationReason ?? string.Empty))
+                t.CancellationReason ?? string.Empty,
+                linkedReplacements.GetValueOrDefault(t.Id) ?? []))
             .ToList();
 
         var activeTeamUserIds = activeTeam.Select(t => t.UserId).ToHashSet();
@@ -137,6 +141,43 @@ public sealed class EfReplacementAssignmentStore(
             Candidates: sortedCandidates);
     }
 
+    private async Task<Dictionary<Guid, List<ReplacementLinkedMemberItem>>> ReadLinkedReplacementsAsync(
+        IReadOnlyList<TeamAssignment> assignments,
+        IReadOnlyDictionary<Guid, string> assignedUsers,
+        CancellationToken cancellationToken)
+    {
+        var cancelledIds = assignments.Where(item => item.Status == TeamAssignmentStatus.Cancelled)
+            .Select(item => item.Id).ToHashSet();
+        if (cancelledIds.Count == 0) return [];
+
+        var assignmentsById = assignments.ToDictionary(item => item.Id);
+        var assignmentIds = assignmentsById.Keys.ToArray();
+        var auditLinks = await db.AuditLogs.AsNoTracking()
+            .Where(log => log.ResourceType == "TeamAssignment" && log.Action == "ReplacementLeaderAssigned" &&
+                assignmentIds.Contains(log.ResourceId) && log.PreviousValue != null)
+            .Select(log => new { log.ResourceId, log.PreviousValue })
+            .ToListAsync(cancellationToken);
+
+        // Both ends must belong to the event and cycle already authorized above.
+        var pairs = new List<(Guid CancelledId, TeamAssignment Replacement)>();
+        foreach (var link in auditLinks)
+        {
+            if (Guid.TryParse(link.PreviousValue, out var cancelledId) && cancelledIds.Contains(cancelledId))
+            {
+                pairs.Add((cancelledId, assignmentsById[link.ResourceId]));
+            }
+        }
+
+        return pairs.DistinctBy(pair => (pair.CancelledId, pair.Replacement.Id))
+            .OrderBy(pair => pair.Replacement.AssignedAt)
+            .ThenBy(pair => pair.Replacement.Id)
+            .GroupBy(pair => pair.CancelledId, pair => new ReplacementLinkedMemberItem(
+                pair.Replacement.Id,
+                assignedUsers.GetValueOrDefault(pair.Replacement.UserId, string.Empty),
+                pair.Replacement.Status.ToString()))
+            .ToDictionary(group => group.Key, group => group.ToList());
+    }
+
     public async Task<AssignReplacementResult> AssignReplacementLeaderAsync(
         Guid eventId,
         Guid candidateUserId,
@@ -183,21 +224,11 @@ public sealed class EfReplacementAssignmentStore(
                 .SingleOrDefaultAsync(c => c.EventId == eventId && c.IsCurrent, cancellationToken)
                 ?? throw new KeyNotFoundException($"Active staffing cycle for event {eventId} was not found.");
 
-            var existingActive = await db.TeamAssignments.AsNoTracking()
-                .FirstOrDefaultAsync(t => t.StaffingCycleId == cycle.Id && t.UserId == candidateUserId && t.Status == TeamAssignmentStatus.Active, cancellationToken);
+            var existingActive = await FindActiveAssignmentAsync(cycle.Id, candidateUserId, cancellationToken);
 
             if (existingActive is not null)
             {
-                return new AssignReplacementResult(
-                    Id: existingActive.Id,
-                    EventId: existingActive.EventId,
-                    StaffingCycleId: existingActive.StaffingCycleId,
-                    UserId: existingActive.UserId,
-                    Status: existingActive.Status.ToString(),
-                    AssignedAt: existingActive.AssignedAt,
-                    AssignedByUserId: existingActive.AssignedByUserId,
-                    Version: Convert.ToBase64String(existingActive.RowVersion),
-                    IsIdempotentReplay: true);
+                return ToAssignmentResult(existingActive, isReplay: true);
             }
 
             if (replacedAssignmentId.HasValue)
@@ -251,18 +282,32 @@ public sealed class EfReplacementAssignmentStore(
                 isAdminActor: isAdmin);
             db.AuditLogs.Add(audit);
 
-            await db.SaveChangesAsync(cancellationToken);
+            try
+            {
+                await db.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateException error) when (IsActiveAssignmentCollision(error))
+            {
+                // The losing insert and its audit/notification writes were rolled back together.
+                db.ChangeTracker.Clear();
+                var winner = await FindActiveAssignmentAsync(cycle.Id, candidateUserId, cancellationToken);
+                if (winner is null) throw;
+                return ToAssignmentResult(winner, isReplay: true);
+            }
 
-            return new AssignReplacementResult(
-                Id: newAssignment.Id,
-                EventId: newAssignment.EventId,
-                StaffingCycleId: newAssignment.StaffingCycleId,
-                UserId: newAssignment.UserId,
-                Status: newAssignment.Status.ToString(),
-                AssignedAt: newAssignment.AssignedAt,
-                AssignedByUserId: newAssignment.AssignedByUserId,
-                Version: Convert.ToBase64String(newAssignment.RowVersion),
-                IsIdempotentReplay: false);
+            return ToAssignmentResult(newAssignment, isReplay: false);
         });
     }
+
+    private Task<TeamAssignment?> FindActiveAssignmentAsync(Guid cycleId, Guid candidateUserId, CancellationToken cancellationToken) =>
+        db.TeamAssignments.AsNoTracking().SingleOrDefaultAsync(item => item.StaffingCycleId == cycleId &&
+            item.UserId == candidateUserId && item.Status == TeamAssignmentStatus.Active, cancellationToken);
+
+    private static bool IsActiveAssignmentCollision(DbUpdateException error) =>
+        error.InnerException is SqlException { Number: 2601 or 2627 } sql &&
+        sql.Message.Contains("UX_TeamAssignments_ActiveLeaderPerCycle", StringComparison.Ordinal);
+
+    private static AssignReplacementResult ToAssignmentResult(TeamAssignment assignment, bool isReplay) => new(
+        assignment.Id, assignment.EventId, assignment.StaffingCycleId, assignment.UserId, assignment.Status.ToString(),
+        assignment.AssignedAt, assignment.AssignedByUserId, Convert.ToBase64String(assignment.RowVersion), isReplay);
 }
