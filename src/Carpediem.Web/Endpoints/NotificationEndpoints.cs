@@ -15,6 +15,8 @@ public static class NotificationEndpoints
 
         group.MapGet("/", GetLatestAsync).WithName("GetMyNotifications")
             .Produces<IReadOnlyList<NotificationInboxItem>>(200);
+        group.MapGet("/unread", GetUnreadAsync).WithName("GetMyUnreadNotifications")
+            .Produces<NotificationUnreadPage>(200).Produces<ApiProblemResponse>(404, "application/problem+json");
         group.MapGet("/unread-count", GetUnreadCountAsync).WithName("GetMyUnreadNotificationCount")
             .Produces<UnreadCountResponse>(200);
         group.MapPost("/{notificationId:guid}/read", MarkReadAsync).WithName("MarkNotificationRead")
@@ -40,6 +42,17 @@ public static class NotificationEndpoints
         if (!TryGetUserId(context, out var userId)) return Unauthenticated(context);
         context.Response.Headers.CacheControl = "no-store";
         return Results.Ok(new UnreadCountResponse(await store.GetUnreadCountAsync(userId, cancellationToken)));
+    }
+
+    private static async Task<IResult> GetUnreadAsync(
+        Guid? beforeId, HttpContext context, INotificationInboxStore store, CancellationToken cancellationToken)
+    {
+        if (!TryGetUserId(context, out var userId)) return Unauthenticated(context);
+        context.Response.Headers.CacheControl = "no-store";
+        var page = await store.GetUnreadAsync(userId, beforeId, cancellationToken);
+        return page is null
+            ? ApiProblemDetailsService.Problem(context, 404, "notification_cursor_not_found", "This inbox page is no longer available.")
+            : Results.Ok(page);
     }
 
     private static async Task<IResult> MarkReadAsync(

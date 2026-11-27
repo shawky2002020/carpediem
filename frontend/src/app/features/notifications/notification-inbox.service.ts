@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { DestroyRef, effect, inject, Injectable, InjectionToken, signal } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, finalize, Subscription } from 'rxjs';
@@ -11,6 +11,11 @@ export interface NotificationInboxItem {
   contextPayload: string | null;
   createdAt: string;
   readAt: string | null;
+}
+
+export interface NotificationUnreadPage {
+  items: NotificationInboxItem[];
+  nextBeforeId: string | null;
 }
 
 export const NOTIFICATION_POLL_INTERVAL_MS = new InjectionToken<number>('Notification poll interval', {
@@ -37,6 +42,8 @@ export class NotificationInboxService {
   private listRefreshQueued = false;
 
   readonly items = signal<NotificationInboxItem[]>([]);
+  private readonly unreadRefresh = signal(0);
+  readonly unreadRefreshVersion = this.unreadRefresh.asReadonly();
   readonly unreadCount = signal(0);
   readonly loading = signal(false);
   readonly error = signal(false);
@@ -95,6 +102,12 @@ export class NotificationInboxService {
     if (!this.activeUserId) return;
     this.refreshCount(false);
     this.refreshList();
+    this.unreadRefresh.update(version => version + 1);
+  }
+
+  getUnreadPage(beforeId?: string) {
+    const params = beforeId ? new HttpParams().set('beforeId', beforeId) : undefined;
+    return this.http.get<NotificationUnreadPage>('/api/notifications/unread', { params });
   }
 
   private refreshCount(loadListOnChange: boolean): void {
@@ -123,7 +136,10 @@ export class NotificationInboxService {
         const changed = response.count !== this.unreadCount();
         this.unreadCount.set(response.count);
         this.error.set(false);
-        if (changed && loadListOnChange) this.refreshList();
+        if (changed && loadListOnChange) {
+          this.refreshList();
+          this.unreadRefresh.update(version => version + 1);
+        }
       },
       error: () => { if (generation === this.generation) this.error.set(true); },
     }));

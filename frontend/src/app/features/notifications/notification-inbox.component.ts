@@ -1,5 +1,6 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, linkedSignal, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { SessionService } from '../../core/auth/session.service';
 import { NotificationInboxItem, NotificationInboxService } from './notification-inbox.service';
@@ -19,9 +20,38 @@ export interface NotificationGroup {
 export class NotificationInboxComponent {
   protected readonly inbox = inject(NotificationInboxService);
   private readonly session = inject(SessionService);
+  protected readonly unreadOnly = signal(false);
+  private readonly unreadCursors = linkedSignal({
+    source: () => this.session.session()?.userId,
+    computation: (): string[] => [],
+  });
+  protected readonly hasNewerUnread = computed(() => this.unreadCursors().length > 0);
+  protected readonly unreadPage = rxResource({
+    params: () => {
+      const userId = this.session.session()?.userId;
+      if (!this.unreadOnly() || !userId) return undefined;
+      return { userId, beforeId: this.unreadCursors().at(-1), version: this.inbox.unreadRefreshVersion() };
+    },
+    stream: ({ params }) => this.inbox.getUnreadPage(params.beforeId),
+  });
+  protected readonly displayedItems = computed(() => this.unreadOnly()
+    ? (this.unreadPage.hasValue() ? this.unreadPage.value().items : [])
+    : this.inbox.items());
+  protected readonly listLoading = computed(() => this.unreadOnly() ? this.unreadPage.isLoading() : this.inbox.loading());
+  protected readonly olderUnread = computed(() => this.unreadPage.hasValue() ? this.unreadPage.value().nextBeforeId : null);
+
+  protected selectView(unreadOnly: boolean): void {
+    if (this.unreadOnly() === unreadOnly) return;
+    this.unreadCursors.set([]);
+    this.unreadOnly.set(unreadOnly);
+  }
+
+  protected browseUnread(beforeId?: string): void {
+    this.unreadCursors.update(cursors => beforeId ? [...cursors, beforeId] : cursors.slice(0, -1));
+  }
 
   readonly groupedNotifications = computed<NotificationGroup[]>(() => {
-    const items = this.inbox.items();
+    const items = this.displayedItems();
     if (items.length === 0) return [];
 
     const now = Date.now();

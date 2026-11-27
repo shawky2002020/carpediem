@@ -7,12 +7,23 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: var(--cd-space-3);
-  margin-block-end: var(--cd-space-8);
+  margin-block-end: var(--cd-space-4);
 
   h1 { margin-block-end: 0; font-size: clamp(2rem, 4vw, 3rem); }
 }
 
 .unread-summary { margin: var(--cd-space-1) 0 0; color: var(--cd-text-secondary); }
+.inbox-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cd-space-2);
+  margin-block-end: var(--cd-space-5);
+
+  button[aria-pressed='true'] {
+    background-color: var(--cd-action-primary);
+    color: var(--cd-text-inverse);
+  }
+}
 .grouped-notifications { display: grid; gap: var(--cd-space-6); }
 .group-heading { font-size: var(--cd-font-size-lg); margin-block-end: var(--cd-space-2); }
 
