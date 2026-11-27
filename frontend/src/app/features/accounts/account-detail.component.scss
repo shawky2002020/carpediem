@@ -1,0 +1,118 @@
+@use './account-presentation';
+
+:host { display: block; }
+.account-detail { max-inline-size: 40rem; margin-inline: auto; overflow-wrap: anywhere; }
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .42rem;
+  min-block-size: var(--cd-touch-target-min);
+  color: var(--cd-action-primary);
+  font-size: .9375rem;
+  font-weight: 650;
+  text-decoration: none;
+
+  &:hover { text-decoration: underline; }
+}
+
+.detail-header {
+  padding-block: .45rem .9rem;
+
+  h1 { margin: 0; font-size: clamp(1.7rem, 1.45rem + 1.2vw, 2.2rem); letter-spacing: -.035em; }
+}
+.identity-email { margin: .18rem 0 0; color: var(--cd-text-secondary); }
+.identity-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .12rem .75rem;
+  margin-block-start: .32rem;
+}
+.request-date { color: var(--cd-text-secondary); font-size: .875rem; }
+
+.detail-feedback p, .detail-alert { margin-block: 0 .65rem; }
+.detail-alert p { flex: auto; margin: 0; }
+
+.account-settings {
+  border: 1px solid var(--cd-border-default);
+  border-radius: var(--cd-radius-control);
+  background: var(--cd-bg-surface);
+}
+.settings-section {
+  padding: .55rem .75rem;
+
+  + .settings-section { border-block-start: 1px solid var(--cd-border-default); }
+}
+.settings-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .3rem .65rem;
+  min-block-size: var(--cd-touch-target-min);
+
+  h2 { margin: 0; font: 700 1rem/1.3 var(--cd-font-ui); letter-spacing: normal; }
+  .cd-btn { padding-inline: .78rem; }
+}
+.settings-label { min-inline-size: 0; }
+.settings-label .assigned-roles { margin-block-start: .25rem; }
+.section-note { margin: .28rem 0 0; color: var(--cd-text-secondary); font-size: .875rem; }
+
+.role-editor { margin-block-start: .45rem; }
+.role-editor fieldset { min-inline-size: 0; padding: 0; border: 0; }
+.role-option {
+  display: flex;
+  gap: .6rem;
+  align-items: center;
+  min-block-size: var(--cd-touch-target-min);
+  padding-inline: .2rem;
+  border-block-start: 1px solid var(--cd-border-default);
+  cursor: pointer;
+
+  input { margin: 0; flex: none; }
+}
+.detail-actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-block-start: .5rem; }
+
+.activity {
+  margin-block-start: .5rem;
+
+  summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    min-block-size: var(--cd-touch-target-min);
+    padding-inline: .75rem;
+    border-radius: var(--cd-radius-control);
+    color: var(--cd-action-primary);
+    font-size: .9375rem;
+    font-weight: 650;
+    list-style: none;
+    cursor: pointer;
+
+    &::-webkit-details-marker { display: none; }
+    &:hover { background: var(--cd-bg-subtle); }
+    app-navigation-icon { inline-size: 1rem; block-size: 1rem; }
+  }
+  &[open] summary app-navigation-icon { rotate: 90deg; }
+}
+.account-activity {
+  margin: 0;
+  padding-inline: .75rem;
+  list-style: none;
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: .15rem .65rem;
+    padding-block: .5rem;
+    border-block-start: 1px solid var(--cd-border-default);
+  }
+
+  time { color: var(--cd-text-secondary); font-size: .875rem; }
+}
+
+.deactivation-dialog { overflow-wrap: anywhere; overscroll-behavior: contain; }
+.deactivation-dialog .identity-email { margin-block-end: .7rem; }

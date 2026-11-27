@@ -3,9 +3,10 @@ import { expect, Page, Route, test } from '@playwright/test';
 
 const targetEventId = '70000000-0000-0000-0000-000000000001';
 const targetLeaderId = '40000000-0000-0000-0000-000000000001';
+const registeredAccountId = '60000000-0000-0000-0000-000000000001';
 
 test.describe('V1 Slices 13 & 17-22 E2E Lifecycle', () => {
-  test('SLICE-20: Public Leader registration and Admin account approval & role management', async ({ page }) => {
+  test('SLICE-20: Public Leader registration and Admin registration review', async ({ page }) => {
     const state = await mockRemainingSlicesApi(page, { role: null });
 
     await page.goto('/register');
@@ -20,17 +21,24 @@ test.describe('V1 Slices 13 & 17-22 E2E Lifecycle', () => {
 
     state.setRole('Admin');
     await page.goto('/admin/accounts');
-    await expect(page.getByRole('heading', { name: 'Accounts' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'new.volunteer' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Accounts', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: /Registration review/ }).click();
+    await expect(page.getByRole('button', { name: 'Approve registration' })).toHaveCount(0);
+    await page.getByRole('link', { name: /Review.*new\.volunteer/ }).click();
+    await expect(page.getByRole('heading', { name: 'new.volunteer', exact: true })).toBeVisible();
 
-    await page.getByRole('button', { name: 'Approve / reactivate' }).click();
-    expect(state.approvals).toBe(1);
-    await expect(page.getByRole('button', { name: 'Deactivate' })).toBeVisible();
+    await page.getByRole('button', { name: 'Approve registration' }).click();
+    await expect.poll(() => state.approvals).toBe(1);
+    await expect(page.getByRole('button', { name: 'Deactivate', exact: true })).toBeVisible();
 
     const axe = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
       .analyze();
     expect(axe.violations).toEqual([]);
+
+    await page.getByRole('link', { name: 'Back to accounts' }).click();
+    await expect(page.getByRole('button', { name: /Registration review/ })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByRole('heading', { name: 'No registrations awaiting review' })).toBeVisible();
   });
 
   test('SLICE-19 & SLICE-13: Operational dashboard and Admin event cancellation', async ({ page }) => {
@@ -127,6 +135,16 @@ async function mockRemainingSlicesApi(page: Page, options: MockSlicesOptions) {
   let submittedRating = false;
   let incidentReviewed = false;
 
+  const registeredAccount = () => ({
+    userId: registeredAccountId,
+    userName: 'new.volunteer',
+    email: 'new.volunteer@localhost.invalid',
+    isActive: accountActive,
+    status: accountActive ? 'active' : 'pending',
+    pendingSince: accountActive ? null : '2026-10-22T12:00:00Z',
+    roles: ['Leader'],
+  });
+
   await page.route('**/api/**', async (route: Route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -176,26 +194,27 @@ async function mockRemainingSlicesApi(page: Page, options: MockSlicesOptions) {
     }
 
     if (path === '/api/admin/accounts' && request.method() === 'GET') {
+      const reviewCount = accountActive ? 0 : 1;
+      const items = url.searchParams.get('view') === 'review' && accountActive ? [] : [registeredAccount()];
       return json(route, 200, {
-        items: [
-          {
-            userId: '60000000-0000-0000-0000-000000000001',
-            userName: 'new.volunteer',
-            email: 'new.volunteer@localhost.invalid',
-            isActive: accountActive,
-            roles: ['Leader'],
-          },
-        ],
+        items,
         page: 1,
-        pageSize: 50,
+        pageSize: 20,
         hasMore: false,
+        totalAccounts: 1,
+        matchingAccounts: items.length,
+        reviewCount,
       });
     }
 
-    if (path === '/api/admin/accounts/60000000-0000-0000-0000-000000000001/approve' && request.method() === 'POST') {
+    if (path === `/api/admin/accounts/${registeredAccountId}` && request.method() === 'GET') {
+      return json(route, 200, { ...registeredAccount(), version: 'account-version-1', history: [] });
+    }
+
+    if (path === `/api/admin/accounts/${registeredAccountId}/approve` && request.method() === 'POST') {
       approvals += 1;
       accountActive = true;
-      return json(route, 200, { userId: '60000000-0000-0000-0000-000000000001', isActive: true });
+      return json(route, 200, { userId: registeredAccountId, isActive: true });
     }
 
     if (path === '/api/dashboard/events' && request.method() === 'GET') {

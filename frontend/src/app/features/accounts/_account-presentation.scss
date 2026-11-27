@@ -1,0 +1,24 @@
+.account-status {
+  display: inline-flex;
+  align-items: baseline;
+  gap: .36rem;
+  color: var(--cd-text-secondary);
+  font-size: .875rem;
+  font-weight: 650;
+
+  &::before { content: ''; flex: none; inline-size: .42rem; block-size: .42rem; border-radius: 50%; background: currentColor; }
+  &[data-status='active'] { color: var(--cd-status-success-fg); }
+  &[data-status='pending'] { color: var(--cd-status-warning-fg); }
+}
+
+.assigned-roles { display: flex; flex-wrap: wrap; gap: .24rem .34rem; align-items: center; min-inline-size: 0; }
+.role-label {
+  display: inline-block;
+  padding: .08rem .42rem;
+  border-radius: var(--cd-radius-sm);
+  background: var(--cd-bg-subtle);
+  color: var(--cd-text-primary);
+  font-size: .8125rem;
+  font-weight: 600;
+}
+.no-roles { color: var(--cd-text-secondary); font-size: .875rem; }

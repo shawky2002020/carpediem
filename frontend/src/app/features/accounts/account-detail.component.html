@@ -1,0 +1,144 @@
+<section class="account-detail" aria-labelledby="account-title">
+  <a class="back-link" [href]="backUrl" (click)="goBack($event)">
+    <app-navigation-icon name="back" /> Back to accounts
+  </a>
+
+  <header class="detail-header">
+    @if (account(); as current) {
+      <h1 id="account-title">{{ accountName(current) }}</h1>
+      @if (secondaryEmail(current); as email) { <p class="identity-email">{{ email }}</p> }
+      <div class="identity-meta">
+        <span class="account-status" [attr.data-status]="current.status">{{ statusLabels[current.status] }}</span>
+        @if (current.pendingSince; as requested) {
+          <span class="request-date">Requested <time [attr.datetime]="requested">{{ requested | date:'mediumDate' }}</time></span>
+        }
+      </div>
+    } @else {
+      <h1 id="account-title">Account details</h1>
+    }
+  </header>
+
+  <div class="detail-feedback" role="status" aria-atomic="true">
+    @switch (saving()) {
+      @case ('roles') { <p>Saving roles…</p> }
+      @case ('approve') { <p>Updating account access…</p> }
+      @case ('deactivate') { <p>Deactivating account…</p> }
+      @default {
+        @if (success()) {
+          <p class="cd-alert cd-alert--success">{{ success() }}</p>
+        } @else if (loading()) {
+          <p>Loading account details…</p>
+        }
+      }
+    }
+  </div>
+
+  @if (loadError()) {
+    <div class="cd-alert cd-alert--error detail-alert" role="alert">
+      <p>{{ loadError() }}</p>
+      <button type="button" class="cd-btn cd-btn--secondary" (click)="load()">Try again</button>
+    </div>
+  }
+  @if (actionError()) {
+    <div id="account-action-error" class="cd-alert cd-alert--error detail-alert" role="alert" tabindex="-1">
+      <p>{{ actionError() }}</p>
+      @if (conflict() && !loadError()) {
+        <button type="button" class="cd-btn cd-btn--secondary" [disabled]="loading()" (click)="load()">Load latest account</button>
+      }
+    </div>
+  }
+
+  @if (account(); as current) {
+    <div class="account-settings">
+      <section class="settings-section" aria-labelledby="account-roles-heading">
+        <div class="settings-row">
+          <div class="settings-label">
+            <h2 id="account-roles-heading" tabindex="-1">Assigned roles</h2>
+            <div class="assigned-roles">
+              @for (role of current.roles; track role) {
+                <span class="role-label">{{ roleLabel(role) }}</span>
+              } @empty { <span class="no-roles">No roles assigned</span> }
+            </div>
+          </div>
+          @if (!editing()) {
+            <button type="button" id="account-edit-roles" class="cd-btn cd-btn--secondary"
+              [disabled]="unavailable()" (click)="editRoles(current)">Edit roles</button>
+          }
+        </div>
+        @if (editing()) {
+          <form class="role-editor" (submit)="$event.preventDefault(); saveRoles(current)">
+            <fieldset id="account-role-options" [disabled]="!!saving() || loading()">
+              <legend class="cd-visually-hidden">Change assigned roles</legend>
+              @for (role of roleOptions; track role) {
+                <label class="role-option">
+                  <input #roleInput type="checkbox" [checked]="draft().includes(role)"
+                    [disabled]="isOwnAccount() && role === 'Admin'" (change)="toggleRole(role, roleInput.checked)" />
+                  {{ roleLabel(role) }}
+                </label>
+              }
+            </fieldset>
+            @if (!draft().length) { <p class="section-note">Choose at least one role to save.</p> }
+            @if (isOwnAccount()) { <p class="section-note">Your own Admin role is required.</p> }
+            <div class="detail-actions">
+              <button type="submit" class="cd-btn cd-btn--primary" [disabled]="!canSave()">Save changes</button>
+              <button type="button" class="cd-btn cd-btn--secondary" [disabled]="!!saving() || loading()" (click)="cancelRoles()">Cancel</button>
+            </div>
+          </form>
+        }
+      </section>
+
+      <section class="settings-section settings-row" aria-labelledby="account-access-heading">
+        <div class="settings-label">
+          <h2 id="account-access-heading" tabindex="-1">Account access</h2>
+          @if (current.status === 'active' && isOwnAccount()) {
+            <p class="section-note">You can’t deactivate your own account.</p>
+          }
+        </div>
+        @switch (current.status) {
+          @case ('pending') {
+            <button type="button" class="cd-btn cd-btn--primary" [disabled]="unavailable() || editing()"
+              (click)="changeAccess(current, 'approve')">Approve registration</button>
+          }
+          @case ('inactive') {
+            <button type="button" class="cd-btn cd-btn--secondary" [disabled]="unavailable() || editing()"
+              (click)="changeAccess(current, 'approve')">Reactivate account</button>
+          }
+          @case ('active') {
+            @if (!isOwnAccount()) {
+              <button type="button" class="cd-btn cd-btn--danger" [disabled]="unavailable() || editing()"
+                (click)="deactivation.showModal()">Deactivate</button>
+            }
+          }
+        }
+      </section>
+    </div>
+
+    @if (current.history.length) {
+      <details class="activity">
+        <summary>
+          Recent activity
+          <app-navigation-icon name="chevron" />
+        </summary>
+        <ul class="account-activity">
+          @for (entry of current.history; track $index) {
+            <li>
+              <span>{{ historyLabels[entry.action] }}</span>
+              <time [attr.datetime]="entry.occurredAt">{{ entry.occurredAt | date:'medium' }}</time>
+            </li>
+          }
+        </ul>
+      </details>
+    }
+    <dialog #deactivation class="deactivation-dialog" aria-labelledby="deactivation-title">
+      <h2 id="deactivation-title">Deactivate {{ accountName(current) }}?</h2>
+      @if (secondaryEmail(current); as email) { <p class="identity-email">{{ email }}</p> }
+      <p>This account will be blocked from signing in until an Admin reactivates it.</p>
+      <div class="detail-actions">
+        <button type="button" class="cd-btn cd-btn--secondary" autofocus (click)="deactivation.close()">Keep account active</button>
+        <button type="button" class="cd-btn cd-btn--danger" (click)="deactivation.close(); changeAccess(current, 'deactivate')">
+          Confirm deactivation
+        </button>
+      </div>
+    </dialog>
+  }
+</section>

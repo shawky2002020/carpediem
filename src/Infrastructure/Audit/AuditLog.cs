@@ -2,6 +2,11 @@ namespace Carpediem.Infrastructure.Audit;
 
 public sealed class AuditLog
 {
+    public const string RegistrationRequested = "AccountRegistrationRequested";
+    public const string AccountApproved = "AccountApproved";
+    public const string AccountDeactivated = "AccountDeactivated";
+    public const string AccountRolesChanged = "AccountRolesChanged";
+
     private AuditLog() { }
 
     public Guid Id { get; private set; }
@@ -245,7 +250,7 @@ public sealed class AuditLog
             "Pending", "Reviewed", "IncidentReport", "AdminReview");
 
     public static AuditLog AccountRegistrationRequested(Guid userId, DateTimeOffset occurredAt) =>
-        Create(null, "AccountRegistrationRequested", userId, Guid.NewGuid(), occurredAt,
+        Create(null, RegistrationRequested, userId, Guid.NewGuid(), occurredAt,
             null, "PendingApproval", "User", "PublicRegistration");
 
     public static AuditLog FeedbackSubmitted(Guid feedbackId, Guid actorId, DateTimeOffset occurredAt,

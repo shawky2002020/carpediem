@@ -1,9 +1,12 @@
 using System.Net;
 using System.Net.Http.Json;
 using Carpediem.Api.IntegrationTests.Infrastructure;
+using Carpediem.Infrastructure.Audit;
 using Carpediem.Infrastructure.Persistence;
+using Carpediem.Modules.Identity.Domain;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,6 +17,129 @@ public sealed class AccountManagementTests(SqlServerFixture sqlServer)
 {
     private static readonly string[] PromotedRoles = ["Leader", "ChiefLeader"];
     private static readonly string[] LeaderOnlyRoles = ["Leader"];
+
+    [Fact]
+    public async Task AccountDirectoryQueriesTheAuthorizedDatasetBeforePaging()
+    {
+        await using var harness = await DraftApiTestHarness.StartAsync(sqlServer);
+        var first = await harness.SeedUserAsync("pending.first", false, "Leader");
+        var second = await harness.SeedUserAsync("pending.second", false, "ChiefLeader");
+        var inactive = await harness.SeedUserAsync("pending.previously-approved", false, "Leader");
+        var longName = new string('z', 120);
+        var tail = await harness.SeedUserAsync(longName, true, PromotedRoles);
+        var noName = Guid.NewGuid();
+        var requested = DateTimeOffset.UtcNow.AddDays(-5);
+        await using (var scope = harness.Factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<CarpediemDbContext>();
+            var leaderId = await db.Roles.Where(role => role.Name == "Leader").Select(role => role.Id).SingleAsync();
+            for (var i = 0; i < 155; i++)
+            {
+                var id = Guid.NewGuid();
+                db.Users.Add(new CarpediemUser
+                {
+                    Id = id, UserName = $"fixture.{i:D3}", NormalizedUserName = $"FIXTURE.{i:D3}",
+                    Email = $"fixture.{i:D3}@example.invalid", NormalizedEmail = $"FIXTURE.{i:D3}@EXAMPLE.INVALID",
+                    IsActive = true,
+                });
+                db.UserRoles.Add(new IdentityUserRole<Guid> { UserId = id, RoleId = leaderId });
+            }
+            db.Users.Add(new CarpediemUser
+            {
+                Id = noName, Email = "missing%name@example.invalid", NormalizedEmail = "MISSING%NAME@EXAMPLE.INVALID",
+                IsActive = false,
+            });
+            db.AuditLogs.AddRange(AuditLog.AccountRegistrationRequested(first, requested),
+                AuditLog.AccountRegistrationRequested(second, requested.AddDays(1)),
+                AuditLog.AccountRegistrationRequested(inactive, requested.AddDays(-1)),
+                AuditLog.AccountChanged(inactive, harness.ActorUserId, Guid.NewGuid(), requested,
+                    "AccountApproved", "False", "True"),
+                AuditLog.AccountChanged(inactive, harness.ActorUserId, Guid.NewGuid(), requested.AddDays(2),
+                    "AccountDeactivated", "True", "False"));
+            await db.SaveChangesAsync();
+        }
+
+        var firstPage = await GetPageAsync(harness);
+        Assert.Equal(161, firstPage.TotalAccounts);
+        Assert.Equal(2, firstPage.ReviewCount);
+        Assert.Equal(161, firstPage.MatchingAccounts);
+        Assert.Equal(20, firstPage.Items.Length);
+        Assert.DoesNotContain(firstPage.Items, item => item.UserId == tail);
+        Assert.Equal(tail, Assert.Single((await GetPageAsync(harness, "?search=%20ZZZZ%20")).Items).UserId);
+        Assert.Equal(noName, Assert.Single((await GetPageAsync(harness, "?search=%25name&status=inactive")).Items).UserId);
+        using (var privateSearch = new HttpRequestMessage(HttpMethod.Get, "/api/admin/accounts"))
+        {
+            privateSearch.Headers.Add("X-Account-Search", Uri.EscapeDataString("missing%name"));
+            using var response = await harness.Client.SendAsync(privateSearch);
+            response.EnsureSuccessStatusCode();
+            Assert.Equal(noName, Assert.Single((await response.Content.ReadFromJsonAsync<AccountPage>())!.Items).UserId);
+        }
+
+        var combined = await GetPageAsync(harness, "?roles=Leader&roles=ChiefLeader&status=active&sort=name-desc");
+        Assert.Equal(156, combined.MatchingAccounts);
+        Assert.Equal(tail, combined.Items[0].UserId);
+        Assert.Equal(2, combined.Items[0].Roles.Length);
+        Assert.Equal(combined.Items.Length, combined.Items.Select(item => item.UserId).Distinct().Count());
+
+        var review = await GetPageAsync(harness, "?view=review");
+        Assert.Equal(new[] { first, second }, review.Items.Select(item => item.UserId));
+        Assert.Equal(requested, review.Items[0].PendingSince);
+        Assert.Equal("pending", review.Items[0].Status);
+        Assert.Equal(inactive, Assert.Single((await GetPageAsync(harness, "?search=pending&status=inactive")).Items).UserId);
+        var lastPage = await GetPageAsync(harness, "?page=9999");
+        Assert.Equal(9, lastPage.Page);
+        Assert.False(lastPage.HasMore);
+        Assert.Single(lastPage.Items);
+        Assert.Empty((await GetPageAsync(harness, "?search=no-matches&page=5")).Items);
+
+        foreach (var invalid in new[] { "?page=0", "?sort=email", "?roles=Operator", "?view=review&status=active" })
+            Assert.Equal(HttpStatusCode.BadRequest, (await harness.Client.GetAsync($"/api/admin/accounts{invalid}")).StatusCode);
+
+        Assert.Equal(HttpStatusCode.OK, (await SendAsync(harness, HttpMethod.Post,
+            $"/api/admin/accounts/{first}/approve", new { })).StatusCode);
+        var afterApproval = await GetPageAsync(harness, "?view=review");
+        Assert.Equal(1, afterApproval.ReviewCount);
+        Assert.Equal(1, afterApproval.MatchingAccounts);
+        Assert.Equal(second, Assert.Single(afterApproval.Items).UserId);
+
+        harness.Factory.ActorRole = "Leader";
+        Assert.Equal(HttpStatusCode.Forbidden, (await harness.Client.GetAsync("/api/admin/accounts?search=fixture")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await harness.Client.GetAsync($"/api/admin/accounts/{tail}")).StatusCode);
+        var denied = await SendAsync(harness, HttpMethod.Put, $"/api/admin/accounts/{tail}/roles", new { roles = LeaderOnlyRoles });
+        Assert.Equal(HttpStatusCode.Forbidden, denied.StatusCode);
+
+        harness.Factory.ActorRole = "Admin";
+        await using (var scope = harness.Factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<CarpediemDbContext>();
+            var actor = await db.Users.SingleAsync(user => user.Id == harness.ActorUserId);
+            actor.IsActive = false;
+            await db.SaveChangesAsync();
+        }
+        Assert.Equal(HttpStatusCode.Forbidden, (await harness.Client.GetAsync("/api/admin/accounts")).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await SendAsync(harness, HttpMethod.Post,
+            $"/api/admin/accounts/{second}/approve", new { })).StatusCode);
+    }
+
+    [Fact]
+    public async Task StaleDetailsCannotOverwriteRoleOrAccessChanges()
+    {
+        await using var harness = await DraftApiTestHarness.StartAsync(sqlServer);
+        var target = await harness.SeedUserAsync("original.leader", true, "Leader");
+        var url = $"/api/admin/accounts/{target}";
+        var before = (await harness.Client.GetFromJsonAsync<AccountDetail>(url))!;
+        Assert.Equal(HttpStatusCode.OK, (await SendAsync(harness, HttpMethod.Put,
+            $"{url}/roles", new { roles = PromotedRoles }, version: before.Version)).StatusCode);
+        var staleRoles = await SendAsync(harness, HttpMethod.Put, $"{url}/roles", new { roles = LeaderOnlyRoles }, version: before.Version);
+        Assert.Equal(HttpStatusCode.Conflict, staleRoles.StatusCode);
+        Assert.Equal("account_conflict", (await staleRoles.Content.ReadFromJsonAsync<ProblemBody>())!.Code);
+        var staleAccess = await SendAsync(harness, HttpMethod.Post, $"{url}/deactivate", new { }, version: before.Version);
+        Assert.Equal(HttpStatusCode.Conflict, staleAccess.StatusCode);
+        var after = (await harness.Client.GetFromJsonAsync<AccountDetail>(url))!;
+        Assert.True(after.IsActive);
+        Assert.Equal(PromotedRoles.Order(), after.Roles.Order());
+        Assert.Single(after.History, entry => entry.Action == "AccountRolesChanged");
+    }
 
     [Fact]
     public async Task RegistrationRequiresApprovalAndAdminCanChangeAccess()
@@ -139,18 +265,25 @@ public sealed class AccountManagementTests(SqlServerFixture sqlServer)
         Assert.Equal(HttpStatusCode.Accepted, otherViewer.StatusCode);
     }
 
+    private static async Task<AccountPage> GetPageAsync(DraftApiTestHarness harness, string query = "") =>
+        (await harness.Client.GetFromJsonAsync<AccountPage>($"/api/admin/accounts{query}"))!;
+
     private static async Task<HttpResponseMessage> SendAsync(DraftApiTestHarness harness,
-        HttpMethod method, string path, object body, string? token = null, string? forwardedFor = null)
+        HttpMethod method, string path, object body, string? token = null, string? forwardedFor = null, string? version = null)
     {
         using var request = new HttpRequestMessage(method, path) { Content = JsonContent.Create(body) };
         request.Headers.Add("X-XSRF-TOKEN", token ?? harness.AntiforgeryToken);
         if (forwardedFor is not null) request.Headers.Add("X-Forwarded-For", forwardedFor);
+        if (version is not null) request.Headers.IfMatch.ParseAdd($"\"{version}\"");
         return await harness.Client.SendAsync(request);
     }
 
     private sealed record AccountSummary(Guid UserId, string UserName, string Email,
-        bool IsActive, string[] Roles);
-    private sealed record AccountPage(AccountSummary[] Items, int Page, int PageSize, bool HasMore);
+        bool IsActive, string[] Roles, string Status, DateTimeOffset? PendingSince);
+    private sealed record AccountPage(AccountSummary[] Items, int Page, int PageSize, bool HasMore,
+        int TotalAccounts, int ReviewCount, int MatchingAccounts);
+    private sealed record AccountDetail(bool IsActive, string[] Roles, string Version, AccountHistory[] History);
+    private sealed record AccountHistory(string Action);
     private sealed record AntiforgeryBody(string RequestToken);
     private sealed record ProblemBody(string Code, string? Detail);
 

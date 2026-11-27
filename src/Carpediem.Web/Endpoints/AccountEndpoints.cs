@@ -25,8 +25,10 @@ public static class AccountEndpoints
         var admin = endpoints.MapGroup("/api/admin/accounts")
             .WithTags("Account Administration")
             .RequireAuthorization(AuthorizationPolicies.RequireAdmin);
-        admin.MapGet("/", ListAsync).WithName("ListAccounts")
-            .Produces<AccountPage>(200);
+        admin.MapGet("/", AccountQueries.ListAsync).WithName("ListAccounts")
+            .Produces<AccountQueries.AccountPage>(200);
+        admin.MapGet("/{userId:guid}", AccountQueries.DetailAsync).WithName("GetAccount")
+            .Produces<AccountQueries.AccountDetail>(200);
         admin.MapPost("/{userId:guid}/approve", ApproveAsync)
             .WithName("ApproveAccount")
             .WithMetadata(new RequireAntiforgeryTokenAttribute());
@@ -90,33 +92,6 @@ public static class AccountEndpoints
         });
     }
 
-    private static async Task<IResult> ListAsync(
-        int? page, HttpContext context, CarpediemDbContext db,
-        CancellationToken cancellationToken)
-    {
-        const int pageSize = 50;
-        var pageNumber = page ?? 1;
-        if (pageNumber is < 1 or > 10000)
-            return ApiProblemDetailsService.Problem(context, 400, "invalid_page", "Page must be between 1 and 10000.");
-        context.Response.Headers.CacheControl = "no-store";
-        var accounts = await db.Users.AsNoTracking().OrderBy(user => user.IsActive)
-            .ThenBy(user => user.UserName).ThenBy(user => user.Id)
-            .Skip((pageNumber - 1) * pageSize).Take(pageSize + 1).ToListAsync(cancellationToken);
-        var hasMore = accounts.Count > pageSize;
-        if (hasMore) accounts.RemoveAt(pageSize);
-        var ids = accounts.Select(user => user.Id).ToArray();
-        var roleRows = await (from userRole in db.UserRoles.AsNoTracking()
-                              join role in db.Roles.AsNoTracking() on userRole.RoleId equals role.Id
-                              where ids.Contains(userRole.UserId)
-                              select new { userRole.UserId, role.Name }).ToListAsync(cancellationToken);
-        var rolesByUser = roleRows.GroupBy(row => row.UserId)
-            .ToDictionary(group => group.Key, group => group.Select(row => row.Name ?? string.Empty).ToArray());
-        var result = accounts.Select(account => new AccountSummary(account.Id,
-            account.UserName ?? string.Empty, account.Email ?? string.Empty, account.IsActive,
-            rolesByUser.GetValueOrDefault(account.Id) ?? [])).ToArray();
-        return Results.Ok(new AccountPage(result, pageNumber, pageSize, hasMore));
-    }
-
     private static Task<IResult> ApproveAsync(
         Guid userId, HttpContext context, IAntiforgery antiforgery,
         UserManager<CarpediemUser> users, CarpediemDbContext db, TimeProvider clock) =>
@@ -137,6 +112,7 @@ public static class AccountEndpoints
             return ApiProblemDetailsService.Problem(context, 409, "self_deactivation_forbidden", "Admins cannot deactivate their own account.");
         var user = await users.FindByIdAsync(userId.ToString());
         if (user is null) return NotFound(context);
+        if (HasStaleVersion(context, user)) return AccountConflict(context);
         if (user.IsActive == active) return Results.Ok(new AccountStateResponse(user.Id, active));
 
         return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
@@ -144,11 +120,11 @@ public static class AccountEndpoints
             await using var transaction = await db.Database.BeginTransactionAsync();
             user.IsActive = active;
             var updated = await users.UpdateAsync(user);
-            if (!updated.Succeeded) return ApiProblemDetailsService.Problem(context, 409, "account_update_failed", "Account could not be updated.");
-            if (!(await users.UpdateSecurityStampAsync(user)).Succeeded)
-                return ApiProblemDetailsService.Problem(context, 409, "account_update_failed", "Account session could not be updated.");
+            if (!updated.Succeeded) return UpdateFailed(context, updated, "Account could not be updated.");
+            var sessionUpdate = await users.UpdateSecurityStampAsync(user);
+            if (!sessionUpdate.Succeeded) return UpdateFailed(context, sessionUpdate, "Account session could not be updated.");
             db.AuditLogs.Add(AuditLog.AccountChanged(user.Id, adminId, Guid.NewGuid(), clock.GetUtcNow(),
-                active ? "AccountApproved" : "AccountDeactivated", (!active).ToString(), active.ToString()));
+                active ? AuditLog.AccountApproved : AuditLog.AccountDeactivated, (!active).ToString(), active.ToString()));
             await db.SaveChangesAsync();
             await transaction.CommitAsync();
             return Results.Ok(new AccountStateResponse(user.Id, active));
@@ -169,6 +145,7 @@ public static class AccountEndpoints
             return ApiProblemDetailsService.Problem(context, 409, "self_demotion_forbidden", "Admins cannot remove their own Admin role.");
         var user = await users.FindByIdAsync(userId.ToString());
         if (user is null) return NotFound(context);
+        if (HasStaleVersion(context, user)) return AccountConflict(context);
         var current = await users.GetRolesAsync(user);
         foreach (var role in desired)
         {
@@ -184,22 +161,41 @@ public static class AccountEndpoints
         return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
         {
             await using var transaction = await db.Database.BeginTransactionAsync();
-            if (remove.Length > 0 && !(await users.RemoveFromRolesAsync(user, remove)).Succeeded)
-                return ApiProblemDetailsService.Problem(context, 409, "account_update_failed", "Roles could not be updated.");
-            if (add.Length > 0 && !(await users.AddToRolesAsync(user, add)).Succeeded)
-                return ApiProblemDetailsService.Problem(context, 409, "account_update_failed", "Roles could not be updated.");
+            if (remove.Length > 0)
+            {
+                var removed = await users.RemoveFromRolesAsync(user, remove);
+                if (!removed.Succeeded) return UpdateFailed(context, removed, "Roles could not be updated.");
+            }
+            if (add.Length > 0)
+            {
+                var added = await users.AddToRolesAsync(user, add);
+                if (!added.Succeeded) return UpdateFailed(context, added, "Roles could not be updated.");
+            }
             if (remove.Length > 0 || add.Length > 0)
             {
-                if (!(await users.UpdateSecurityStampAsync(user)).Succeeded)
-                    return ApiProblemDetailsService.Problem(context, 409, "account_update_failed", "Account session could not be updated.");
+                var sessionUpdate = await users.UpdateSecurityStampAsync(user);
+                if (!sessionUpdate.Succeeded) return UpdateFailed(context, sessionUpdate, "Account session could not be updated.");
                 db.AuditLogs.Add(AuditLog.AccountChanged(user.Id, adminId, Guid.NewGuid(), clock.GetUtcNow(),
-                    "AccountRolesChanged", string.Join(',', current.Order()), string.Join(',', desired.Order())));
+                    AuditLog.AccountRolesChanged, string.Join(',', current.Order()), string.Join(',', desired.Order())));
                 await db.SaveChangesAsync();
             }
             await transaction.CommitAsync();
             return Results.Ok(new AccountRolesResponse(user.Id, desired));
         });
     }
+
+    // Existing clients may omit If-Match. The details editor supplies the version it displayed.
+    private static bool HasStaleVersion(HttpContext context, CarpediemUser user) =>
+        context.Request.Headers.TryGetValue("If-Match", out var version) &&
+        version.ToString() != $"\"{user.ConcurrencyStamp}\"";
+
+    private static IResult AccountConflict(HttpContext context) => ApiProblemDetailsService.Problem(context, 409,
+        "account_conflict", "This account changed since you opened it. Load the latest account before trying again.");
+
+    private static IResult UpdateFailed(HttpContext context, IdentityResult result, string title) =>
+        result.Errors.Any(error => error.Code == nameof(IdentityErrorDescriber.ConcurrencyFailure))
+            ? AccountConflict(context)
+            : ApiProblemDetailsService.Problem(context, 409, "account_update_failed", title);
 
     private static async Task<bool> ValidAntiforgeryAsync(HttpContext context, IAntiforgery antiforgery)
     {
@@ -217,8 +213,6 @@ public static class AccountEndpoints
 
     private sealed record RegisterRequest(string UserName, string Email, string Password);
     private sealed record SetRolesRequest(string[] Roles);
-    private sealed record AccountSummary(Guid UserId, string UserName, string Email, bool IsActive, string[] Roles);
-    private sealed record AccountPage(AccountSummary[] Items, int Page, int PageSize, bool HasMore);
     private sealed record AccountStateResponse(Guid UserId, bool IsActive);
     private sealed record AccountRolesResponse(Guid UserId, string[] Roles);
 }
