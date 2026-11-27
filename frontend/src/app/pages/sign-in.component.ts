@@ -1,3 +1,4 @@
+import { Location } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -44,7 +45,10 @@ import { AccountAccessComponent } from './account-access.component';
             {{ saving() ? 'Signing in…' : 'Sign in' }}
           </button>
         </form>
-        <p class="auth-footer">Need a Leader account? <a routerLink="/register">Register as a Leader</a></p>
+        <p class="auth-footer">
+          <span>New Leader accounts require Admin approval before sign-in.</span>
+          <a routerLink="/register">Register as a Leader</a>
+        </p>
       </section>
     </app-account-access>
   `,
@@ -53,6 +57,7 @@ import { AccountAccessComponent } from './account-access.component';
 export class SignInComponent {
   private readonly session = inject(SessionService);
   private readonly router = inject(Router);
+  private readonly location = inject(Location);
   protected readonly saving = signal(false);
   protected readonly error = signal('');
   protected readonly form = new FormGroup({
@@ -65,7 +70,7 @@ export class SignInComponent {
     this.saving.set(true);
     this.error.set('');
     this.session.login(this.form.getRawValue()).pipe(finalize(() => this.saving.set(false))).subscribe({
-      next: () => void this.router.navigate(['/']),
+      next: () => void this.router.navigateByUrl(this.destination(), { replaceUrl: true }),
       error: failure => {
         const status = failure.status;
         if (status === 0 || status >= 500) {
@@ -77,5 +82,14 @@ export class SignInComponent {
         }
       },
     });
+  }
+
+  private destination(): string {
+    const state = this.location.getState();
+    const url = state && typeof state === 'object' && 'returnUrl' in state ? state.returnUrl : null;
+    // The guard stores the Angular URL in history state. Public query parameters are not used.
+    return typeof url === 'string' && url.startsWith('/') && !url.startsWith('//') && !url.includes('\\')
+      ? url
+      : '/';
   }
 }
