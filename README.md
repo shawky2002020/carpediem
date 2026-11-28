@@ -205,64 +205,20 @@ graph TD
 
 ## 7. Running Locally
 
-Follow these instructions to run the complete Carpediem platform locally in development mode.
+Start the complete Carpediem platform locally with one command from the repository root:
+
+```bash
+npm run dev
+```
+
+The command starts the local SQL Server database, applies the idempotent database migration, waits for the API health check, installs frontend dependencies when needed, and launches the Angular development server. Open the URL printed in the terminal (normally `http://127.0.0.1:4200`). Press `Ctrl+C` to stop the frontend; the database and API containers remain available for the next run.
 
 ### Prerequisites
-- **.NET SDK**: `10.0.100` or higher ([Download .NET](https://dotnet.microsoft.com/download))
-- **Node.js**: `v20.x` or `v22.x` ([Download Node.js](https://nodejs.org/))
+- **Node.js**: `24.15.0` or higher (see `.node-version`) ([Download Node.js](https://nodejs.org/))
 - **Docker**: Docker Desktop or Docker Engine running with Linux containers ([Download Docker](https://www.docker.com/))
-- **Git**: Installed and configured on your system
+- **API URL**: `http://127.0.0.1:5025` (used by the frontend development proxy)
 
----
-
-### Step 1: Start the Database Container
-Carpediem uses Microsoft SQL Server 2025. Start the local development container:
-
-```bash
-docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=Carpediem#2026DevSql!" \
-   -p 14333:1433 --name carpediem-sqlserver-1 -d \
-   mcr.microsoft.com/mssql/server:2025-latest
-```
-
-*Note: Port `14333` is used by default in development to prevent conflicts with existing SQL Server instances.*
-
----
-
-### Step 2: Apply Database Migrations & Seed Data
-Navigate to the repository root and apply the EF Core database migrations:
-
-```bash
-dotnet ef database update --project src/Carpediem.Infrastructure/Carpediem.Infrastructure.csproj --startup-project src/Carpediem.Web/Carpediem.Web.csproj
-```
-
-The database will automatically seed with default administrative, chief leader, and leader test accounts alongside sample upcoming events.
-
----
-
-### Step 3: Start the Backend Web API
-Run the backend API using the `https` launch profile:
-
-```bash
-dotnet run --project src/Carpediem.Web/Carpediem.Web.csproj --launch-profile https
-```
-
-- API Base URL: `https://localhost:7076` (and `http://localhost:5024`)
-- Swagger UI / OpenAPI Spec: `https://localhost:7076/swagger`
-
----
-
-### Step 4: Start the Angular Frontend
-In a new terminal window, install frontend dependencies and start the Angular development server:
-
-```bash
-cd frontend
-npm install
-npm start
-```
-
-- Web Application URL: `http://127.0.0.1:4200/`
-
----
+Compose uses the local development SQL Server password `Carpediem#2026DevSql!` unless overridden by `CARPEDIEM_SQL_PASSWORD`.
 
 ### Seeded Development Accounts
 All development accounts are provisioned with the password: `Carpediem#2026SeedAdmin!`
