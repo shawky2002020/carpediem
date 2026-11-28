@@ -1,14 +1,26 @@
 import { expect, test } from '@playwright/test';
 
 test('workspace navigation keeps administrator destinations and restores keyboard focus', async ({ page }, testInfo) => {
+  const account = {
+    userId: '60000000-0000-0000-0000-000000000002',
+    userName: 'leader.qa',
+    email: 'leader@localhost.invalid',
+    status: 'active',
+    isActive: true,
+    pendingSince: null,
+    roles: ['Leader'],
+  };
   await page.route('**/api/**', route => {
     const path = new URL(route.request().url()).pathname;
     if (path === '/api/session/me') return route.fulfill({ json: { userId: 'admin-qa', userName: 'admin.qa', roles: ['Admin'] } });
     if (path === '/api/session/antiforgery') return route.fulfill({ json: { requestToken: 'e2e' } });
     if (path === '/api/notifications/unread-count') return route.fulfill({ json: { count: 1 } });
     if (path === '/api/admin/accounts') return route.fulfill({ json: {
-      items: [{ userId: 'leader-qa', userName: 'leader.qa', email: 'leader@localhost.invalid', isActive: true, roles: ['Leader'] }],
-      page: 1, pageSize: 50, hasMore: false,
+      items: [account], page: 1, pageSize: 20, hasMore: false,
+      totalAccounts: 1, matchingAccounts: 1, reviewCount: 0,
+    } });
+    if (path === `/api/admin/accounts/${account.userId}`) return route.fulfill({ json: {
+      ...account, version: 'account-version-1', history: [],
     } });
     return route.fulfill({ json: [] });
   });
@@ -38,6 +50,9 @@ test('workspace navigation keeps administrator destinations and restores keyboar
     await expect(workspace.getByRole('link', { name: 'Accounts' })).toHaveAttribute('aria-current', 'page');
   }
 
+  await expect(page.getByRole('button', { name: 'Deactivate', exact: true })).toHaveCount(0);
+  await page.getByRole('link', { name: /Details.*leader\.qa/ }).click();
+  await expect(page.getByRole('heading', { name: 'leader.qa', exact: true })).toBeVisible();
   const deactivate = page.getByRole('button', { name: 'Deactivate', exact: true });
   await deactivate.click();
   const dialog = page.getByRole('dialog', { name: 'Deactivate leader.qa?' });

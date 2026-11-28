@@ -1,0 +1,129 @@
+<section class="accounts-page" aria-labelledby="accounts-title">
+  <header class="directory-header">
+    <h1 id="accounts-title">Accounts</h1>
+    @if (page(); as data) {
+      <p>{{ data.totalAccounts }} total {{ data.totalAccounts === 1 ? 'account' : 'accounts' }}{{ loading() || error() ? ' at last load' : '' }}</p>
+    }
+  </header>
+
+  <div class="query-tools">
+    <div class="search-field">
+      <app-navigation-icon name="search" />
+      <label class="cd-visually-hidden" for="account-search">Search name or email</label>
+      <input #searchInput id="account-search" type="search" placeholder="Search name or email" maxlength="256"
+        autocomplete="off" [formControl]="search" />
+      @if (search.value) {
+        <button type="button" class="icon-button" aria-label="Clear search" (click)="clearSearch(searchInput)">
+          <app-navigation-icon name="close" />
+        </button>
+      }
+    </div>
+    <button type="button" id="account-filters" class="filter-button" aria-haspopup="dialog" (click)="openFilters(filters)">
+      <app-navigation-icon name="filters" />
+      Filters
+      @if (filterCount()) { <span class="filter-count">{{ filterCount() }}</span> }
+    </button>
+  </div>
+
+  <div class="view-switch" role="group" aria-label="Account view">
+    <button type="button" [attr.aria-pressed]="query().view === 'all'" (click)="selectView('all')">All accounts</button>
+    <button type="button" [attr.aria-pressed]="query().view === 'review'" (click)="selectView('review')">
+      Registration review
+      @if (page(); as data) {
+        @if (!loading() && !error()) {
+          <span class="review-count" aria-hidden="true">{{ data.reviewCount }}</span>
+          <span class="cd-visually-hidden">{{ data.reviewCount }} pending</span>
+        }
+      }
+    </button>
+  </div>
+
+  @if (filterCount()) {
+    <div class="applied-filters" role="group" aria-label="Applied filters">
+      @for (role of query().roles; track role) {
+        <button type="button" class="filter-chip" [attr.aria-label]="'Remove ' + roleLabel(role) + ' filter'"
+          (click)="removeRole(role)">{{ roleLabel(role) }} <app-navigation-icon name="close" /></button>
+      }
+      @if (query().status; as status) {
+        <button type="button" class="filter-chip" [attr.aria-label]="'Remove ' + statusLabels[status] + ' filter'"
+          (click)="clearStatus()">{{ statusLabels[status] }} <app-navigation-icon name="close" /></button>
+      }
+      <button type="button" class="clear-filters" (click)="clearFilters()">Clear filters</button>
+    </div>
+  }
+
+  <div class="result-toolbar">
+    <h2 id="account-results" tabindex="-1" aria-live="polite" aria-atomic="true">
+      @if (loading()) {
+        {{ page() ? 'Updating results…' : 'Loading accounts…' }}
+      } @else if (error()) {
+        {{ page() ? 'Showing last loaded results' : 'Accounts unavailable' }}
+      } @else if (page(); as data) {
+        {{ data.matchingAccounts }} {{ data.matchingAccounts === 1 ? 'result' : 'results' }}
+      }
+    </h2>
+    <div class="sort-field">
+      <label for="account-sort">Sort</label>
+      <select id="account-sort" (change)="selectSort($event)">
+        @if (query().view === 'review') {
+          <option value="oldest" [selected]="query().sort === 'oldest'">Oldest request first</option>
+        }
+        @for (option of sortOptions; track option.value) {
+          <option [value]="option.value" [selected]="query().sort === option.value">{{ option.label }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="cd-alert cd-alert--error result-error" role="alert">
+      <p>{{ error() }}</p>
+      <button class="cd-btn cd-btn--secondary" type="button" (click)="reload()">Try again</button>
+    </div>
+  }
+
+  <app-account-results [page]="page()" [loading]="loading()" [failed]="!!error()"
+    [view]="query().view" [detailNavigation]="detailNavigation"
+    (pageChange)="changePage($event)" (queryReset)="resetQuery()"
+    (accountOpen)="rememberPosition($event.event, $event.accountId)" />
+</section>
+<dialog #filters class="account-filter-dialog" aria-labelledby="account-filter-title">
+  <form (submit)="$event.preventDefault(); applyFilters(filters)">
+    <header class="filter-header">
+      <h2 id="account-filter-title">Filters</h2>
+      <button type="button" class="icon-button" aria-label="Close filters" (click)="filters.close()" autofocus>
+        <app-navigation-icon name="close" />
+      </button>
+    </header>
+    <fieldset>
+      <legend>Assigned roles</legend>
+      <p>Match any selected role.</p>
+      @for (role of roleOptions; track role) {
+        <label class="filter-option">
+          <input #roleInput type="checkbox" [checked]="filterRoles().includes(role)"
+            (change)="toggleRole(role, roleInput.checked)" />
+          {{ roleLabel(role) }}
+        </label>
+      }
+    </fieldset>
+    @if (query().view === 'all') {
+      <fieldset>
+        <legend>Account status</legend>
+        <label class="filter-option">
+          <input type="radio" name="account-status" [checked]="!filterStatus()" (change)="filterStatus.set('')" />
+          Any status
+        </label>
+        @for (status of statusOptions; track status) {
+          <label class="filter-option">
+            <input type="radio" name="account-status" [checked]="filterStatus() === status" (change)="filterStatus.set(status)" />
+            {{ statusLabels[status] }}
+          </label>
+        }
+      </fieldset>
+    }
+    <footer class="filter-actions">
+      <button type="button" class="cd-btn cd-btn--secondary" (click)="filters.close()">Cancel</button>
+      <button type="submit" class="cd-btn cd-btn--primary">Apply filters</button>
+    </footer>
+  </form>
+</dialog>

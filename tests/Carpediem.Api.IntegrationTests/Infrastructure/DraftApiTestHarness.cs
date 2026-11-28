@@ -117,6 +117,7 @@ public sealed class DraftApiTestHarness : IAsyncDisposable
             NormalizedUserName = userName.ToUpperInvariant(),
             Email = $"{userName}@localhost.invalid",
             NormalizedEmail = $"{userName}@localhost.invalid".ToUpperInvariant(),
+            SecurityStamp = Guid.NewGuid().ToString("N"),
             IsActive = isActive,
         };
         db.Users.Add(user);

@@ -1,0 +1,103 @@
+<div class="results" [attr.aria-busy]="loading()">
+    @if (page(); as data) {
+      @if (data.items.length) {
+        <ul class="account-list" aria-label="Account results">
+          @for (account of data.items; track account.userId) {
+            <li class="account-row">
+              <div class="account-row-body">
+                <ng-container [ngTemplateOutlet]="identity" [ngTemplateOutletContext]="{ $implicit: account }" />
+                <div class="row-meta">
+                  <ng-container [ngTemplateOutlet]="status" [ngTemplateOutletContext]="{ $implicit: account }" />
+                  <ng-container [ngTemplateOutlet]="roles" [ngTemplateOutletContext]="{ $implicit: account }" />
+                </div>
+                @if (account.pendingSince; as requested) {
+                  <span class="request-date">Requested <time [attr.datetime]="requested">{{ requestAge(requested) }}</time></span>
+                }
+              </div>
+              <ng-container [ngTemplateOutlet]="details" [ngTemplateOutletContext]="{ $implicit: account }" />
+            </li>
+          }
+        </ul>
+        <table class="account-table" aria-label="Account results">
+          <thead>
+            <tr>
+              <th scope="col">Account</th>
+              <th scope="col">Roles</th>
+              <th scope="col">Status</th>
+              @if (view() === 'review') { <th scope="col">Request age</th> }
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (account of data.items; track account.userId) {
+              <tr>
+                <th scope="row"><ng-container [ngTemplateOutlet]="identity" [ngTemplateOutletContext]="{ $implicit: account }" /></th>
+                <td><ng-container [ngTemplateOutlet]="roles" [ngTemplateOutletContext]="{ $implicit: account }" /></td>
+                <td><ng-container [ngTemplateOutlet]="status" [ngTemplateOutletContext]="{ $implicit: account }" /></td>
+                @if (view() === 'review') {
+                  <td>@if (account.pendingSince; as requested) {
+                    <time [attr.datetime]="requested">{{ requestAge(requested) }}</time>
+                  }</td>
+                }
+                <td><ng-container [ngTemplateOutlet]="details" [ngTemplateOutletContext]="{ $implicit: account }" /></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <nav class="pagination" aria-label="Account pages">
+          <button type="button" class="cd-btn cd-btn--secondary" [disabled]="loading() || !!failed() || data.page <= 1"
+            (click)="pageChange.emit(data.page - 1)">Previous</button>
+          <p class="displayed-range">
+            @if (!loading() && !failed()) {
+              {{ (data.page - 1) * data.pageSize + 1 }}–{{ (data.page - 1) * data.pageSize + data.items.length }}
+              of {{ data.matchingAccounts }}
+            }
+          </p>
+          <button type="button" class="cd-btn cd-btn--secondary" [disabled]="loading() || !!failed() || !data.hasMore"
+            (click)="pageChange.emit(data.page + 1)">Next</button>
+        </nav>
+      } @else if (!loading() && !failed()) {
+        <div class="empty-results">
+          @if (!data.totalAccounts) {
+            <h3>No accounts yet</h3>
+          } @else if (view() === 'review' && !data.reviewCount) {
+            <h3>No registrations awaiting review</h3>
+            <p>New registrations will appear here when they need approval.</p>
+          } @else {
+            <h3>No matching accounts</h3>
+            <p>Try a different name or email, or clear the filters.</p>
+            <button type="button" class="cd-btn cd-btn--secondary" (click)="queryReset.emit()">Reset search and filters</button>
+          }
+        </div>
+      }
+    }
+  </div>
+
+
+<ng-template #identity let-account>
+  <div class="identity">
+    <span class="account-name">{{ accountName(account) }}</span>
+    @if (secondaryEmail(account); as email) { <span class="account-email">{{ email }}</span> }
+  </div>
+</ng-template>
+
+<ng-template #roles let-account>
+  <div class="assigned-roles">
+    @for (role of account.roles; track role) {
+      <span class="role-label">{{ roleLabel(role) }}</span>
+    } @empty { <span class="no-roles">No roles assigned</span> }
+  </div>
+</ng-template>
+
+<ng-template #status let-account>
+  <span class="account-status" [attr.data-status]="account.status">{{ statusLabel(account.status) }}</span>
+</ng-template>
+
+<ng-template #details let-account>
+  @let action = account.status === 'pending' ? 'Review' : 'Details';
+  <a class="details-link" [routerLink]="[account.userId]" [state]="detailNavigation()"
+    [attr.aria-label]="action + ' for ' + accountName(account)" [attr.data-account-id]="account.userId"
+    (click)="accountOpen.emit({ event: $event, accountId: account.userId })">
+    {{ action }} <app-navigation-icon name="chevron" />
+  </a>
+</ng-template>

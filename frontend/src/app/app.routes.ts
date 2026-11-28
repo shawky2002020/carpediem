@@ -13,7 +13,13 @@ export const routes: Routes = [
   { path: '', title: 'Home · Carpediem', component: HomeComponent },
   { path: 'sign-in', title: 'Sign in · Carpediem', component: SignInComponent },
   { path: 'register', title: 'Register as a Leader · Carpediem', loadComponent: () => import('./features/accounts/register.component').then(m => m.RegisterComponent) },
-  { path: 'admin/accounts', title: 'Accounts · Carpediem', canActivate: [adminGuard], loadComponent: () => import('./features/accounts/account-admin.component').then(m => m.AccountAdminComponent) },
+  {
+    path: 'admin/accounts', canActivate: [adminGuard], children: [
+      { path: '', title: 'Accounts · Carpediem', loadComponent: () => import('./features/accounts/account-admin.component').then(m => m.AccountAdminComponent) },
+      { path: ':userId', title: 'Account details · Carpediem', canDeactivate: [pendingChangesGuard],
+        loadComponent: () => import('./features/accounts/account-detail.component').then(m => m.AccountDetailComponent) },
+    ],
+  },
   { path: 'admin/feedback', title: 'Feedback review · Carpediem', canActivate: [adminGuard], loadComponent: () => import('./features/engagement/feedback-admin.component').then(m => m.FeedbackAdminComponent) },
   { path: 'admin/incidents', title: 'Incident review · Carpediem', canActivate: [adminGuard], loadComponent: () => import('./features/engagement/incident-admin.component').then(m => m.IncidentAdminComponent) },
   { path: 'events/:eventId/feedback', title: 'Event feedback · Carpediem', canActivate: [authenticatedGuard], loadComponent: () => import('./features/engagement/event-feedback.component').then(m => m.EventFeedbackComponent) },
