@@ -39,11 +39,11 @@ test('Chief Leader views roll sheet and submits attendance outcomes', async ({ p
   expect(api.postCalls).toBe(1);
 });
 
-test('Mark All Attended button toggles all active volunteers', async ({ page }) => {
+test('Bulk action marks all unrecorded volunteers', async ({ page }) => {
   await mockAttendanceApi(page);
   await page.goto(`/events/${targetEventId}/attendance`);
 
-  const markAllBtn = page.getByRole('button', { name: 'Mark all volunteers as attended' });
+  const markAllBtn = page.getByRole('button', { name: 'Mark remaining as attended' });
   await markAllBtn.click();
 
   await expect(page.getByTestId('stat-attended')).toHaveText('2');
@@ -62,7 +62,7 @@ test('Displays error alert when API returns 409 conflict', async ({ page }) => {
   });
   await page.goto(`/events/${targetEventId}/attendance`);
 
-  const markAllBtn = page.getByRole('button', { name: 'Mark all volunteers as attended' });
+  const markAllBtn = page.getByRole('button', { name: 'Mark remaining as attended' });
   await markAllBtn.click();
 
   const submitBtn = page.getByRole('button', { name: 'Finalize attendance roll call' });
@@ -84,7 +84,7 @@ test('Attendance roll sheet meets WCAG 2.2 AA, 44px touch targets, and 200% zoom
   expect(axeResults.violations).toEqual([]);
 
   // Minimum 44px touch target on Mark All button
-  const markAllBtn = page.getByRole('button', { name: 'Mark all volunteers as attended' });
+  const markAllBtn = page.getByRole('button', { name: 'Mark remaining as attended' });
   const markAllBox = await markAllBtn.boundingBox();
   expect(markAllBox!.height).toBeGreaterThanOrEqual(44);
   expect(markAllBox!.width).toBeGreaterThanOrEqual(44);
@@ -107,13 +107,109 @@ test('Attendance roll sheet meets WCAG 2.2 AA, 44px touch targets, and 200% zoom
   await expect(page.locator(':focus')).toBeVisible();
 });
 
+test('recovers an unsaved no show after refresh and returning from navigation', async ({ page }) => {
+  const api = await mockAttendanceApi(page);
+  await page.goto(`/events/${targetEventId}/attendance`);
+  const noShow = page.getByRole('button', { name: 'Mark Alice Smith as no show' });
+  await noShow.click();
+
+  await page.reload();
+  await expect(noShow).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByText('Recovered 1 unsaved entry in this tab.')).toBeVisible();
+
+  await page.getByRole('link', { name: 'Dashboard' }).first().click();
+  await expect(page).toHaveURL(/dashboard$/);
+  await page.goBack();
+  await expect(noShow).toHaveAttribute('aria-pressed', 'true');
+  expect(api.postCalls).toBe(0);
+});
+
+test('bulk marks only unrecorded rows and cannot overwrite an explicit exception', async ({ page }) => {
+  await mockAttendanceApi(page);
+  await page.goto(`/events/${targetEventId}/attendance`);
+  const noShow = page.getByRole('button', { name: 'Mark Alice Smith as no show' });
+  await noShow.click();
+  const bulk = page.getByRole('button', { name: 'Mark remaining as attended' });
+  await bulk.click();
+  await expect(noShow).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByTestId('stat-attended')).toHaveText('1');
+  await expect(page.getByTestId('stat-noshow')).toHaveText('1');
+  await expect(bulk).toBeDisabled();
+});
+
+test('failed submit keeps the draft and successful retry clears it', async ({ page }) => {
+  const api = await mockAttendanceApi(page, { failOnce: true });
+  await page.goto(`/events/${targetEventId}/attendance`);
+  const noShow = page.getByRole('button', { name: 'Mark Alice Smith as no show' });
+  const finalize = page.getByRole('button', { name: 'Finalize attendance roll call' });
+  await noShow.click();
+  await finalize.click();
+  await expect(page.getByRole('alert')).toContainText('Server unavailable');
+  await page.reload();
+  await expect(noShow).toHaveAttribute('aria-pressed', 'true');
+
+  await finalize.click();
+  await expect(page.getByText('Attendance finalized successfully!')).toBeVisible();
+  await page.reload();
+  await expect(page.getByTestId('stat-noshow')).toHaveText('1');
+  await expect(noShow).toHaveCount(0);
+  await expect(finalize).toBeDisabled();
+  expect(api.postCalls).toBe(2);
+});
+
+test('reload after another operator finalizes one row retains only remaining work', async ({ page }) => {
+  const api = await mockAttendanceApi(page);
+  await page.goto(`/events/${targetEventId}/attendance`);
+  await page.getByRole('button', { name: 'Mark Alice Smith as no show' }).click();
+  await page.getByRole('button', { name: 'Mark Bob Jones as attended' }).click();
+  api.record('30000000-0000-0000-0000-000000000001', 'Attended');
+
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Mark Alice Smith as no show' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Mark Bob Jones as attended' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByText(/one or more draft entries were already recorded/i)).toBeVisible();
+});
+
+test('expired sign-in keeps the draft and offers reauthentication', async ({ page }) => {
+  const api = await mockAttendanceApi(page, { failOnce: true, failedStatus: 401 });
+  await page.goto(`/events/${targetEventId}/attendance`);
+  const noShow = page.getByRole('button', { name: 'Mark Alice Smith as no show' });
+  await noShow.click();
+  await page.getByRole('button', { name: 'Finalize attendance roll call' }).click();
+  await expect(page.getByRole('link', { name: 'Sign in again' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Finalize attendance roll call' })).toBeDisabled();
+
+  // The next authenticated GET models the same operator signing in again.
+  await page.reload();
+  await expect(noShow).toHaveAttribute('aria-pressed', 'true');
+  expect(api.postCalls).toBe(1);
+});
+
+test('a different signed-in operator never sees the original draft', async ({ page }) => {
+  const api = await mockAttendanceApi(page);
+  await page.goto(`/events/${targetEventId}/attendance`);
+  const noShow = page.getByRole('button', { name: 'Mark Alice Smith as no show' });
+  await noShow.click();
+
+  api.signInAs('10000000-0000-0000-0000-000000000099');
+  await page.reload();
+  await expect(noShow).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.getByText(/unsaved entry in this tab/i)).toHaveCount(0);
+});
+
 interface MockAttendanceApiOptions {
   conflictDetail?: string;
   status?: number;
+  failOnce?: boolean;
+  failedStatus?: number;
 }
 
 async function mockAttendanceApi(page: Page, options: MockAttendanceApiOptions = {}) {
   let postCalls = 0;
+  let userId = '10000000-0000-0000-0000-000000000001';
+  const recorded = new Map<string, string>();
+  const outcomeFor = (ordinal: number) => recorded.get('30000000-0000-0000-0000-00000000000' + ordinal) ?? null;
+  const finalizedAt = (ordinal: number) => outcomeFor(ordinal) ? '2026-10-15T12:00:00Z' : null;
 
   await page.route('**/api/**', async (route: Route) => {
     const request = route.request();
@@ -125,7 +221,7 @@ async function mockAttendanceApi(page: Page, options: MockAttendanceApiOptions =
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          userId: '10000000-0000-0000-0000-000000000001',
+          userId,
           userName: 'chief_leader_user',
           roles: ['ChiefLeader'],
           isActive: true,
@@ -154,22 +250,22 @@ async function mockAttendanceApi(page: Page, options: MockAttendanceApiOptions =
           location: 'Grand Ballroom',
           staffingCycleId: '20000000-0000-0000-0000-000000000001',
           isCompleted: false,
-          isAllFinalized: false,
+          isAllFinalized: recorded.size === 2,
           entries: [
             {
               teamAssignmentId: '30000000-0000-0000-0000-000000000001',
               volunteerUserId: '40000000-0000-0000-0000-000000000001',
               volunteerName: 'Alice Smith',
-              outcome: null,
-              finalizedAt: null,
+              outcome: outcomeFor(1),
+              finalizedAt: finalizedAt(1),
               version: null,
             },
             {
               teamAssignmentId: '30000000-0000-0000-0000-000000000002',
               volunteerUserId: '40000000-0000-0000-0000-000000000002',
               volunteerName: 'Bob Jones',
-              outcome: null,
-              finalizedAt: null,
+              outcome: outcomeFor(2),
+              finalizedAt: finalizedAt(2),
               version: null,
             },
           ],
@@ -179,6 +275,9 @@ async function mockAttendanceApi(page: Page, options: MockAttendanceApiOptions =
 
     if (path === `/api/events/${targetEventId}/attendance` && request.method() === 'POST') {
       postCalls++;
+      if (options.failOnce && postCalls === 1) {
+        return route.fulfill({ status: options.failedStatus ?? 500, json: { title: 'Server unavailable', detail: 'Server unavailable' } });
+      }
 
       if (options.conflictDetail) {
         return route.fulfill({
@@ -194,6 +293,7 @@ async function mockAttendanceApi(page: Page, options: MockAttendanceApiOptions =
         });
       }
 
+      for (const item of request.postDataJSON().entries) recorded.set(item.teamAssignmentId, item.outcome);
       return route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -213,5 +313,7 @@ async function mockAttendanceApi(page: Page, options: MockAttendanceApiOptions =
 
   return {
     get postCalls() { return postCalls; },
+    signInAs(id: string) { userId = id; },
+    record(id: string, outcome: string) { recorded.set(id, outcome); },
   };
 }

@@ -24,10 +24,20 @@
   @if (errorMessage()) {
     <div class="cd-alert--error cd-callout cd-callout--danger" role="alert">
       <p>{{ errorMessage() }}</p>
-      @if (loadFailed()) {
+      @if (signInRequired()) {
+        <a class="cd-btn cd-btn--secondary" routerLink="/sign-in">Sign in again</a>
+      } @else if (loadFailed()) {
         <button type="button" class="cd-btn cd-btn--secondary" (click)="load()" [disabled]="loading()">Reload roll sheet</button>
       }
     </div>
+  }
+
+  @if (draftNotice(); as notice) {
+    <p class="cd-callout cd-callout--info" role="status">{{ notice }}</p>
+  }
+
+  @if (hasChanges() && !draftRecoverable()) {
+    <p class="cd-callout cd-callout--warning" role="status">This tab cannot recover unsaved entries if you leave or reload.</p>
   }
 
   @if (loading() && !rollSheet()) {
@@ -72,10 +82,9 @@
             <button
               type="button"
               class="cd-btn cd-btn--secondary"
-              (click)="markAllAttended()"
-              [disabled]="loading() || loadFailed() || submitting() || correctionSubmitting()"
-              aria-label="Mark all volunteers as attended"
-            >Mark All Attended</button>
+              (click)="markRemainingAttended()"
+              [disabled]="loading() || loadFailed() || submitting() || correctionSubmitting() || !unrecordedCount()"
+            >Mark remaining as attended</button>
           }
         </div>
 
@@ -182,6 +191,11 @@
             </li>
           }
         </ul>
+
+        @if (hasChanges()) {
+          <button class="cd-btn cd-btn--subtle cd-discard" type="button" (click)="discardDraft()"
+            [disabled]="loading() || submitting() || correctionSubmitting()">Discard unsaved entries</button>
+        }
 
         @if (!sheet.isAllFinalized) {
           <div class="cd-submit-bar">

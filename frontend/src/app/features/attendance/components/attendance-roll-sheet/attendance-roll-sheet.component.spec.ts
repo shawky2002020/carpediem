@@ -50,6 +50,7 @@ describe('AttendanceRollSheetComponent', () => {
   };
 
   beforeEach(async () => {
+    sessionStorage.clear();
     attendanceServiceMock = {
       getRollSheet: vi.fn().mockReturnValue(of(defaultMockRollSheet)),
       finalizeAttendance: vi.fn(),
@@ -63,7 +64,7 @@ describe('AttendanceRollSheetComponent', () => {
         { provide: AttendanceService, useValue: attendanceServiceMock },
         {
           provide: SessionService,
-          useValue: { isAdmin: () => true }
+          useValue: { isAdmin: () => true, session: () => ({ userId: 'test-admin' }) }
         },
         {
           provide: ActivatedRoute,
@@ -109,8 +110,8 @@ describe('AttendanceRollSheetComponent', () => {
     expect(component.noShowCount()).toBe(1);
   });
 
-  it('marks all volunteers as attended when markAllAttended is called', () => {
-    component.markAllAttended();
+  it('marks unrecorded volunteers as attended', () => {
+    component.markRemainingAttended();
 
     expect(component.attendedCount()).toBe(2);
     expect(component.noShowCount()).toBe(0);
@@ -137,6 +138,7 @@ describe('AttendanceRollSheetComponent', () => {
     component.submit();
 
     expect(attendanceServiceMock.finalizeAttendance).toHaveBeenCalledWith(mockEventId, {
+      requireUnrecorded: true,
       entries: [
         { teamAssignmentId: '33333333-3333-3333-3333-333333333333', outcome: 'Attended' },
         { teamAssignmentId: '55555555-5555-5555-5555-555555555555', outcome: 'NoShow' },

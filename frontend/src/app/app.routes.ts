@@ -95,6 +95,7 @@ export const routes: Routes = [
     path: 'events/:eventId/attendance',
     title: 'Attendance · Carpediem',
     canActivate: [chiefLeaderGuard],
+    canDeactivate: [pendingChangesGuard],
     loadComponent: () => import('./features/attendance/components/attendance-roll-sheet/attendance-roll-sheet.component').then(m => m.AttendanceRollSheetComponent),
   },
   {

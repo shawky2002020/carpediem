@@ -1,7 +1,8 @@
-import { afterNextRender, Component, computed, ElementRef, inject, Injector, Input, OnInit, signal, viewChild, viewChildren } from '@angular/core';
+import { afterNextRender, Component, computed, ElementRef, HostListener, inject, Injector, Input, OnInit, signal, viewChild, viewChildren } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
+import { attendanceDraftKey, readAttendanceDraft, writeAttendanceDraft } from '../../data/attendance-draft.storage';
 import {
   AttendanceOutcomeType,
   AttendanceRollSheet,
@@ -42,6 +43,9 @@ export class AttendanceRollSheetComponent implements OnInit {
   readonly errorMessage = signal<string | null>(null);
   readonly successMessage = signal<string | null>(null);
   readonly statusMessage = signal<string | null>(null);
+  readonly draftNotice = signal<string | null>(null);
+  readonly draftRecoverable = signal(true);
+  readonly signInRequired = signal(false);
   readonly correctingOutcomeId = signal<string | null>(null);
   readonly correctionForm = new FormGroup({
     outcome: new FormControl<AttendanceOutcomeType>('Attended', { nonNullable: true }),
@@ -80,16 +84,30 @@ export class AttendanceRollSheetComponent implements OnInit {
     }
 
     this.loading.set(true);
+    this.signInRequired.set(false);
     this.errorMessage.set(null);
 
     this.service.getRollSheet(id)
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: sheet => {
+          const previousCycle = this.rollSheet()?.staffingCycleId;
+          const key = this.draftKey(id);
+          const remembered = key ? readAttendanceDraft(key, sheet.staffingCycleId) : new Map();
+          const pending = this.outcomesState();
+          const source = previousCycle === sheet.staffingCycleId && pending.size ? pending : remembered;
+          const editable = new Set(sheet.entries.filter(entry => entry.outcome === null && !entry.finalizedAt)
+            .map(entry => entry.teamAssignmentId));
+          const remaining = new Map([...source].filter(([assignmentId]) => editable.has(assignmentId)));
+
           this.rollSheet.set(sheet);
           this.loadFailed.set(false);
-          const editable = new Set(sheet.entries.filter(entry => !entry.finalizedAt).map(entry => entry.teamAssignmentId));
-          this.outcomesState.update(pending => new Map([...pending].filter(([assignmentId]) => editable.has(assignmentId))));
+          this.setDraft(remaining);
+          if (source.size > remaining.size) {
+            this.draftNotice.set('One or more draft entries were already recorded or are no longer on the roster. Review the latest outcomes.');
+          } else if (remaining.size && !pending.size) {
+            this.draftNotice.set(`Recovered ${remaining.size} unsaved ${remaining.size === 1 ? 'entry' : 'entries'} in this tab.`);
+          }
           const correctionId = this.correctingOutcomeId();
           if (correctionId && !sheet.entries.some(entry => entry.teamAssignmentId === correctionId && entry.attendanceOutcomeId)) {
             this.cancelCorrection();
@@ -97,7 +115,13 @@ export class AttendanceRollSheetComponent implements OnInit {
         },
         error: err => {
           this.loadFailed.set(true);
-          this.errorMessage.set(err.error?.detail ?? 'Failed to load attendance roll sheet.');
+          if (err.status === 401 || err.status === 403) {
+            this.rollSheet.set(null);
+            this.outcomesState.set(new Map());
+            this.draftNotice.set(null);
+          }
+          this.signInRequired.set(err.status === 401);
+          this.errorMessage.set(err.error?.detail ?? err.error?.title ?? 'Failed to load attendance roll sheet.');
         }
       });
   }
@@ -108,7 +132,7 @@ export class AttendanceRollSheetComponent implements OnInit {
 
     const map = new Map(this.outcomesState());
     map.set(teamAssignmentId, outcome);
-    this.outcomesState.set(map);
+    this.setDraft(map);
     this.statusMessage.set(`Marked ${entry.volunteerName} as ${outcome === 'Attended' ? 'attended' : 'no show'}.`);
   }
 
@@ -120,17 +144,46 @@ export class AttendanceRollSheetComponent implements OnInit {
     return entry?.outcome ?? null;
   }
 
-  markAllAttended(): void {
-    if (this.loading() || this.loadFailed() || this.submitting() || this.correctionSubmitting()) return;
+  markRemainingAttended(): void {
+    if (this.loading() || this.loadFailed() || this.submitting() || this.correctionSubmitting() || !this.unrecordedCount()) return;
 
     const map = new Map(this.outcomesState());
     for (const entry of this.entries()) {
-      if (!entry.finalizedAt) {
+      if (!entry.finalizedAt && entry.outcome === null && !map.has(entry.teamAssignmentId)) {
         map.set(entry.teamAssignmentId, 'Attended');
       }
     }
-    this.outcomesState.set(map);
-    this.statusMessage.set('Marked all unfinalized volunteers as Attended.');
+    this.setDraft(map);
+    this.statusMessage.set('Marked unrecorded volunteers as Attended. Existing choices were kept.');
+  }
+
+  discardDraft(): void {
+    if (!window.confirm('Discard unsaved attendance for this event?')) return;
+    this.setDraft(new Map());
+    this.draftNotice.set(null);
+    this.statusMessage.set('Unsaved attendance entries discarded.');
+  }
+
+  canDeactivate(): boolean {
+    return !this.hasChanges() || this.draftRecoverable() ||
+      window.confirm('Attendance recovery is unavailable. Discard unsaved entries and leave?');
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  beforeUnload(event: BeforeUnloadEvent): void {
+    if (this.hasChanges() && !this.draftRecoverable()) event.preventDefault();
+  }
+
+  private draftKey(eventId: string): string | null {
+    const userId = this.sessionService.session()?.userId;
+    return userId ? attendanceDraftKey(userId, eventId) : null;
+  }
+
+  private setDraft(entries: Map<string, AttendanceOutcomeType>): void {
+    this.outcomesState.set(entries);
+    const sheet = this.rollSheet();
+    const key = sheet ? this.draftKey(sheet.eventId) : null;
+    this.draftRecoverable.set(!!key && !!sheet && writeAttendanceDraft(key, sheet.staffingCycleId, entries));
   }
 
   submit(): void {
@@ -146,18 +199,21 @@ export class AttendanceRollSheetComponent implements OnInit {
       outcome
     }));
 
-    const request: FinalizeAttendanceRequest = { entries: submissions };
+    const request: FinalizeAttendanceRequest = { entries: submissions, requireUnrecorded: true };
 
     this.service.finalizeAttendance(id, request)
       .pipe(finalize(() => this.submitting.set(false)))
       .subscribe({
         next: () => {
-          this.outcomesState.set(new Map());
+          this.setDraft(new Map());
+          this.draftNotice.set(null);
           this.successMessage.set('Attendance finalized successfully!');
           this.load();
         },
         error: err => {
-          this.errorMessage.set(err.error?.detail ?? 'Failed to finalize attendance roll call.');
+          this.signInRequired.set(err.status === 401);
+          if (err.status === 409 || err.status === 401 || err.status === 403) this.loadFailed.set(true);
+          this.errorMessage.set(err.error?.detail ?? err.error?.title ?? 'Failed to finalize attendance roll call.');
         }
       });
   }

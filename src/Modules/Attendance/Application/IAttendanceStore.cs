@@ -54,6 +54,7 @@ public interface IAttendanceStore
         Guid actorUserId,
         Guid correlationId,
         DateTimeOffset utcNow,
+        bool requireUnrecorded = false,
         CancellationToken cancellationToken = default);
 
     Task<CorrectAttendanceResult> CorrectAttendanceAsync(
