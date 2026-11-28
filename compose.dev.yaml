@@ -1,0 +1,14 @@
+services:
+  sqlserver:
+    ports: !override
+      - "127.0.0.1:14334:1433"
+  carpediem-migrator:
+    entrypoint:
+      - /bin/bash
+      - -lc
+      - |
+        /opt/mssql-tools18/bin/sqlcmd -I -b -S carpediem-db -U sa -P "$$CARPEDIEM_SQL_PASSWORD" -C -Q "IF DB_ID(N'Carpediem') IS NULL CREATE DATABASE [Carpediem];" &&
+        /opt/mssql-tools18/bin/sqlcmd -I -b -S carpediem-db -U sa -P "$$CARPEDIEM_SQL_PASSWORD" -C -d Carpediem -i /migrations/v1-idempotent.sql
+  carpediem-api:
+    ports:
+      - "127.0.0.1:5025:8080"
