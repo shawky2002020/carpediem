@@ -1,7 +1,7 @@
 <div class="team-selection-container">
   <header class="team-selection-header">
     <a class="back-link" routerLink="/dashboard">&larr; Dashboard</a>
-    <h1 id="team-selection-title">Team Selection</h1>
+    <h1 #teamHeading id="team-selection-title" tabindex="-1">Team Selection</h1>
     @if (context(); as ctx) {
       <app-operational-spine
         [title]="ctx.eventTitle"
@@ -108,9 +108,12 @@
                   </div>
                   <div class="candidate-actions">
                     <a
+                      #historyLink
                       class="history-link"
                       [routerLink]="['/events', effectiveEventId(), 'leaders', candidate.userId, 'history']"
                       [attr.aria-label]="'View history for ' + candidate.userName"
+                      [attr.data-history-control]="'available-' + candidate.userId"
+                      (click)="rememberHistory($event, candidate.userId)"
                     >View history</a>
                     <button
                       type="button"
@@ -167,9 +170,12 @@
                   </div>
                   <div class="candidate-actions">
                     <a
+                      #historyLink
                       class="history-link"
                       [routerLink]="['/events', effectiveEventId(), 'leaders', candidate.userId, 'history']"
                       [attr.aria-label]="'View history for ' + candidate.userName"
+                      [attr.data-history-control]="'direct-' + candidate.userId"
+                      (click)="rememberHistory($event, candidate.userId)"
                     >View history</a>
                     <button
                       type="button"
@@ -212,9 +218,12 @@
                   <span class="meta-text">Selected <time [attr.datetime]="member.assignedAt">{{ formatDate(member.assignedAt) }}</time></span>
                 </div>
                 <a
+                  #historyLink
                   class="history-link"
                   [routerLink]="['/events', effectiveEventId(), 'leaders', member.userId, 'history']"
                   [attr.aria-label]="'View history for ' + member.userName"
+                  [attr.data-history-control]="'roster-' + member.userId"
+                  (click)="rememberHistory($event, member.userId)"
                 >View history</a>
               </li>
             }

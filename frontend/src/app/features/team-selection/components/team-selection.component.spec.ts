@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
+import { SessionService } from '../../../core/auth/session.service';
 import {
   ActiveTeamMember,
   AvailableCandidate,
@@ -82,6 +83,7 @@ describe('TeamSelectionComponent', () => {
       imports: [TeamSelectionComponent],
       providers: [
         provideRouter([]),
+        { provide: SessionService, useValue: { session: () => null } },
         { provide: TeamSelectionService, useValue: teamSelectionServiceMock },
         {
           provide: ActivatedRoute,

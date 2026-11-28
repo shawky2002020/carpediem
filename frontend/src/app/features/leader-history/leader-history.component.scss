@@ -38,6 +38,7 @@
 
   h3 { margin-block-end: var(--cd-space-1); }
   .event-date, details p { color: var(--cd-text-secondary); }
+  .event-date { display: flex; align-items: center; flex-wrap: wrap; gap: var(--cd-space-2); }
 }
 
 .event-facts {

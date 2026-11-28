@@ -92,6 +92,44 @@ public sealed class LeaderHistoryTests(SqlServerFixture sqlServer)
     }
 
     [Fact]
+    public async Task OwnHistoryIdentifiesCompletedEventsWithoutChangingRecordedAssignmentAndAttendance()
+    {
+        await using var harness = await DraftApiTestHarness.StartAsync(sqlServer);
+        var leader = await harness.SeedUserAsync("history.event-state.leader", true, CarpediemRoles.Leader);
+        var chief = await harness.SeedUserAsync("history.event-state.chief", true, CarpediemRoles.ChiefLeader);
+        var now = DateTimeOffset.UtcNow;
+        var completedId = await SeedPublishedEventAsync(harness, chief, now.AddDays(-7));
+        var publishedId = await SeedPublishedEventAsync(harness, chief, now.AddDays(7));
+
+        await using (var scope = harness.Factory.Services.CreateAsyncScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<CarpediemDbContext>();
+            var events = await db.Events.Include(item => item.StaffingCycles).ToListAsync();
+            foreach (var eventItem in events)
+            {
+                var assignment = TeamAssignment.CreateDirectAssignment(eventItem.StaffingCycles.Single(cycle => cycle.IsCurrent).Id,
+                    eventItem.Id, leader, chief, eventItem.StartDateTime, eventItem.StartDateTime.AddHours(-1), false, "Published");
+                db.TeamAssignments.Add(assignment);
+                if (eventItem.Id != completedId) continue;
+                db.AttendanceOutcomes.Add(AttendanceOutcome.Create(assignment.Id, AttendanceOutcomeValue.Attended, chief, now));
+                eventItem.Complete(now, harness.ActorUserId);
+            }
+            await db.SaveChangesAsync();
+        }
+
+        harness.Factory.ActorUserId = leader;
+        harness.Factory.ActorRole = CarpediemRoles.Leader;
+        var history = (await harness.Client.GetFromJsonAsync<LeaderHistoryBody>("/api/profile/me"))!;
+        var completed = Assert.Single(history.Events, entry => entry.EventId == completedId);
+        Assert.Equal("Completed", completed.EventStatus);
+        Assert.Equal("Active", completed.AssignmentStatus);
+        Assert.Equal("Attended", completed.AttendanceOutcome);
+        var published = Assert.Single(history.Events, entry => entry.EventId == publishedId);
+        Assert.Equal("Published", published.EventStatus);
+        Assert.Equal("Active", published.AssignmentStatus);
+    }
+
+    [Fact]
     public async Task ChiefNeedsActiveEventAuthorityAndAdminCanInspectAnyLeader()
     {
         await using var harness = await DraftApiTestHarness.StartAsync(sqlServer);
@@ -143,18 +181,18 @@ public sealed class LeaderHistoryTests(SqlServerFixture sqlServer)
             (await harness.Client.GetAsync($"/api/leaders/{Guid.NewGuid()}/history")).StatusCode);
     }
 
-    private static async Task<Guid> SeedPublishedEventAsync(DraftApiTestHarness harness, Guid chiefId)
+    private static async Task<Guid> SeedPublishedEventAsync(DraftApiTestHarness harness, Guid chiefId, DateTimeOffset? startAt = null)
     {
         await using var scope = harness.Factory.Services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<CarpediemDbContext>();
-        var now = DateTimeOffset.UtcNow;
-        var start = now.AddDays(7);
+        var start = startAt ?? DateTimeOffset.UtcNow.AddDays(7);
+        var publishedAt = start.AddDays(-7);
         var eventItem = Event.CreateDraft(
             "History event", start, start.AddHours(2), "Cairo", null,
-            harness.ActorUserId, now.AddDays(-1), DateOnly.FromDateTime(start.Date));
-        var chief = eventItem.AppointChiefLeader(chiefId, harness.ActorUserId, now.AddHours(-2));
-        chief.AcceptDirect(chiefId, now.AddHours(-1), false);
-        eventItem.Publish(harness.ActorUserId, now);
+            harness.ActorUserId, publishedAt.AddDays(-1), DateOnly.FromDateTime(start.Date));
+        var chief = eventItem.AppointChiefLeader(chiefId, harness.ActorUserId, publishedAt.AddHours(-2));
+        chief.AcceptDirect(chiefId, publishedAt.AddHours(-1), false);
+        eventItem.Publish(harness.ActorUserId, publishedAt);
         db.Events.Add(eventItem);
         await db.SaveChangesAsync();
         return eventItem.Id;
@@ -167,5 +205,6 @@ public sealed class LeaderHistoryTests(SqlServerFixture sqlServer)
         int NoShows,
         int SelfCancellations,
         LeaderHistoryEntryBody[] Events);
-    private sealed record LeaderHistoryEntryBody(bool IsCurrentCycle, string? AttendanceOutcome, bool SelfCancelled);
+    private sealed record LeaderHistoryEntryBody(Guid EventId, string? EventStatus, string AssignmentStatus,
+        bool IsCurrentCycle, string? AttendanceOutcome, bool SelfCancelled);
 }

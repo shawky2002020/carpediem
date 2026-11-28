@@ -2,6 +2,7 @@ export interface LeaderHistoryEntry {
   assignmentId: string;
   eventId: string;
   eventTitle: string;
+  eventStatus?: 'Draft' | 'Published' | 'Completed' | 'Cancelled';
   staffingCycleNumber: number;
   effectiveEventDate: string;
   isCurrentCycle: boolean;
